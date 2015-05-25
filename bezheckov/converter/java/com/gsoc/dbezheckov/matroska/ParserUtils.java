@@ -40,12 +40,17 @@ public class ParserUtils {
 		return new String(buffer, "UTF-8");
 	}
 	
-	public static float parseFloat(InputStream inputStream, final int size) throws IOException {
+	public static double parseFloat(InputStream inputStream, final int size) throws IOException {
 		byte[] buffer = new byte[size];
 		int numberOfReadsBytes = inputStream.read(buffer, 0, size);
 		assert numberOfReadsBytes == size;
 		
-		return ByteBuffer.wrap(buffer, 0, size).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+		ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, 0, size).order(ByteOrder.BIG_ENDIAN);
+		if (8 == size) {
+			return byteBuffer.getDouble();
+		}
+		
+		return byteBuffer.getFloat();
 	}
 	
 	public static ArrayList<Tag> parseMasterElement(InputStream inputStream, final int size) throws IOException {

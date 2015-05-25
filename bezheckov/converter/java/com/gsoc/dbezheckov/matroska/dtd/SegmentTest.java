@@ -27,7 +27,13 @@ public class SegmentTest extends Tag {
 	@Override
 	public void parse(InputStream inputStream) throws IOException {
 		
-		// parse only seek head container info
+		// parse meta Seek Information
+		subElements.add(ParserUtils.parseTag(inputStream));
+		
+		// parse void
+		subElements.add(ParserUtils.parseTag(inputStream));
+		
+		// parse segment Information
 		subElements.add(ParserUtils.parseTag(inputStream));
 	}
 
