@@ -6,11 +6,11 @@ import java.io.InputStream;
 import com.gsoc.dbezheckov.matroska.ParserUtils;
 import com.gsoc.dbezheckov.matroska.VINT;
 
-public class SingleUnsignedIntegerTag extends Tag {
+public class UnsignedIntegerTag extends Tag {
 	
 	private long value;
 	
-	public SingleUnsignedIntegerTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+	public UnsignedIntegerTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
 		super(name, id, size);
 		parse(inputStream);
 	}
