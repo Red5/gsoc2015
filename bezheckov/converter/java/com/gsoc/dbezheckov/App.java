@@ -25,11 +25,11 @@ public class App  {
     		return;
     	}
     	
-    	MatroskaParser ebmlParser = new SimpleMatroskaParser();
+    	MatroskaParser parser = new SimpleMatroskaParser();
     	
     	try ( InputStream inputStream = new BufferedInputStream(new FileInputStream(new File(args[0]))) ) {
     		// simple log
-    		for (Tag tag : ebmlParser.parse(inputStream)) {
+    		for (Tag tag : parser.parse(inputStream)) {
     			System.out.println(tag);
     		}
     	} catch (FileNotFoundException e) {
