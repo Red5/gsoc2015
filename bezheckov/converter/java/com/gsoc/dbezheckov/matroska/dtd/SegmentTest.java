@@ -38,6 +38,14 @@ public class SegmentTest extends Tag {
 		
 		// parse tracks
 		subElements.add(ParserUtils.parseTag(inputStream));
+		
+		// parse tags
+		subElements.add(ParserUtils.parseTag(inputStream));
+		
+		// parse clusters test
+		for (int i = 0; i < 14; ++i) {
+			subElements.add(ParserUtils.parseTag(inputStream));
+		}
 	}
 
 }

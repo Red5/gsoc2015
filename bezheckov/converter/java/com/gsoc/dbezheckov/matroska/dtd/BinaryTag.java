@@ -37,7 +37,7 @@ public class BinaryTag extends Tag {
 	}
 	
 	public String toString() {
-		return (getName() + " = " + bytesToHex(value));
+		return (getName() + " = binary " + (int) getSize());
     }
 
 }
