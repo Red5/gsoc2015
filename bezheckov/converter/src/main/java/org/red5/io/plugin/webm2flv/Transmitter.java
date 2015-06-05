@@ -16,35 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.io.plugin.mkv2flv.matroska.dtd;
+package org.red5.io.plugin.webm2flv;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
-import org.red5.io.plugin.mkv2flv.matroska.ParserUtils;
-import org.red5.io.plugin.mkv2flv.matroska.VINT;
-
-
-public class FloatTag extends Tag {
-
-	private double value;
-	
-	public FloatTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
-		super(name, id, size);
-		parse(inputStream);
+public class Transmitter {
+	public void transmit(InputStream input, OutputStream output) {
+		
 	}
-
-	@Override
-	public void parse(InputStream inputStream) throws IOException {
-		value = ParserUtils.parseFloat(inputStream, (int) getSize());
-	}
-	
-	public double getValue() {
-		return value;
-	}
-	
-	public String toString() {
-		return (getName() + " = " + value);
-    }
-
 }

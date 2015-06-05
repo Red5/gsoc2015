@@ -16,35 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.io.plugin.mkv2flv.matroska.dtd;
+package org.red5.io.plugin.webm2flv.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
-import org.red5.io.plugin.mkv2flv.matroska.ParserUtils;
-import org.red5.io.plugin.mkv2flv.matroska.VINT;
+import org.red5.io.plugin.webm2flv.matroska.ParserUtils;
+import org.red5.io.plugin.webm2flv.matroska.VINT;
 
 
-public class StringTag extends Tag {
+public class CompoundTag extends Tag {
+
+	private ArrayList<Tag> subElements = new ArrayList<Tag>();
 	
-	private String value;
-	
-	public StringTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+	public CompoundTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
 		super(name, id, size);
 		parse(inputStream);
 	}
 	
-	public String getValue() {
-		return value;
+	public String toString() {
+		StringBuilder result = new StringBuilder(getName() + "\n");
+		for (Tag tag : subElements) {
+			result.append("    " + tag + "\n");
+		}
+		return result.toString();
 	}
 
 	@Override
 	public void parse(InputStream inputStream) throws IOException {
-		value = ParserUtils.parseString(inputStream, (int) getSize());
+		subElements = ParserUtils.parseMasterElement(inputStream, (int) getSize());
 	}
-	
-	public String toString() {
-		return (getName() + " = " + value);
-    }
 
 }

@@ -18,10 +18,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.red5.io.plugin.mkv2flv</groupId>
-	<artifactId>mkv2flv</artifactId>
+	<artifactId>webm2flv</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0</version>
-	<name>mkv2flv</name>
+	<name>webm2flv</name>
 	<url>https://github.com/Red5/gsoc2015</url>
 	<licenses>
 		<license>
@@ -35,7 +35,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.2</version>
 				<configuration>
 					<compilerVersion>1.7</compilerVersion>
 					<fork>true</fork>
@@ -49,7 +49,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>org.red5.io.plugin.mkv2flv.App</mainClass>
+							<mainClass>org.red5.io.plugin.webm2flv.App</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -60,7 +60,7 @@
 		<dependency>
 		<groupId>junit</groupId>
 		<artifactId>junit</artifactId>
-		<version>3.8.1</version>
+		<version>4.12</version>
 		<scope>test</scope>
 		</dependency>
 	</dependencies>

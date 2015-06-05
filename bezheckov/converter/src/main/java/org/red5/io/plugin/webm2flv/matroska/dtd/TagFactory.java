@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.io.plugin.mkv2flv.matroska.dtd;
+package org.red5.io.plugin.webm2flv.matroska.dtd;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.red5.io.plugin.mkv2flv.matroska.VINT;
+import org.red5.io.plugin.webm2flv.matroska.VINT;
 
 
 public class TagFactory {

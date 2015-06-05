@@ -16,39 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.io.plugin.mkv2flv.matroska.dtd;
+package org.red5.io.plugin.webm2flv.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.red5.io.plugin.mkv2flv.matroska.VINT;
+import org.red5.io.plugin.webm2flv.matroska.ParserUtils;
+import org.red5.io.plugin.webm2flv.matroska.VINT;
 
 
-public abstract class Tag {
-	
-	private String name;
-	
-	private VINT id;
-	
-	private VINT size;
-	
-	public Tag(String name, VINT id, VINT size) {
-		this.name = name;
-		this.id = id;
-		this.size = size;
-	}
-	
-	public abstract void parse(InputStream inputStream) throws IOException;
+public class FloatTag extends Tag {
 
-	public String getName() {
-		return name;
+	private double value;
+	
+	public FloatTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+		super(name, id, size);
+		parse(inputStream);
 	}
 
-	public long getId() {
-		return id.getBinary();
+	@Override
+	public void parse(InputStream inputStream) throws IOException {
+		value = ParserUtils.parseFloat(inputStream, (int) getSize());
+	}
+	
+	public double getValue() {
+		return value;
+	}
+	
+	public String toString() {
+		return (getName() + " = " + value);
 	}
 
-	public long getSize() {
-		return size.getValue();
-	}
 }
