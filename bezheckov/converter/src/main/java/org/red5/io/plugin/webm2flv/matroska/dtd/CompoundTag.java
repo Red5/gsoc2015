@@ -30,9 +30,8 @@ public class CompoundTag extends Tag {
 
 	private ArrayList<Tag> subElements = new ArrayList<Tag>();
 	
-	public CompoundTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+	public CompoundTag(String name, VINT id, VINT size) {
 		super(name, id, size);
-		parse(inputStream);
 	}
 	
 	public String toString() {

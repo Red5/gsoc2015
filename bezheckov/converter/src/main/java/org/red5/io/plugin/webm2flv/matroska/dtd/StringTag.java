@@ -29,9 +29,8 @@ public class StringTag extends Tag {
 	
 	private String value;
 	
-	public StringTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+	public StringTag(String name, VINT id, VINT size) {
 		super(name, id, size);
-		parse(inputStream);
 	}
 	
 	public String getValue() {

@@ -29,9 +29,8 @@ public class FloatTag extends Tag {
 
 	private double value;
 	
-	public FloatTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+	public FloatTag(String name, VINT id, VINT size) {
 		super(name, id, size);
-		parse(inputStream);
 	}
 
 	@Override

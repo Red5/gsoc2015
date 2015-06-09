@@ -31,9 +31,8 @@ public class BinaryTag extends Tag {
 	
 	private byte[] value;
 
-	public BinaryTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+	public BinaryTag(String name, VINT id, VINT size) {
 		super(name, id, size);
-		parse(inputStream);
 	}
 	
 	public static String bytesToHex(byte[] bytes) {

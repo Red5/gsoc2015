@@ -19,7 +19,6 @@
 package org.red5.io.plugin.webm2flv.matroska.dtd;
 
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.Properties;
 
 import org.red5.io.plugin.webm2flv.matroska.VINT;
@@ -39,7 +38,7 @@ public class TagFactory {
 		}
 	}
 	
-	public static Tag createTag(VINT id, VINT size, InputStream inputStream) {
+	public static Tag createTag(VINT id, VINT size) {
 		String[] parameters = propertyies.getProperty(Long.toHexString(id.getBinary())).split(",");
 		String className = parameters[1];
 		String name = parameters[0];
@@ -47,8 +46,8 @@ public class TagFactory {
 		try {
 			Class<?> type = Class.forName(TagFactory.class.getPackage().getName() + "." + className);
 			return (Tag) type
-					.getConstructor(String.class, VINT.class, VINT.class, InputStream.class)
-					.newInstance(name, id, size, inputStream);
+					.getConstructor(String.class, VINT.class, VINT.class)
+					.newInstance(name, id, size);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

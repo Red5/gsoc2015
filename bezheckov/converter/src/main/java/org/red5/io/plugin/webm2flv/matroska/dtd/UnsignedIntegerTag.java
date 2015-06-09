@@ -31,7 +31,6 @@ public class UnsignedIntegerTag extends Tag {
 	
 	public UnsignedIntegerTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
 		super(name, id, size);
-		parse(inputStream);
 	}
 
 	@Override

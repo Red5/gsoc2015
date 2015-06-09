@@ -30,9 +30,8 @@ public class SegmentTest extends Tag {
 
 	private ArrayList<Tag> subElements = new ArrayList<Tag>();
 	
-	public SegmentTest(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+	public SegmentTest(String name, VINT id, VINT size) {
 		super(name, id, size);
-		parse(inputStream);
 	}
 	
 	public String toString() {

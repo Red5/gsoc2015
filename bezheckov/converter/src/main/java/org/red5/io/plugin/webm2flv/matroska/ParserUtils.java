@@ -144,7 +144,7 @@ public class ParserUtils {
 		VINT id = readVINT(inputStream);
 		VINT size = readVINT(inputStream);
 		
-		return TagFactory.createTag(id, size, inputStream);
+		return TagFactory.createTag(id, size);
 	}
 	
 }

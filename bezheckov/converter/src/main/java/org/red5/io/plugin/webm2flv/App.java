@@ -19,41 +19,43 @@
 package org.red5.io.plugin.webm2flv;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.red5.io.plugin.webm2flv.matroska.MatroskaParser;
-import org.red5.io.plugin.webm2flv.matroska.SimpleMatroskaParser;
-import org.red5.io.plugin.webm2flv.matroska.dtd.Tag;
+import java.io.OutputStream;
 
 public class App {
 	
 	public static void main(String[] args) {
 		
-		if (0 == args.length) {
+		if (args.length < 2) {
 			System.out.println("usage: java -jar converter.jar path/to/your/file.mkv");
 			return;
 		}
 		
-		if ("".equals(args[0])) {
-			System.out.println("empty path");
+		if ("".equals(args[0]) || "".equals(args[1])) {
+			System.out.println("invalid arguments");
 			return;
 		}
 		
-		MatroskaParser parser = new SimpleMatroskaParser();
-		
-		try ( InputStream inputStream = new BufferedInputStream(new FileInputStream(new File(args[0]))) ) {
-			// simple log
-			for (Tag tag : parser.parse(inputStream)) {
-				System.out.println(tag);
-			}
-		} catch (FileNotFoundException e) {
+		Converter converter = new Converter();
+		try (
+				InputStream input = new BufferedInputStream(new FileInputStream(new File(args[0])));
+				OutputStream output = new BufferedOutputStream(new FileOutputStream(new File(args[1])))
+			) {
+			converter.convert(input, output);
+		}
+		catch (FileNotFoundException e) {
 			System.out.println("File not found " + e.getMessage());
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			System.out.println("IO exception " + e.getMessage());
+		} catch (ConverterException e) {
+			System.out.println("ConverterException " + e.getMessage());
 		}
 	}
 }
