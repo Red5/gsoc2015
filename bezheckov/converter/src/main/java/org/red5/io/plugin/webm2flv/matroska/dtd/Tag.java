@@ -21,6 +21,7 @@ package org.red5.io.plugin.webm2flv.matroska.dtd;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.red5.io.plugin.webm2flv.ConverterException;
 import org.red5.io.plugin.webm2flv.matroska.VINT;
 
 
@@ -38,7 +39,7 @@ public abstract class Tag {
 		this.size = size;
 	}
 	
-	public abstract void parse(InputStream inputStream) throws IOException;
+	public abstract void parse(InputStream inputStream) throws IOException, ConverterException;
 
 	public String getName() {
 		return name;

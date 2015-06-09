@@ -29,7 +29,7 @@ public class UnsignedIntegerTag extends Tag {
 	
 	private long value;
 	
-	public UnsignedIntegerTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+	public UnsignedIntegerTag(String name, VINT id, VINT size) throws IOException {
 		super(name, id, size);
 	}
 

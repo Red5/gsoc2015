@@ -22,8 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.red5.io.plugin.webm2flv.ConverterException;
 import org.red5.io.plugin.webm2flv.matroska.dtd.Tag;
 
 public interface MatroskaParser {
-	ArrayList<Tag> parse(InputStream inputStream) throws IOException;
+	ArrayList<Tag> parse(InputStream inputStream) throws IOException, ConverterException;
 }

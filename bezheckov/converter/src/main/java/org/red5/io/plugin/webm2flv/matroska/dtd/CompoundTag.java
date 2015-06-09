@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.red5.io.plugin.webm2flv.ConverterException;
 import org.red5.io.plugin.webm2flv.matroska.ParserUtils;
 import org.red5.io.plugin.webm2flv.matroska.VINT;
 
@@ -43,7 +44,7 @@ public class CompoundTag extends Tag {
 	}
 
 	@Override
-	public void parse(InputStream inputStream) throws IOException {
+	public void parse(InputStream inputStream) throws IOException, ConverterException {
 		subElements = ParserUtils.parseMasterElement(inputStream, (int) getSize());
 	}
 

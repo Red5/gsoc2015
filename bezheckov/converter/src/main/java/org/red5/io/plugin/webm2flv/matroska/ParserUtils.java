@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
+import org.red5.io.plugin.webm2flv.ConverterException;
 import org.red5.io.plugin.webm2flv.matroska.dtd.Tag;
 import org.red5.io.plugin.webm2flv.matroska.dtd.TagFactory;
 
@@ -72,7 +73,7 @@ public class ParserUtils {
 		return byteBuffer.getFloat();
 	}
 	
-	public static ArrayList<Tag> parseMasterElement(InputStream inputStream, final int size) throws IOException {
+	public static ArrayList<Tag> parseMasterElement(InputStream inputStream, final int size) throws IOException, ConverterException {
 		byte bufferForSubElements[] = new byte[size];
 		int readOfBytes = inputStream.read(bufferForSubElements, 0, size);
 		assert readOfBytes == size;
@@ -139,7 +140,7 @@ public class ParserUtils {
 		return (byte) ((value >> position) & 1);
 	}
 
-	public static Tag parseTag(InputStream inputStream) throws IOException {
+	public static Tag parseTag(InputStream inputStream) throws IOException, ConverterException {
 		
 		VINT id = readVINT(inputStream);
 		VINT size = readVINT(inputStream);

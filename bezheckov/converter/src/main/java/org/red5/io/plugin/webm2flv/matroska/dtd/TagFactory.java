@@ -21,6 +21,7 @@ package org.red5.io.plugin.webm2flv.matroska.dtd;
 import java.io.FileInputStream;
 import java.util.Properties;
 
+import org.red5.io.plugin.webm2flv.ConverterException;
 import org.red5.io.plugin.webm2flv.matroska.VINT;
 
 
@@ -38,8 +39,12 @@ public class TagFactory {
 		}
 	}
 	
-	public static Tag createTag(VINT id, VINT size) {
-		String[] parameters = propertyies.getProperty(Long.toHexString(id.getBinary())).split(",");
+	public static Tag createTag(VINT id, VINT size) throws ConverterException {
+		String value = propertyies.getProperty(Long.toHexString(id.getBinary()));
+		if (null == value) {
+			throw new ConverterException("not supported matroska tag: " + id.getBinary());
+		}
+		String[] parameters = value.split(",");
 		String className = parameters[1];
 		String name = parameters[0];
 		
