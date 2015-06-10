@@ -94,6 +94,10 @@ public class ParserUtils {
 		return value;
 	}
 	
+	public static int readIntByVINT(InputStream inputStream) throws IOException {
+		return (int)readVINT(inputStream).getValue();
+	}
+	
 	private static final int BIT_IN_BYTE = 8;
 	
 	private static VINT readVINT(InputStream inputStream) throws IOException {

@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License") +  you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.red5.io.plugin.webm2flv.flv;
 
 import java.io.IOException;
@@ -27,6 +45,18 @@ public class FLVWriter {
 	
 	private static final byte INT_TYPE = 0x01;
 	
+	private static final byte AUDIO_TAG_TYPE = 0x08;
+	
+	private static final int AUDIO_TAG_HEADER_SIZE = 1;
+	
+	private static final int LINEAR_PCM_TYPE = 0x3d;
+	
+	private static final int VIDEO_TAG_HEADER_SIZE = 5;
+	
+	private static final byte VIDEO_TAG_TYPE = 0x09;
+	
+	private static final int FLV_TAG_HEADER_SIZE = 11;
+	
 	public static void writeHeader(OutputStream output) throws IOException {
 		output.write(MAGICS);
 		output.write(VERSION);
@@ -38,6 +68,23 @@ public class FLVWriter {
 	private static byte[] toByteArray(double value) {
 	    byte[] bytes = new byte[8];
 	    ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).putDouble(value);
+	    return bytes;
+	}
+	
+	private static byte[] toByteArrayUInt24(int value) {
+	    byte[] bytes = new byte[3];
+	    bytes[2] = (byte) (value & 0xff);
+	    bytes[1] = (byte) ((value & 0xff00) >> 8);
+	    bytes[0] = (byte) ((value & 0xff0000) >> 16);
+	    return bytes;
+	}
+	
+	private static byte[] toByteArrayUInt32(int value) {
+	    byte[] bytes = new byte[4];
+	    bytes[3] = (byte) (value & 0xff);
+	    bytes[2] = (byte) ((value & 0xff00) >> 8);
+	    bytes[1] = (byte) ((value & 0xff0000) >> 16);
+	    bytes[0] = (byte) ((value & 0xff000000) >> 24);
 	    return bytes;
 	}
 	
@@ -71,6 +118,36 @@ public class FLVWriter {
 		writeOnMetaDataElement("stereo".getBytes(), metaData.isStereo(), output);
 		writeOnMetaDataElement("audiocodecid".getBytes(), FLVOnMetaData.AUDIO_CODEC_ID, output);
 		output.write(ON_META_DATA_FOOTER);
+	}
+	
+	private static void writeTagHeader(byte tagType, int size, int timestamp, OutputStream output) throws IOException {
+		output.write(tagType);
+		output.write(toByteArrayUInt24(size));
+		output.write(toByteArrayUInt24(timestamp));
+		output.write(0x00); // timestamp extended
+		
+		// streamId always three zeros
+		output.write(0x00);
+		output.write(0x00);
+		output.write(0x00);
+	}
+	
+	public static void writeVideoTag(int timestamp, int compositionTime, byte[] data, boolean isKeyFrame, byte packetType, OutputStream output) 
+			throws IOException {
+		writeTagHeader(VIDEO_TAG_TYPE, data.length + VIDEO_TAG_HEADER_SIZE, timestamp, output);
+		
+		output.write(((isKeyFrame ? 0x1 : 0x2) << 4) | (byte)FLVOnMetaData.VIDEO_CODEC_ID);
+		output.write(packetType);
+		output.write(toByteArrayUInt24(compositionTime));
+		output.write(data);
+		output.write(toByteArrayUInt32(FLV_TAG_HEADER_SIZE + data.length + VIDEO_TAG_HEADER_SIZE));
+	}
+	
+	public static void writeAudioTag(int timestamp, int compositionTime, byte[] data, OutputStream output) 
+			throws IOException {
+		writeTagHeader(AUDIO_TAG_TYPE, data.length + AUDIO_TAG_HEADER_SIZE, timestamp, output);
+		output.write(LINEAR_PCM_TYPE);
+		output.write(toByteArrayUInt32(FLV_TAG_HEADER_SIZE + data.length + AUDIO_TAG_HEADER_SIZE));
 	}
 	
 }

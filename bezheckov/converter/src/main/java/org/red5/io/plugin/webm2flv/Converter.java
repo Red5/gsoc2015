@@ -18,6 +18,7 @@
  */
 package org.red5.io.plugin.webm2flv;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,6 +28,7 @@ import org.red5.io.plugin.webm2flv.flv.FLVOnMetaData;
 import org.red5.io.plugin.webm2flv.flv.FLVWriter;
 import org.red5.io.plugin.webm2flv.flv.TagHandler;
 import org.red5.io.plugin.webm2flv.matroska.ParserUtils;
+import org.red5.io.plugin.webm2flv.matroska.dtd.BinaryTag;
 import org.red5.io.plugin.webm2flv.matroska.dtd.FloatTag;
 import org.red5.io.plugin.webm2flv.matroska.dtd.StringTag;
 import org.red5.io.plugin.webm2flv.matroska.dtd.Tag;
@@ -37,6 +39,18 @@ public class Converter {
 	private HashMap<String, TagHandler> handlers = new HashMap<>();
 	
 	private FLVOnMetaData onMetaData;
+	
+	private byte[] codecPrivate;
+	
+	boolean codecPrivateDone = false;
+	
+	private long clusterTimecode = 0;
+	
+	private int lastTrackNumber = -1;
+	
+	private int videoTrackNumber = -1;
+	
+	private int audioTrackNumber = -1;
 	
 	public Converter() {
 		
@@ -85,7 +99,22 @@ public class Converter {
 		
 		handlers.put("Tracks", enterHandler);
 		handlers.put("TrackEntry", enterHandler);
-		handlers.put("Video", enterHandler);
+		handlers.put("TrackNumber", new TagHandler() {
+			@Override
+			public void handle(Tag tag, InputStream input, OutputStream output)
+					throws IOException, ConverterException {
+				tag.parse(input);
+				lastTrackNumber = (int) ((UnsignedIntegerTag)tag).getValue();
+			}
+		});
+		
+		handlers.put("Video", new TagHandler() {
+			@Override
+			public void handle(Tag tag, InputStream input, OutputStream output)
+					throws IOException, ConverterException {
+				videoTrackNumber = lastTrackNumber;
+			}
+		});
 		
 		handlers.put("PixelWidth", new TagHandler() {
 			@Override
@@ -105,7 +134,22 @@ public class Converter {
 			}
 		});
 		
-		handlers.put("Audio", enterHandler);
+		handlers.put("CodecPrivate", new TagHandler() {
+			@Override
+			public void handle(Tag tag, InputStream input, OutputStream output)
+					throws IOException, ConverterException {
+				tag.parse(input);
+				codecPrivate = ((BinaryTag)tag).getValue();
+			}
+		});
+		
+		handlers.put("Audio", new TagHandler() {
+			@Override
+			public void handle(Tag tag, InputStream input, OutputStream output)
+					throws IOException, ConverterException {
+				audioTrackNumber = lastTrackNumber;
+			}
+		});
 		
 		handlers.put("SamplingFrequency", new TagHandler() {
 			@Override
@@ -123,6 +167,7 @@ public class Converter {
 				tag.parse(input);
 				onMetaData.setAudioSampleSize(((UnsignedIntegerTag)tag).getValue());
 				FLVWriter.writeOnMetaDataTag(onMetaData, output);
+				FLVWriter.writeVideoTag(0, 0, codecPrivate, true, (byte) 0, output);
 			}
 		});
 		
@@ -135,8 +180,49 @@ public class Converter {
 			}
 		});
 		
-	}
+		handlers.put("CodecID", new TagHandler() {
+			@Override
+			public void handle(Tag tag, InputStream input, OutputStream output)
+					throws IOException, ConverterException {
+				tag.parse(input);
+				String codecName = ((StringTag)tag).getValue();
+				if (!"V_MPEG4/ISO/AVC".equals(codecName) && !"A_PCM/INT/LIT".equals(codecName)) {
+					throw new ConverterException("not supported codec " + codecName);
+				}
+			}
+		});
 		
+		handlers.put("Cluster", enterHandler);
+		
+		handlers.put("Timecode", new TagHandler() {
+			@Override
+			public void handle(Tag tag, InputStream input, OutputStream output)
+					throws IOException, ConverterException {
+				tag.parse(input);
+				clusterTimecode = ((UnsignedIntegerTag)tag).getValue();
+			}
+		});
+		
+		handlers.put("SimpleBlock", new TagHandler() {
+			@Override
+			public void handle(Tag tag, InputStream input, OutputStream output)
+					throws IOException, ConverterException {
+				tag.parse(input);
+				byte[] data = ((BinaryTag)tag).getValue();
+				assert data.length > 3;
+				
+				ByteArrayInputStream inputStreamForSimpleBlock = new ByteArrayInputStream(data);
+				int trackNumber = ParserUtils.readIntByVINT(inputStreamForSimpleBlock);
+				
+				long blockTimecode = ParserUtils.parseInteger(inputStreamForSimpleBlock, 2);
+				if (trackNumber == videoTrackNumber) {
+					FLVWriter.writeVideoTag(0, (int)(clusterTimecode + blockTimecode), data, 1 == (data[3] & 0x80), (byte) 0x1, output);
+				}
+			}
+		});
+		
+	}
+	
 	public void convert(InputStream input, OutputStream output) throws IOException, ConverterException {
 		
 		// 1. check first tag in input - this _must_ be EBML tag
