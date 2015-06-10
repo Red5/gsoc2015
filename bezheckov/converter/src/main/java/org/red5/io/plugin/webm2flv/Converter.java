@@ -216,7 +216,7 @@ public class Converter {
 				
 				long blockTimecode = ParserUtils.parseInteger(inputStreamForSimpleBlock, 2);
 				if (trackNumber == videoTrackNumber) {
-					FLVWriter.writeVideoTag(0, (int)(clusterTimecode + blockTimecode), data, 1 == (data[3] & 0x80), (byte) 0x1, output);
+					FLVWriter.writeVideoTag((int)(clusterTimecode + blockTimecode), 0, data, 1 == (data[3] & 0x80), (byte) 0x1, output);
 				}
 			}
 		});

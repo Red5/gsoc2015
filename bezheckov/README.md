@@ -8,4 +8,4 @@ Build instruction: mvn install
 
 Usage: java -jar target/webm2flv-1.0.jar path/to/your/file.webm
 
-sample files are available on http://dropmefiles.com/MRh8P
+sample files are available on http://dropmefiles.com/OWes4
