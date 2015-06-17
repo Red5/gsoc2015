@@ -6,6 +6,6 @@ Build system: maven
 
 Build instruction: mvn install
 
-Usage: java -jar target/webm2flv-1.0.jar path/to/your/file.webm
+Usage: java -jar target/webm2flv-1.0.jar path/to/your/file.webm name/of/your/output/file.flv
 
 sample files are available on http://dropmefiles.com/OWes4
