@@ -215,6 +215,9 @@ public class Converter {
 				if (trackNumber == videoTrackNumber) {
 					FLVWriter.writeVideoTag((int)(clusterTimecode + timeCode), 0, data, isKeyFrame, (byte) 0x1, output);
 				}
+				else if (trackNumber == audioTrackNumber) {
+					FLVWriter.writeAudioTag((int)(clusterTimecode + timeCode), 0, data, output);
+				}
 			}
 		});
 		
