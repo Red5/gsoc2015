@@ -20,50 +20,51 @@ package org.red5.io.plugin.webm2flv.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import org.red5.io.plugin.webm2flv.ConverterException;
 import org.red5.io.plugin.webm2flv.matroska.ParserUtils;
 import org.red5.io.plugin.webm2flv.matroska.VINT;
 
-public class SegmentTest extends Tag {
+public class SimpleBlock extends Tag {
 
-	private ArrayList<Tag> subElements = new ArrayList<Tag>();
+	private int trackNumber;
 	
-	public SegmentTest(String name, VINT id, VINT size) {
+	private long timeCode;
+	
+	private byte[] binary;
+	
+	private boolean keyFrame;
+	
+	public SimpleBlock(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 	
-	public String toString() {
-		StringBuilder result = new StringBuilder(getName() + "\n");
-		for (Tag tag : subElements) {
-			result.append("    " + tag + "\n");
-		}
-		return result.toString();
-	}
-
 	@Override
-	public void parse(InputStream inputStream) throws IOException, ConverterException {
-		
-		// parse meta seek information
-		subElements.add(ParserUtils.parseTag(inputStream));
-		
-		// parse void
-		subElements.add(ParserUtils.parseTag(inputStream));
-		
-		// parse segment information
-		subElements.add(ParserUtils.parseTag(inputStream));
-		
-		// parse tracks
-		subElements.add(ParserUtils.parseTag(inputStream));
-		
-		// parse tags
-		subElements.add(ParserUtils.parseTag(inputStream));
-		
-		// parse clusters test
-		for (int i = 0; i < 14; ++i) {
-			subElements.add(ParserUtils.parseTag(inputStream));
-		}
+	public void parse(InputStream inputStream) throws IOException,
+			ConverterException {
+		trackNumber = ParserUtils.readIntByVINT(inputStream);
+		timeCode = ParserUtils.parseInteger(inputStream, 2); // int16 by specification
+		keyFrame = (0x80 == (inputStream.read() & 0x80));
+		binary = ParserUtils.parseBinary(inputStream, (int) getSize() - 4);
 	}
 
+	public byte[] getBinary() {
+		return binary;
+	}
+
+	public long getTimeCode() {
+		return timeCode;
+	}
+
+	public int getTrackNumber() {
+		return trackNumber;
+	}
+	
+	public String toString() {
+		return (getName() + " = binary " + binary.length);
+	}
+
+	public boolean isKeyFrame() {
+		return keyFrame;
+	}
 }

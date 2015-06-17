@@ -49,7 +49,7 @@ public class FLVWriter {
 	
 	private static final int AUDIO_TAG_HEADER_SIZE = 1;
 	
-	private static final int LINEAR_PCM_TYPE = 0x3d;
+	private static final int LINEAR_PCM_TYPE = 0x3f;
 	
 	private static final int VIDEO_TAG_HEADER_SIZE = 5;
 	
@@ -147,6 +147,7 @@ public class FLVWriter {
 			throws IOException {
 		writeTagHeader(AUDIO_TAG_TYPE, data.length + AUDIO_TAG_HEADER_SIZE, timestamp, output);
 		output.write(LINEAR_PCM_TYPE);
+		output.write(data);
 		output.write(toByteArrayUInt32(FLV_TAG_HEADER_SIZE + data.length + AUDIO_TAG_HEADER_SIZE));
 	}
 	

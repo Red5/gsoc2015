@@ -18,7 +18,6 @@
  */
 package org.red5.io.plugin.webm2flv;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,6 +29,7 @@ import org.red5.io.plugin.webm2flv.flv.TagHandler;
 import org.red5.io.plugin.webm2flv.matroska.ParserUtils;
 import org.red5.io.plugin.webm2flv.matroska.dtd.BinaryTag;
 import org.red5.io.plugin.webm2flv.matroska.dtd.FloatTag;
+import org.red5.io.plugin.webm2flv.matroska.dtd.SimpleBlock;
 import org.red5.io.plugin.webm2flv.matroska.dtd.StringTag;
 import org.red5.io.plugin.webm2flv.matroska.dtd.Tag;
 import org.red5.io.plugin.webm2flv.matroska.dtd.UnsignedIntegerTag;
@@ -208,15 +208,12 @@ public class Converter {
 			public void handle(Tag tag, InputStream input, OutputStream output)
 					throws IOException, ConverterException {
 				tag.parse(input);
-				byte[] data = ((BinaryTag)tag).getValue();
-				assert data.length > 3;
-				
-				ByteArrayInputStream inputStreamForSimpleBlock = new ByteArrayInputStream(data);
-				int trackNumber = ParserUtils.readIntByVINT(inputStreamForSimpleBlock);
-				
-				long blockTimecode = ParserUtils.parseInteger(inputStreamForSimpleBlock, 2);
+				int trackNumber = ((SimpleBlock)tag).getTrackNumber();
+				long timeCode = ((SimpleBlock)tag).getTimeCode();
+				byte[] data = ((SimpleBlock)tag).getBinary();
+				boolean isKeyFrame = ((SimpleBlock)tag).isKeyFrame();
 				if (trackNumber == videoTrackNumber) {
-					FLVWriter.writeVideoTag((int)(clusterTimecode + blockTimecode), 0, data, 1 == (data[3] & 0x80), (byte) 0x1, output);
+					FLVWriter.writeVideoTag((int)(clusterTimecode + timeCode), 0, data, isKeyFrame, (byte) 0x1, output);
 				}
 			}
 		});
