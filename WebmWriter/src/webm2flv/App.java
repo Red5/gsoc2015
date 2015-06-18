@@ -57,6 +57,5 @@ public class App {
 		} catch (ConverterException e) {
 			System.out.println("ConverterException " + e.getMessage());
 		}
-		System.out.println("File processed");
 	}
 }

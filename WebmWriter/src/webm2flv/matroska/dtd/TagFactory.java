@@ -31,7 +31,7 @@ public class TagFactory {
 	
 	static {
 		propertyies = new Properties();
-		try (FileInputStream input = new FileInputStream("src/resources/matroska_type_definition_config.properties")) {
+		try (FileInputStream input = new FileInputStream("src/main/resources/matroska_type_definition_config.properties")) {
 			propertyies.load(input);
 		}
 		catch (Exception e) {

@@ -48,6 +48,70 @@ public abstract class Tag {
 	public void writeTag(OutputStream output) throws IOException {
 				
 	}
+	
+	  public long writeHeaderData(OutputStream output)
+	  {
+
+	    int len = 0;
+
+	    len += name.remaining();
+
+	    final byte[] encodedSize = Tag.makeEbmlCodedSize(getSize());
+	    // System.out.printf("Writing header for element %s with size %d (%s)\n", typeInfo.name, getTotalSize(), EBMLReader.bytesToHex(size));
+
+	    len += encodedSize.length;
+	    final ByteBuffer buf = ByteBuffer.allocate(len);
+	    buf.put(getType());
+	    buf.put(encodedSize);
+	    buf.flip();
+	    LOG.trace("Writing out header {}, {}", buf.remaining(), EBMLReader.bytesToHex(buf.array()));
+	    output.write(buf);
+	    return len;
+	  }
+	  
+	  
+	  public static byte[] makeEbmlCodedSize(final long size, int minSizeLen)
+	  {
+	    final int len = codedSizeLength(size, minSizeLen);
+	    final byte[] ret = new byte[len];
+	    // byte[] packedSize = packIntUnsigned(size);
+	    long mask = 0x00000000000000FFL;
+	    for (int i = 0; i < len; i++)
+	    {
+	      ret[len - 1 - i] = (byte) ((size & mask) >>> (i * 8));
+	      mask <<= 8;
+	    }
+	    // The first size bits should be clear, otherwise we have an error in the size determination.
+	    ret[0] |= 0x80 >> (len - 1);
+	    return ret;
+	  }
+	  
+	  public static int codedSizeLength(final long value, int minSizeLen)
+	  {
+	    int codedSize = 0;
+	    if (value < 127)
+	    {
+	      codedSize = 1;
+	    }
+	    else if (value < 16383)
+	    {
+	      codedSize = 2;
+	    }
+	    else if (value < 2097151)
+	    {
+	      codedSize = 3;
+	    }
+	    else if (value < 268435455)
+	    {
+	      codedSize = 4;
+	    }
+	    if ((minSizeLen > 0) && (codedSize <= minSizeLen))
+	    {
+	      codedSize = minSizeLen;
+	    }
+
+	    return codedSize;
+	  }
 
 	public long getId() {
 		return id.getBinary();

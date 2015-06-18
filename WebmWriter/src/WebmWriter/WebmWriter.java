@@ -1,9 +1,16 @@
 package WebmWriter;
+
+import webm2flv.matroska.ParserUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import webm2flv.ConverterException;
+import webm2flv.flv.TagHandler;
+import webm2flv.matroska.dtd.Tag;
 
 public class WebmWriter {
 
@@ -17,6 +24,8 @@ public class WebmWriter {
 	private static final long DOC_TYPE_VERSION_ID = 0x4287L;
 	private static final long DOC_TYPE_READ_VERSION = 0x4285L;
 	
+	private FileOutputStream output;
+	
 	private static final int BIT_IN_BYTE = 8;
 	
 	private Map<Long, ElementType> typeInfo = new HashMap<Long, ElementType>();
@@ -25,6 +34,18 @@ public class WebmWriter {
 	
 	public WebmWriter(InputStream inputStream) {
 
+		
+		Tag tag = ParserUtils.parseTag(input);
+		if (!"EBML".equals(tag.getName())) {
+			throw new ConverterException("not supported file format, first tag should be EBML");
+		}
+		
+		// 2. read through all tags and gather info to output, like a SAX parser
+		while (0 != input.available()) {
+			tag = ParserUtils.parseTag(input);
+			
+		}
+		
 		this.inputStream = inputStream;
 		
 		// simple stub for "document type definition - DTD"
@@ -40,70 +61,129 @@ public class WebmWriter {
 		typeInfo.put(DOC_TYPE_READ_VERSION, ElementType.UnsignedInteger);
 	}
 	
-	public void parseHeader() {
-		try {
-			// see layout by specification http://matroska.org/technical/specs/rfc/index.html
-			Element ebml = readElement();
-			Element ebmlVersion = readElement();
-			Element ebmlReadVersion = readElement();
-			Element ebmlMaxIdLength = readElement();
-			Element ebmlMaxSizeLength = readElement();
+	public void writeHeader() throws IOException {
 
-			System.out.println("success");
+	}
+
+
+	/** {@inheritDoc} */
+	public boolean writeStream(byte[] b) {
+		try {
+			dataFile.write(b);
+			return true;
 		} catch (IOException e) {
-			e.printStackTrace();
+			//log.error("", e);
+		}
+		return false;
+	}
+
+	private void writeMetadataTag(double duration, int videoCodecId, int audioCodecId) throws IOException {
+
+	}
+
+	/** 
+	 * Ends the writing process, then merges the data file with the flv file header and metadata.
+	 */
+	public void close() {
+		log.debug("close");
+		log.debug("Meta tags: {}", metaTags);
+		try {
+			lock.acquire();
+			if (!append) {
+				// write the file header
+				writeHeader();
+				// write the metadata with the final duration
+				writeMetadataTag(duration * 0.001d, videoCodecId, audioCodecId);
+				// set the data file the beginning 
+				dataFile.seek(0);
+				file.getChannel().transferFrom(dataFile.getChannel(), bytesWritten, dataFile.length());
+			} else {
+				// TODO update duration
+
+			}
+		} catch (IOException e) {
+			log.error("IO error on close", e);
+		} catch (InterruptedException e) {
+			log.warn("Exception acquiring lock", e);
+		} finally {
+			try {
+				if (dataFile != null) {
+					// close the file
+					dataFile.close();
+					//TODO delete the data file
+					File dat = new File(filePath + ".ser");
+					if (dat.exists()) {
+						dat.delete();
+					}
+				}
+			} catch (IOException e) {
+				log.error("", e);
+			}
+			try {
+				if (file != null) {
+					// run a test on the flv if debugging is on
+					if (log.isDebugEnabled()) {
+						// debugging
+						try {
+							ITagReader reader = null;
+							if (flv != null) {
+								reader = flv.getReader();
+							}
+							if (reader == null) {
+								file.seek(0);
+								reader = new FLVReader(file.getChannel());
+							}
+							log.trace("reader: {}", reader);
+							log.debug("Has more tags: {}", reader.hasMoreTags());
+							ITag tag = null;
+							while (reader.hasMoreTags()) {
+								tag = reader.readTag();
+								log.debug("\n{}", tag);
+							}
+						} catch (IOException e) {
+							log.warn("", e);
+						}
+					}
+					// close the file
+					file.close();
+				}
+			} catch (IOException e) {
+				log.error("", e);
+			}
+			lock.release();
 		}
 	}
-	
-	private Element readElement() throws IOException {
-		VInt elementId = readVInt();
-		VInt elementSize = readVInt();
-		ElementType type = typeInfo.get(elementId.getValue()); 
-		
-		// type dependent action with data
-		
-		return new Element(elementId, elementSize, null, type);
+
+	/** {@inheritDoc}
+	 */
+	public IStreamableFile getFile() {
+		return flv;
 	}
-	
-	private VInt readVInt() throws IOException {
-		ArrayList<Byte> lengthBytes = new ArrayList<Byte>();
-		byte length = determineLength(lengthBytes);
-		
-		long value = lengthBytes.get(0);
-		for (int i = 1; i < lengthBytes.size(); ++i) {
-			value = (value << BIT_IN_BYTE) | ((long)lengthBytes.get(i) & (long)0xff);
-		}
-		
-		for (int i = 0; i < length; ++i) {
-			byte nextByte = (byte)inputStream.read();
-			lengthBytes.add(nextByte);
-			value = (value << BIT_IN_BYTE) | ((long)nextByte & (long)0xff);
-		}
-		
-		return new VInt(value, length);
+
+	public void setFLV(IFLV flv) {
+		this.flv = flv;
 	}
-	
-	private byte determineLength(ArrayList<Byte> lengthBytes) throws IOException {
-		byte length = 0;
-		
-		// search mark set bit
-		
-		// skip zero bytes
-		byte tmp = 0;
-		while (0 == (tmp = (byte)inputStream.read())) {
-			length += BIT_IN_BYTE;
-			lengthBytes.add(tmp);
-		}
-		
-		// skip zero bits
-		int position = BIT_IN_BYTE - 1;
-		lengthBytes.add(tmp);
-		while (position >= 0 && 0 == getBit(tmp, position--)) { ++length; }
-		
-		return length;
+
+	/** 
+	 * {@inheritDoc}
+	 */
+	public int getOffset() {
+		return offset;
 	}
-	
-	private byte getBit(byte value, int position) {
-		return (byte) ((value >> position) & 1);
+
+	/**
+	 * Setter for offset
+	 *
+	 * @param offset Value to set for offset
+	 */
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
+
+	/** 
+	 * {@inheritDoc}
+	 */
+	public long getBytesWritten() {
+		return bytesWritten;
 	}
 }
