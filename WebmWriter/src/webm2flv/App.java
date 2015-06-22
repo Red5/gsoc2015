@@ -27,9 +27,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.Object;
+
+import webm2flv.matroska.dtd.TagFactory;
+import webm2flv.matroska.dtd.UnsignedIntegerTag;
+import WebmWriter.WebmWriter;
 
 public class App {
-	
 	public static void main(String[] args) {
 		
 		if (args.length < 2) {
@@ -42,12 +46,31 @@ public class App {
 			return;
 		}
 		
-		Converter converter = new Converter();
+		/*Converter converter = new Converter();*/
 		try (
 				InputStream input = new BufferedInputStream(new FileInputStream(new File(args[0])));
-				OutputStream output = new BufferedOutputStream(new FileOutputStream(new File(args[1])))
+				//OutputStream output = new BufferedOutputStream(new FileOutputStream(new File(args[1])))
+				File outputFile = new File(args[1]);
+				outputFile.createNewFile();
+				WebmWriter = new WebmWriter(outputFile, false);
 			) {
-			converter.convert(input, output);
+			/*converter.convert(input, output);*/
+			
+			/*UnsignedIntegerTag ebmlTag = (UnsignedIntegerTag) TagFactory.createTag("EBMLVersion");
+			ebmlTag.setValue(1);
+			UnsignedIntegerTag ebmlTag = (UnsignedIntegerTag) TagFactory.createTag("EBMLReadVersion");
+			ebmlTag.setValue(1);
+			UnsignedIntegerTag ebmlTag = (UnsignedIntegerTag) TagFactory.createTag("EBMLMaxIDLength");
+			ebmlTag.setValue(4);
+			UnsignedIntegerTag ebmlTag = (UnsignedIntegerTag) TagFactory.createTag("EBMLMaxSizeLength");
+			ebmlTag.setValue(8);
+			UnsignedIntegerTag ebmlTag = (UnsignedIntegerTag) TagFactory.createTag("DocTypeVersion");
+			ebmlTag.setValue(3);
+			UnsignedIntegerTag ebmlTag = (UnsignedIntegerTag) TagFactory.createTag("DocTypeReadVersion");
+			ebmlTag.setValue(2);*/
+			
+			
+			//ebmlTag.writeHeaderData(output);
 		}
 		catch (FileNotFoundException e) {
 			System.out.println("File not found " + e.getMessage());

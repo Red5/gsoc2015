@@ -28,6 +28,10 @@ import webm2flv.matroska.VINT;
 public class FloatTag extends Tag {
 
 	private double value;
+
+	public FloatTag(String name, VINT id) {
+		super(name, id);
+	}
 	
 	public FloatTag(String name, VINT id, VINT size) {
 		super(name, id, size);
@@ -38,6 +42,23 @@ public class FloatTag extends Tag {
 		value = ParserUtils.parseFloat(inputStream, (int) getSize());
 	}
 	
+	protected byte[] dataToByteArray() {
+		byte[] bytes = new byte[1];
+		return bytes;
+	}
+	
+	public void setDefaultValue(String newValue) {
+		setValue(Float.parseFloat(newValue));
+	}
+	public void setValue(double newValue) {
+		value = newValue;
+		if(value < Float.MAX_VALUE) {
+			size = new VINT(4, (byte)(4), 4);
+		} else {
+			size = new VINT(8, (byte)(4), 8);
+		}
+	}
+
 	public double getValue() {
 		return value;
 	}

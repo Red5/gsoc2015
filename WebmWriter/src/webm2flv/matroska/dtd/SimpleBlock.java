@@ -34,6 +34,10 @@ public class SimpleBlock extends Tag {
 	private byte[] binary;
 	
 	private boolean keyFrame;
+
+	public SimpleBlock(String name, VINT id) {
+		super(name, id);
+	}
 	
 	public SimpleBlock(String name, VINT id, VINT size) {
 		super(name, id, size);
@@ -46,6 +50,15 @@ public class SimpleBlock extends Tag {
 		timeCode = ParserUtils.parseInteger(inputStream, 2); // int16 by specification
 		keyFrame = (0x80 == (inputStream.read() & 0x80));
 		binary = ParserUtils.parseBinary(inputStream, (int) getSize() - 4);
+	}
+	
+	
+	protected byte[] dataToByteArray() {
+		byte[] bytes = new byte[1];
+		return bytes;
+	}
+	
+	public void setDefaultValue(String newValue) {
 	}
 
 	public byte[] getBinary() {

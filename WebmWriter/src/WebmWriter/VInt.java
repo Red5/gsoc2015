@@ -2,9 +2,12 @@ package WebmWriter;
 
 public class VInt {
 	
-	private long value;
+	private long value = 0;
 	
-	private byte length;
+	private byte length = 0;
+
+	public VInt() {
+	}
 	
 	public VInt(long value, byte length) {
 		this.value = value;

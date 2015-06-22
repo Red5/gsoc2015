@@ -18,6 +18,7 @@
  */
 package webm2flv.matroska.dtd;
 
+import java.nio.ByteBuffer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,7 +33,15 @@ public abstract class Tag {
 	
 	private VINT id;
 	
-	private VINT size;
+	protected VINT size;
+	
+	public Tag() {
+	}
+	
+	public Tag(String name, VINT id) {
+		this.name = name;
+		this.id = id;
+	}
 	
 	public Tag(String name, VINT id, VINT size) {
 		this.name = name;
@@ -40,7 +49,12 @@ public abstract class Tag {
 		this.size = size;
 	}
 	
+	
 	public abstract void parse(InputStream inputStream) throws IOException, ConverterException;
+	
+	public abstract void setDefaultValue(String newValue);
+	  
+	protected abstract byte[] dataToByteArray();
 
 	public String getName() {
 		return name;
@@ -49,70 +63,84 @@ public abstract class Tag {
 				
 	}
 	
-	  public long writeHeaderData(OutputStream output)
-	  {
-
-	    int len = 0;
-
-	    len += name.remaining();
-
-	    final byte[] encodedSize = Tag.makeEbmlCodedSize(getSize());
-	    // System.out.printf("Writing header for element %s with size %d (%s)\n", typeInfo.name, getTotalSize(), EBMLReader.bytesToHex(size));
-
-	    len += encodedSize.length;
-	    final ByteBuffer buf = ByteBuffer.allocate(len);
-	    buf.put(getType());
-	    buf.put(encodedSize);
-	    buf.flip();
-	    LOG.trace("Writing out header {}, {}", buf.remaining(), EBMLReader.bytesToHex(buf.array()));
-	    output.write(buf);
-	    return len;
-	  }
-	  
-	  
-	  public static byte[] makeEbmlCodedSize(final long size, int minSizeLen)
-	  {
-	    final int len = codedSizeLength(size, minSizeLen);
+	public static byte[] makeEbmlCodedSize(final long size, int minSizeLen)
+	{
+	    final int len = binaryCodedSize(size, minSizeLen);
 	    final byte[] ret = new byte[len];
-	    // byte[] packedSize = packIntUnsigned(size);
 	    long mask = 0x00000000000000FFL;
 	    for (int i = 0; i < len; i++)
 	    {
-	      ret[len - 1 - i] = (byte) ((size & mask) >>> (i * 8));
-	      mask <<= 8;
+	        ret[len - 1 - i] = (byte) ((size & mask) >>> (i * 8));
+	        mask <<= 8;
 	    }
-	    // The first size bits should be clear, otherwise we have an error in the size determination.
 	    ret[0] |= 0x80 >> (len - 1);
 	    return ret;
-	  }
-	  
-	  public static int codedSizeLength(final long value, int minSizeLen)
-	  {
-	    int codedSize = 0;
+	}
+	
+    public ByteBuffer writeHeaderData()
+	{
+	    int len = 0;
+
+	    len += id.getLength();
+
+	    final byte[] encodedSize = makeEbmlCodedSize(getSize(), 0);
+	    // System.out.printf("Writing header for element %s with size %d (%s)\n", typeInfo.name, getTotalSize(), EBMLReader.bytesToHex(size));
+
+	    len += encodedSize.length;
+	    len += getSize();
+	    final ByteBuffer buf = ByteBuffer.allocate(len);
+	    System.out.println("Id:" + id.getValue() + "Idl:" + id.getLength() + ", Length:" + len + "GetSize():" + getSize());
+	    buf.put(convertToByteArray(id.getValue(), (int) id.getLength()));
+	    System.out.println(buf.array());
+	    buf.put(encodedSize);
+	    buf.put(dataToByteArray());
+	    buf.flip();
+	    /*try {
+			output.write(buf.array());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}*/
+	    return buf;
+	}
+    
+	protected byte[] convertToByteArray(long value, int size) {
+		byte[] bytes = new byte[size];
+		long tempValue = value;
+		for (int i = 0; i < size; ++i) {
+			bytes[i] = (byte) (tempValue >> (size - i - 1 << 3));
+		}
+		return bytes;
+	}
+
+    
+	public static int binaryCodedSize(final long value, int minSizeLen)
+	{
+	    int octetsNumber = 0;
 	    if (value < 127)
 	    {
-	      codedSize = 1;
+	    	octetsNumber = 1;
 	    }
 	    else if (value < 16383)
 	    {
-	      codedSize = 2;
+	    	octetsNumber = 2;
 	    }
 	    else if (value < 2097151)
 	    {
-	      codedSize = 3;
+	    	octetsNumber = 3;
 	    }
 	    else if (value < 268435455)
 	    {
-	      codedSize = 4;
+	    	octetsNumber = 4;
 	    }
-	    if ((minSizeLen > 0) && (codedSize <= minSizeLen))
+	    if ((minSizeLen > 0) && (octetsNumber <= minSizeLen))
 	    {
-	      codedSize = minSizeLen;
+	    	octetsNumber = minSizeLen;
 	    }
 
-	    return codedSize;
-	  }
-
+	    return octetsNumber;
+	}
+	  
+	  
 	public long getId() {
 		return id.getBinary();
 	}

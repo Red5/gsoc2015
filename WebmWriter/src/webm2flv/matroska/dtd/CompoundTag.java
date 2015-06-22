@@ -31,9 +31,25 @@ public class CompoundTag extends Tag {
 
 	private ArrayList<Tag> subElements = new ArrayList<Tag>();
 	
+	public CompoundTag() {
+		super();
+	}
+	public CompoundTag(String name, VINT id) {
+		super(name, id);
+	}
 	public CompoundTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
+	
+	public void setDefaultValue(String newValue) {
+	}
+	
+	protected byte[] dataToByteArray() {
+		byte[] bytes = new byte[1];
+		return bytes;
+	}
+
+	
 	
 	public String toString() {
 		StringBuilder result = new StringBuilder(getName() + "\n");
@@ -46,6 +62,10 @@ public class CompoundTag extends Tag {
 	@Override
 	public void parse(InputStream inputStream) throws IOException, ConverterException {
 		subElements = ParserUtils.parseMasterElement(inputStream, (int) getSize());
+	}
+	
+	public void addChild(Tag newChild) {
+		subElements.add(newChild);
 	}
 
 }

@@ -28,6 +28,10 @@ import webm2flv.matroska.VINT;
 public class StringTag extends Tag {
 	
 	private String value;
+
+	public StringTag(String name, VINT id) {
+		super(name, id);
+	}
 	
 	public StringTag(String name, VINT id, VINT size) {
 		super(name, id, size);
@@ -36,10 +40,19 @@ public class StringTag extends Tag {
 	public String getValue() {
 		return value;
 	}
+	
+	protected byte[] dataToByteArray() {
+		byte[] bytes = new byte[1];
+		return bytes;
+	}
 
 	@Override
 	public void parse(InputStream inputStream) throws IOException {
 		value = ParserUtils.parseString(inputStream, (int) getSize());
+	}
+	
+	public void setDefaultValue(String newValue) {
+		value = newValue;
 	}
 	
 	public String toString() {

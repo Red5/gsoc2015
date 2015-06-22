@@ -28,15 +28,24 @@ import webm2flv.matroska.VINT;
 public class TagFactory {
 	
 	static Properties propertyies;
+	static Properties writerProperties;
 	
 	static {
 		propertyies = new Properties();
-		try (FileInputStream input = new FileInputStream("src/main/resources/matroska_type_definition_config.properties")) {
+		try (FileInputStream input = new FileInputStream("src/resources/matroska_type_definition_config.properties")) {
 			propertyies.load(input);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+		writerProperties = new Properties();
+		try (FileInputStream input = new FileInputStream("src/resources/matroska_type_prototypes.properties")) {
+			writerProperties.load(input);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public static Tag createTag(VINT id, VINT size) throws ConverterException {
@@ -58,6 +67,43 @@ public class TagFactory {
 		}
 		
 		return null;
+	}
+	
+	public static Tag createTag(String tagName) throws ConverterException {
+		String value = writerProperties.getProperty(tagName);
+		if (null == value) {
+			throw new ConverterException("not supported matroska tag: " + tagName);
+		}
+		String[] parameters = value.split(",");
+		String id = parameters[0];
+		String className = parameters[1];
+
+		long longId = Long.parseLong(id, 16); 
+		VINT typeVint = new VINT(longId, (byte)(id.length() / 2), longId);
+		try {
+			Class<?> type = Class.forName(TagFactory.class.getPackage().getName() + "." + className);
+			System.out.println(TagFactory.class.getPackage().getName() + "." + className);
+			Tag newTag = (Tag) type
+					.getConstructor(String.class, VINT.class)
+					.newInstance(tagName, typeVint);
+			return newTag;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		return null;
+	}
+	
+	
+	public static byte[] hexStringToByteArray(String hex) {
+	    int len = hex.length();
+	    byte[] data = new byte[len / 2];
+	    for (int i = 0; i < len; i += 2) {
+	        data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+	                             + Character.digit(hex.charAt(i+1), 16));
+	    }
+	    return data;
 	}
 	
 }

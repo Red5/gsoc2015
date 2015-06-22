@@ -28,6 +28,10 @@ import webm2flv.matroska.VINT;
 public class UnsignedIntegerTag extends Tag {
 	
 	private long value;
+
+	public UnsignedIntegerTag(String name, VINT id) throws IOException {
+		super(name, id);
+	}
 	
 	public UnsignedIntegerTag(String name, VINT id, VINT size) throws IOException {
 		super(name, id, size);
@@ -38,8 +42,28 @@ public class UnsignedIntegerTag extends Tag {
 		value = ParserUtils.parseInteger(inputStream, (int) getSize());
 	}
 	
+	
+	public void setDefaultValue(String newValue) {
+		setValue(Integer.parseInt(newValue));
+	}
+	public void setValue(long newValue) {
+		value = newValue;
+		int newSize = binaryCodedSize(value, 0);
+		this.size = new VINT(newSize, (byte)(4), newSize);
+	}
+	
 	public long getValue() {
 		return value;
+	}
+	
+	protected byte[] dataToByteArray() {
+		int arraySize = (int) size.getValue();
+		byte[] bytes = new byte[arraySize];
+		long tempValue = value;
+		for (int i = 0; i < arraySize; ++i) {
+			bytes[i] = (byte) (tempValue >> (arraySize - i - 1 << 3));
+		}
+		return bytes;
 	}
 	
 	public String toString() {

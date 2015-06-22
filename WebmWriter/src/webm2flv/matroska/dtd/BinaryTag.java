@@ -31,6 +31,10 @@ public class BinaryTag extends Tag {
 	
 	private byte[] value;
 
+	public BinaryTag(String name, VINT id) {
+		super(name, id);
+	}
+	
 	public BinaryTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
@@ -44,10 +48,23 @@ public class BinaryTag extends Tag {
 		}
 		return new String(hexChars);
 	}
+	
+	protected byte[] dataToByteArray() {
+		byte[] bytes = new byte[1];
+		return bytes;
+	}
 
 	@Override
 	public void parse(InputStream inputStream) throws IOException {
 		value = ParserUtils.parseBinary(inputStream, (int) getSize());
+	}
+	
+	public void setDefaultValue(String newValue) {
+	}
+
+	
+	public void setValue(byte[] newValue) {
+		value = newValue;
 	}
 
 	public byte[] getValue() {

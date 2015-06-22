@@ -29,9 +29,19 @@ import webm2flv.matroska.VINT;
 public class SegmentTest extends Tag {
 
 	private ArrayList<Tag> subElements = new ArrayList<Tag>();
+
+	public SegmentTest(String name, VINT id) {
+		super(name, id);
+	}
+
 	
 	public SegmentTest(String name, VINT id, VINT size) {
 		super(name, id, size);
+	}
+	
+	protected byte[] dataToByteArray() {
+		byte[] bytes = new byte[1];
+		return bytes;
 	}
 	
 	public String toString() {
@@ -65,5 +75,9 @@ public class SegmentTest extends Tag {
 			subElements.add(ParserUtils.parseTag(inputStream));
 		}
 	}
+	
+	public void setDefaultValue(String newValue) {
+	}
+
 
 }
