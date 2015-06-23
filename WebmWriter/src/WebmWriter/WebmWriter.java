@@ -1,24 +1,12 @@
 package WebmWriter;
 
-import webm2flv.matroska.ParserUtils;
-import webm2flv.matroska.dtd.CompoundTag;
-
-
-import webm2flv.matroska.dtd.TagFactory;
-import webm2flv.matroska.dtd.UnsignedIntegerTag;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
-import webm2flv.ConverterException;
-import webm2flv.flv.TagHandler;
-import webm2flv.matroska.dtd.Tag;
+import webmTags.TagFactory;
+import webmTags.UnsignedIntegerTag;
 
 public class WebmWriter {
 	

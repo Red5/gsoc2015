@@ -26,8 +26,8 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 import webm2flv.ConverterException;
-import webm2flv.matroska.dtd.Tag;
-import webm2flv.matroska.dtd.TagFactory;
+import webmTags.Tag;
+import webmTags.TagFactory;
 
 
 public class ParserUtils {

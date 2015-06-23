@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package webm2flv.matroska.dtd;
+package webmTags;
 
 import java.nio.ByteBuffer;
 import java.io.IOException;

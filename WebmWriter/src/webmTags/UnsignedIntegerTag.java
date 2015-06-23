@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package webm2flv.matroska.dtd;
+package webmTags;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,42 +25,45 @@ import webm2flv.matroska.ParserUtils;
 import webm2flv.matroska.VINT;
 
 
-public class FloatTag extends Tag {
+public class UnsignedIntegerTag extends Tag {
+	
+	private long value;
 
-	private double value;
-
-	public FloatTag(String name, VINT id) {
+	public UnsignedIntegerTag(String name, VINT id) throws IOException {
 		super(name, id);
 	}
 	
-	public FloatTag(String name, VINT id, VINT size) {
+	public UnsignedIntegerTag(String name, VINT id, VINT size) throws IOException {
 		super(name, id, size);
 	}
 
 	@Override
 	public void parse(InputStream inputStream) throws IOException {
-		value = ParserUtils.parseFloat(inputStream, (int) getSize());
+		value = ParserUtils.parseInteger(inputStream, (int) getSize());
+	}
+	
+	
+	public void setDefaultValue(String newValue) {
+		setValue(Integer.parseInt(newValue));
+	}
+	public void setValue(long newValue) {
+		value = newValue;
+		int newSize = binaryCodedSize(value, 0);
+		this.size = new VINT(newSize, (byte)(4), newSize);
+	}
+	
+	public long getValue() {
+		return value;
 	}
 	
 	protected byte[] dataToByteArray() {
-		byte[] bytes = new byte[1];
-		return bytes;
-	}
-	
-	public void setDefaultValue(String newValue) {
-		setValue(Float.parseFloat(newValue));
-	}
-	public void setValue(double newValue) {
-		value = newValue;
-		if(value < Float.MAX_VALUE) {
-			size = new VINT(4, (byte)(4), 4);
-		} else {
-			size = new VINT(8, (byte)(4), 8);
+		int arraySize = (int) size.getValue();
+		byte[] bytes = new byte[arraySize];
+		long tempValue = value;
+		for (int i = 0; i < arraySize; ++i) {
+			bytes[i] = (byte) (tempValue >> (arraySize - i - 1 << 3));
 		}
-	}
-
-	public double getValue() {
-		return value;
+		return bytes;
 	}
 	
 	public String toString() {

@@ -16,30 +16,47 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package webm2flv.matroska;
+package webmTags;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 
-import webm2flv.ConverterException;
-import webm2flv.matroska.dtd.Tag;
+import webm2flv.matroska.ParserUtils;
+import webm2flv.matroska.VINT;
 
 
-public class SimpleMatroskaParser implements MatroskaParser {
+public class StringTag extends Tag {
+	
+	private String value;
+
+	public StringTag(String name, VINT id) {
+		super(name, id);
+	}
+	
+	public StringTag(String name, VINT id, VINT size) {
+		super(name, id, size);
+	}
+	
+	public String getValue() {
+		return value;
+	}
+	
+	protected byte[] dataToByteArray() {
+		byte[] bytes = new byte[1];
+		return bytes;
+	}
 
 	@Override
-	public ArrayList<Tag> parse(InputStream inputStream) throws IOException, ConverterException {
-		
-		ArrayList<Tag> listOfTags = new ArrayList<Tag>();
-		
-		// parse EBML tag
-		listOfTags.add(ParserUtils.parseTag(inputStream));
-		
-		// parse Segment tag
-		listOfTags.add(ParserUtils.parseTag(inputStream));
-		
-		return listOfTags;
+	public void parse(InputStream inputStream) throws IOException {
+		value = ParserUtils.parseString(inputStream, (int) getSize());
+	}
+	
+	public void setDefaultValue(String newValue) {
+		value = newValue;
+	}
+	
+	public String toString() {
+		return (getName() + " = " + value);
 	}
 
 }
