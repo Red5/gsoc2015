@@ -52,6 +52,8 @@ public class Converter {
 	
 	private int audioTrackNumber = -1;
 	
+	private int currentVideoTimestamp = 0;
+	
 	public Converter() {
 		
 		TagHandler enterHandler = new TagHandler() {
@@ -213,7 +215,8 @@ public class Converter {
 				byte[] data = ((SimpleBlock)tag).getBinary();
 				boolean isKeyFrame = ((SimpleBlock)tag).isKeyFrame();
 				if (trackNumber == videoTrackNumber) {
-					FLVWriter.writeVideoTag((int)(clusterTimecode + timeCode), 0, data, isKeyFrame, (byte) 0x1, output);
+					FLVWriter.writeVideoTag(currentVideoTimestamp, 0, data, isKeyFrame, (byte) 0x1, output);
+					currentVideoTimestamp += FLVWriter.VIDEO_TIMESTAMP_STEP;
 				}
 				else if (trackNumber == audioTrackNumber) {
 					FLVWriter.writeAudioTag((int)(clusterTimecode + timeCode), 0, data, output);

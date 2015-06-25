@@ -57,6 +57,8 @@ public class FLVWriter {
 	
 	private static final int FLV_TAG_HEADER_SIZE = 11;
 	
+	public static final int VIDEO_TIMESTAMP_STEP = 40;
+	
 	public static void writeHeader(OutputStream output) throws IOException {
 		output.write(MAGICS);
 		output.write(VERSION);
