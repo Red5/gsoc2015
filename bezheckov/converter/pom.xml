@@ -17,11 +17,12 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.red5.io.plugin.mkv2flv</groupId>
+	<groupId>org.red5.server.plugin.webm2flv</groupId>
 	<artifactId>webm2flv</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0</version>
 	<name>webm2flv</name>
+	<description>The Red5 Webm2flvPlugin</description>
 	<url>https://github.com/Red5/gsoc2015</url>
 	<licenses>
 		<license>
@@ -31,6 +32,15 @@
 			<comments>A business-friendly OSS license</comments>
 		</license>
 	</licenses>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<red5-client.version>1.0.2-SNAPSHOT</red5-client.version>
+		<spring.version>3.1.1.RELEASE</spring.version>
+		<slf4j.version>1.7.5</slf4j.version>
+		<mina.version>2.0.7</mina.version>
+		<logback.version>1.0.13</logback.version>
+		<junit.version>4.12</junit.version>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -49,7 +59,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>org.red5.io.plugin.webm2flv.App</mainClass>
+							<mainClass>org.red5.server.plugin.webm2flv.App</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -93,12 +103,38 @@
 			</plugin>
 		</plugins>
 	</build>
+	<repositories>
+		<repository>
+			<id>Red5</id>
+			<url>http://red5.googlecode.com/svn/repository</url>
+		</repository>
+		<repository>
+			<id>repo1.maven.org</id>
+			<url>http://repo1.maven.org/maven2</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
-		<groupId>junit</groupId>
-		<artifactId>junit</artifactId>
-		<version>4.12</version>
-		<scope>test</scope>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.mina</groupId>
+			<artifactId>mina-parent</artifactId>
+			<version>${mina.version}</version>
+			<type>pom</type>
+		</dependency>
+		<dependency>
+			<groupId>org.red5</groupId>
+			<artifactId>red5-server</artifactId>
+			<version>1.0.2-RC3</version>
 		</dependency>
 	</dependencies>
 </project>
