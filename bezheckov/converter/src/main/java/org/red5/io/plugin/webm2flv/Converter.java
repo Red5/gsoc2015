@@ -34,6 +34,10 @@ import org.red5.io.plugin.webm2flv.matroska.dtd.StringTag;
 import org.red5.io.plugin.webm2flv.matroska.dtd.Tag;
 import org.red5.io.plugin.webm2flv.matroska.dtd.UnsignedIntegerTag;
 
+/**
+ * class for convert webm/mkv h264 video and pcm_16_le audio to flv
+ * with same video and audio encoding
+ */
 public class Converter {
 	
 	private HashMap<String, TagHandler> handlers = new HashMap<>();
@@ -226,6 +230,26 @@ public class Converter {
 		
 	}
 	
+	/**
+	 * convert input webm/mkv to flv
+	 * work like a Simple API for XML parser (SAX)
+	 * 
+	 * <pre>
+	 * algorithm:
+	 * in constructor this class we define handler by tag
+	 * then:
+	 * 	for (Tag tag : input)
+	 * 	{
+	 * 		if (tag have handler) -> handle(tag);
+	 * 		else skip tag
+	 * 	}
+	 * </pre>
+	 * 
+	 * @param input
+	 * @param output
+	 * @throws IOException
+	 * @throws ConverterException
+	 */
 	public void convert(InputStream input, OutputStream output) throws IOException, ConverterException {
 		
 		// 1. check first tag in input - this _must_ be EBML tag

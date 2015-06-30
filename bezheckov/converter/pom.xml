@@ -7,7 +7,7 @@
    (the "License"); you may not use this file except in compliance with
    the License.  You may obtain a copy of the License at
 
-        http://www.apache.org/licenses/LICENSE-2.0
+		http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,6 +52,43 @@
 							<mainClass>org.red5.io.plugin.webm2flv.App</mainClass>
 						</manifest>
 					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<verbose>true</verbose>
+					<failOnError>false</failOnError>
+					<sourcepath>${basedir}/src/main/java</sourcepath>
+					<includeDependencySources>false</includeDependencySources>
+					<dependencySourceIncludes>
+						<dependencySourceInclude>org.red5:*</dependencySourceInclude>
+					</dependencySourceIncludes>
+					<detectOfflineLinks>false</detectOfflineLinks>
+					<stylesheetfile>javadoc.css</stylesheetfile>
+					<links>
+						<link>http://download.oracle.com/javase/7/docs/api</link>
+						<link>http://docs.spring.io/spring/docs/4.0.3.RELEASE/javadoc-api</link>
+						<link>http://www.slf4j.org/api</link>
+						<link>http://logging.apache.org/log4j/1.2/apidocs</link>
+					</links>
+					<tags>
+						<tag>
+							<name>todo</name>
+							<!-- todo tag for all places -->
+							<placement>a</placement>
+							<head>To do:</head>
+						</tag>
+					</tags>
 				</configuration>
 			</plugin>
 		</plugins>

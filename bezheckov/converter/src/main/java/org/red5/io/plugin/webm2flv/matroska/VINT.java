@@ -18,6 +18,10 @@
  */
 package org.red5.io.plugin.webm2flv.matroska;
 
+/**
+ * variable size integer class
+ * <a href="http://matroska.org/technical/specs/rfc/index.html">EBML RFC</a>
+ */
 public class VINT {
 	private long binaryValue;
 	

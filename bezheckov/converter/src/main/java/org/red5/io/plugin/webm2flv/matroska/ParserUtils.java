@@ -143,7 +143,18 @@ public class ParserUtils {
 	private static byte getBit(byte value, int position) {
 		return (byte) ((value >> position) & 1);
 	}
-
+	
+	/**
+	 * parsing tag by matroska specification
+	 * <a href="http://matroska.org/technical/specs/index.html">matroska spec</a>
+	 * 
+	 * tag = VINT id, VINT size, data
+	 * 
+	 * @param inputStream
+	 * @return tag, without parsing tag data, because it delegate to an tag itself
+	 * @throws IOException
+	 * @throws ConverterException
+	 */
 	public static Tag parseTag(InputStream inputStream) throws IOException, ConverterException {
 		
 		VINT id = readVINT(inputStream);

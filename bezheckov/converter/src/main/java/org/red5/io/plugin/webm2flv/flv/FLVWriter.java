@@ -59,6 +59,12 @@ public class FLVWriter {
 	
 	public static final int VIDEO_TIMESTAMP_STEP = 40;
 	
+	/**
+	 * write flv header
+	 * 
+	 * @param output
+	 * @throws IOException
+	 */
 	public static void writeHeader(OutputStream output) throws IOException {
 		output.write(MAGICS);
 		output.write(VERSION);

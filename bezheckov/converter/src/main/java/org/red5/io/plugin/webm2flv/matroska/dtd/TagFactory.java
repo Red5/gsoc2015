@@ -24,7 +24,12 @@ import java.util.Properties;
 import org.red5.io.plugin.webm2flv.ConverterException;
 import org.red5.io.plugin.webm2flv.matroska.VINT;
 
-
+/**
+ * factory for creating matroska tags,
+ * it use property file - matroska_type_definition_config.properties
+ * with structure:
+ * long id = "name provided specification","java class representing tag data"
+ */
 public class TagFactory {
 	
 	static Properties propertyies;

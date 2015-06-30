@@ -18,6 +18,11 @@
  */
 package org.red5.io.plugin.webm2flv.flv;
 
+/**
+ * 
+ * class representing meta data in flv
+ *
+ */
 public class FLVOnMetaData {
 	
 	public static final double VIDEO_DATA_RATE = 0D;
