@@ -70,6 +70,7 @@ public class TagFactory {
 	}
 	
 	public static Tag createTag(String tagName) throws ConverterException {
+		System.out.println("Tag: " + tagName);
 		String value = writerProperties.getProperty(tagName);
 		if (null == value) {
 			throw new ConverterException("not supported matroska tag: " + tagName);
@@ -81,6 +82,7 @@ public class TagFactory {
 		long longId = Long.parseLong(id, 16); 
 		VINT typeVint = new VINT(longId, (byte)(id.length() / 2), longId);
 		try {
+			System.out.println("Class name: " + TagFactory.class.getPackage().getName() + "." + className);
 			Class<?> type = Class.forName(TagFactory.class.getPackage().getName() + "." + className);
 			System.out.println(TagFactory.class.getPackage().getName() + "." + className);
 			Tag newTag = (Tag) type

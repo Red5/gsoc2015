@@ -31,7 +31,7 @@ public abstract class Tag {
 	
 	private String name;
 	
-	private VINT id;
+	protected VINT id;
 	
 	protected VINT size;
 	
@@ -54,7 +54,7 @@ public abstract class Tag {
 	
 	public abstract void setDefaultValue(String newValue);
 	  
-	protected abstract byte[] dataToByteArray();
+	protected abstract byte[] dataToByteArray() throws IOException;
 
 	public String getName() {
 		return name;
@@ -77,21 +77,20 @@ public abstract class Tag {
 	    return ret;
 	}
 	
-    public ByteBuffer writeHeaderData()
+    public ByteBuffer writeHeaderData() throws IOException
 	{
 	    int len = 0;
 
 	    len += id.getLength();
 
 	    final byte[] encodedSize = makeEbmlCodedSize(getSize(), 0);
-	    // System.out.printf("Writing header for element %s with size %d (%s)\n", typeInfo.name, getTotalSize(), EBMLReader.bytesToHex(size));
-
+	    //System.out.printf("Writing header for element %s with size %d (%s)\n", typeInfo.name, getTotalSize(), EBMLReader.bytesToHex(size));
+	    
 	    len += encodedSize.length;
 	    len += getSize();
 	    final ByteBuffer buf = ByteBuffer.allocate(len);
 	    System.out.println("Id:" + id.getValue() + "Idl:" + id.getLength() + ", Length:" + len + "GetSize():" + getSize());
 	    buf.put(convertToByteArray(id.getValue(), (int) id.getLength()));
-	    System.out.println(buf.array());
 	    buf.put(encodedSize);
 	    buf.put(dataToByteArray());
 	    buf.flip();

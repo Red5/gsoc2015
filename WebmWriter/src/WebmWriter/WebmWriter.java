@@ -7,6 +7,7 @@ import java.io.RandomAccessFile;
 
 import webmTags.TagFactory;
 import webmTags.UnsignedIntegerTag;
+import webmTags.StringTag;
 
 public class WebmWriter {
 	
@@ -51,6 +52,10 @@ public class WebmWriter {
 
 	}
 	
+	public WebmWriter(Object outputFile, boolean append2) {
+		// TODO Auto-generated constructor stub
+	}
+
 	public void writeHeader() throws IOException {
 		try {
 			UnsignedIntegerTag ebmlVersion = (UnsignedIntegerTag) TagFactory.createTag("EBMLVersion");
@@ -68,6 +73,11 @@ public class WebmWriter {
 			UnsignedIntegerTag ebmlMaxSizeLength = (UnsignedIntegerTag) TagFactory.createTag("EBMLMaxSizeLength");
 			ebmlMaxSizeLength.setValue(8);
 			file.write(ebmlMaxSizeLength.writeHeaderData().array());
+				 
+			StringTag docTypeTag = (StringTag) TagFactory.createTag("DocType");
+			byte[] bytes = {(byte) 0x77, (byte)0x65, (byte)0x62, (byte)0x6D};
+			docTypeTag.setValue(new String(bytes, "UTF-8"));
+			file.write(docTypeTag.writeHeaderData().array());	
 			
 			UnsignedIntegerTag docTypeVersion = (UnsignedIntegerTag) TagFactory.createTag("DocTypeVersion");
 			docTypeVersion.setValue(3);

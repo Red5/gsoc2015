@@ -19,6 +19,7 @@
 package webmTags;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.io.InputStream;
 
 import webm2flv.matroska.ParserUtils;
@@ -37,13 +38,19 @@ public class StringTag extends Tag {
 		super(name, id, size);
 	}
 	
+	public void setValue(String content) throws IOException {
+		value = content;
+		this.size = new VINT(content.length(), (byte)(4), content.length());
+	}
+	
+	
 	public String getValue() {
 		return value;
 	}
 	
-	protected byte[] dataToByteArray() {
-		byte[] bytes = new byte[1];
-		return bytes;
+	
+	protected byte[] dataToByteArray() throws UnsupportedEncodingException {
+		return value.getBytes("UTF-8");
 	}
 
 	@Override

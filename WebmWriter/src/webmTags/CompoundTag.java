@@ -45,10 +45,8 @@ public class CompoundTag extends Tag {
 	}
 	
 	protected byte[] dataToByteArray() {
-		byte[] bytes = new byte[1];
-		return bytes;
+		return new byte[0];
 	}
-
 	
 	
 	public String toString() {
