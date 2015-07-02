@@ -21,14 +21,18 @@ package webmTags;
 import java.io.FileInputStream;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import webm2flv.ConverterException;
 import webm2flv.matroska.VINT;
 
 
 public class TagFactory {
-	
+	private static Logger log = LoggerFactory.getLogger(TagFactory.class);	
 	static Properties propertyies;
 	static Properties writerProperties;
+	
 	
 	static {
 		propertyies = new Properties();
@@ -63,7 +67,7 @@ public class TagFactory {
 					.getConstructor(String.class, VINT.class, VINT.class)
 					.newInstance(name, id, size);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Can not find property", e);
 		}
 		
 		return null;
@@ -90,7 +94,7 @@ public class TagFactory {
 					.newInstance(tagName, typeVint);
 			return newTag;
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Can not find property", e);
 		}
 		
 		

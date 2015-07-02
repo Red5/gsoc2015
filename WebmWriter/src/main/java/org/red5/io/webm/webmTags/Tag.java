@@ -84,7 +84,6 @@ public abstract class Tag {
 	    len += id.getLength();
 
 	    final byte[] encodedSize = makeEbmlCodedSize(getSize(), 0);
-	    //System.out.printf("Writing header for element %s with size %d (%s)\n", typeInfo.name, getTotalSize(), EBMLReader.bytesToHex(size));
 	    
 	    len += encodedSize.length;
 	    len += getSize();
@@ -94,11 +93,6 @@ public abstract class Tag {
 	    buf.put(encodedSize);
 	    buf.put(dataToByteArray());
 	    buf.flip();
-	    /*try {
-			output.write(buf.array());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
 	    return buf;
 	}
     
