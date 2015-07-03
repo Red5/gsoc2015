@@ -21,26 +21,26 @@ package org.red5.server.plugin.webm2flv;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.plugin.Red5Plugin;
+import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
 public class WebM2FLVPlugin extends Red5Plugin {
 	
-	private Converter converter = new Converter();
-	private static Logger log = Red5LoggerFactory.getLogger(ExamplePlugin.class, "plugins");
+	private static Logger log = Red5LoggerFactory.getLogger(WebM2FLVPlugin.class, "plugins");
 	
 	public String getName() {
 		return "WebM2FLVPlugin";
 	}
 	
-	public void convert(InputStream input, OutputStream output) {
+	public static void convert(InputStream input, OutputStream output) {
+		Converter converter = new Converter();
 		try {
 			converter.convert(input, output);
 		} catch (IOException e) {
-			log.debug("IO exception " + e.getMessage());
+			log.error("IO exception " + e.getMessage());
 		} catch (ConverterException e) {
-			log.debug("ConverterException " + e.getMessage());
+			log.error("ConverterException " + e.getMessage());
 		}
 	}
 }
