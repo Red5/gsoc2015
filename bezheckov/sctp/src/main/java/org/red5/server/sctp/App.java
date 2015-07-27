@@ -18,9 +18,22 @@
  */
 package org.red5.server.sctp;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+
 public class App {
-    public static void main(String[] args) {
-    	// to do test with SctpServerChannel
-    	// example from http://www.oracle.com/technetwork/articles/javase/index-139946.html
+    public static void main(String[] args) throws IOException {
+    	
+    	// example server
+    	SocketAddress serverSocketAddress = new InetSocketAddress(65123); 
+    	System.out.println("create and bind for sctp address");
+    	SctpServerChannel sctpServerChannel =  SctpServerChannel.open().bind(serverSocketAddress); 
+    	System.out.println("address bind process finished successfully");
+    	
+    	SctpChannel sctpChannel = null;
+    	while ((sctpChannel = sctpServerChannel.accept()) != null) { 
+    		System.out.println("client connection received");
+        }
     }
 }

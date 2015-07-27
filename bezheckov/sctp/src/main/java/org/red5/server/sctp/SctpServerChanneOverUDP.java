@@ -18,34 +18,55 @@
  */
 package org.red5.server.sctp;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
 
 public class SctpServerChanneOverUDP extends SctpServerChannel {
+	
+	private static final int BUFFER_SIZE = 1024;
+	
+	private byte[] buffer = new byte[BUFFER_SIZE];
+	
+	private DatagramSocket serverSocket;
+	
+	private SctpChannel[] pendingChannels;
 
 	protected SctpServerChanneOverUDP(SelectorProvider provider) {
 		super(provider);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public SctpChannel accept() throws IOException {
-		// TODO Auto-generated method stub
+		
+		/*
+		 * TODO
+		 * 1. wait INIT
+		 * 2. send INIT_ACK 
+		 * 3. wait COOKIE_ECHO
+		 * 4. send COOKIE_ACK
+		 */
+		
 		return null;
 	}
 
 	@Override
-	public SctpServerChannel bind(SocketAddress local, int backlog)
-			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+	public SctpServerChannel bind(SocketAddress local, int backlog) throws IOException {
+		pendingChannels = new SctpChannel[backlog];
+		if (serverSocket == null) {
+			serverSocket = new DatagramSocket(local);
+		}
+		else {
+			throw new IOException("already bound");
+		}
+		return this;
 	}
 
 	@Override
-	public SctpServerChannel bindAddress(InetAddress address)
-			throws IOException {
+	public SctpServerChannel bindAddress(InetAddress address) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -59,25 +80,21 @@ public class SctpServerChanneOverUDP extends SctpServerChannel {
 	@Override
 	protected void implCloseSelectableChannel() throws IOException {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	protected void implConfigureBlocking(boolean block) throws IOException {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub	
 	}
 
 	@Override
-	public SctpServerChannel unbindAddress(InetAddress address)
-			throws IOException {
+	public SctpServerChannel unbindAddress(InetAddress address) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public <T> SctpServerChannel setOption(SctpSocketOption<T> name, T value)
-			throws IOException {
+	public <T> SctpServerChannel setOption(SctpSocketOption<T> name, T value) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -87,5 +104,4 @@ public class SctpServerChanneOverUDP extends SctpServerChannel {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

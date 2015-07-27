@@ -25,15 +25,8 @@ import java.nio.ByteBuffer;
  */
 public class Chunk {
 	
-	public Chunk(final ChunkType type, final byte flags, final short length, final byte[] data) {
-		this.type = type;
-		this.flags = flags;
-		this.length = length;
-		this.data = data;
-	}
-	
 	// type(8 bit) + flags(8 bit) + length(16 bit)
-	private static final int CHUNK_HEADER_SIZE = 32;
+	protected static final int CHUNK_HEADER_SIZE = 32;
 	
 	private byte[] data;
 	
@@ -42,6 +35,25 @@ public class Chunk {
 	private byte flags;
 	
 	private short length;
+	
+	public void parse(byte[] data, int offset) {
+		// parse common header
+		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset, CHUNK_HEADER_SIZE);
+		type = ChunkType.values()[byteBuffer.get()];
+		flags = byteBuffer.get();
+		length = byteBuffer.getShort();
+	}
+	
+	public Chunk(byte[] data, int offset) {
+		parse(data, offset);
+	}
+	
+	public Chunk(final ChunkType type, final byte flags, final short length, final byte[] data) {
+		this.type = type;
+		this.flags = flags;
+		this.length = length;
+		this.data = data;
+	}
 
 	public int getSize() {
 		return CHUNK_HEADER_SIZE + length;
@@ -56,5 +68,4 @@ public class Chunk {
 		
 		return byteBuffer.array();
 	}
-
 }

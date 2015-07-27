@@ -22,9 +22,26 @@ import java.nio.channels.spi.AbstractSelectableChannel;
 import java.nio.channels.spi.SelectorProvider;
 
 public abstract class SctpChannel extends AbstractSelectableChannel {
+	
+	public static enum State {
+		INIT,
+		INIT_RECEIVED,
+		COOKIE_ECHO_RECEIVED,
+		ESTABLISH
+	}
+	
+	private State state;
 
 	protected SctpChannel(SelectorProvider provider) {
 		super(provider);
-		// TODO Auto-generated constructor stub
+		setState(State.INIT);
+	}
+
+	public State getState() {
+		return state;
+	}
+
+	public void setState(State state) {
+		this.state = state;
 	}
 }
