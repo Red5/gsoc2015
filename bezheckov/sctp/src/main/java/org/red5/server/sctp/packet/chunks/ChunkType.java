@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp.packet;
+package org.red5.server.sctp.packet.chunks;
 
 public enum ChunkType {
 	

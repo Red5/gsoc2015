@@ -16,54 +16,54 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp.packet;
+package org.red5.server.sctp.packet.chunks;
 
 import java.nio.ByteBuffer;
 
-public final class InitChunk extends Chunk {
+public class Init extends Chunk {
 
-	private int InitiateTag;
+	private int initiateTag;
 	
-	private int AdvertisedReceiverWindowCredit;
+	private int advertisedReceiverWindowCredit;
 	
-	private short NumberOfOutboundStreams;
+	private short numberOfOutboundStreams;
 	
-	private short NumberOfInboundStreams;
+	private short numberOfInboundStreams;
 	
-	private int InitialTSN;
+	private int initialTSN;
 	
-	public InitChunk(byte flags, short length, byte[] data) {
+	public Init(short length, byte[] data) {
 		super(ChunkType.INIT, (byte) 0x00, length, data);
 	}
 	
-	@Override
-	public void parse(byte[] data, int offset) {
-		super.parse(data, offset);
-		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset + CHUNK_HEADER_SIZE, data.length - CHUNK_HEADER_SIZE);
-		InitiateTag = byteBuffer.getInt();
-		AdvertisedReceiverWindowCredit = byteBuffer.getInt();
-		NumberOfOutboundStreams = byteBuffer.getShort();
-		NumberOfInboundStreams = byteBuffer.getShort();
-		InitialTSN = byteBuffer.getInt();
+	public Init(final byte[] data, final int offset) {
+		super(data, offset);
+		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset + CHUNK_HEADER_SIZE, data.length - (offset + CHUNK_HEADER_SIZE));
+		setLength((short)(data.length - (offset + CHUNK_HEADER_SIZE)));
+		initiateTag = byteBuffer.getInt();
+		advertisedReceiverWindowCredit = byteBuffer.getInt();
+		numberOfOutboundStreams = byteBuffer.getShort();
+		numberOfInboundStreams = byteBuffer.getShort();
+		initialTSN = byteBuffer.getInt();
 	}
 
 	public int getInitiateTag() {
-		return InitiateTag;
+		return initiateTag;
 	}
 
 	public int getAdvertisedReceiverWindowCredit() {
-		return AdvertisedReceiverWindowCredit;
+		return advertisedReceiverWindowCredit;
 	}
 
 	public short getNumberOfOutboundStreams() {
-		return NumberOfOutboundStreams;
+		return numberOfOutboundStreams;
 	}
 
 	public short getNumberOfInboundStreams() {
-		return NumberOfInboundStreams;
+		return numberOfInboundStreams;
 	}
 
 	public int getInitialTSN() {
-		return InitialTSN;
+		return initialTSN;
 	}
 }

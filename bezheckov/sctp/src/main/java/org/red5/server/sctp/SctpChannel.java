@@ -18,23 +18,32 @@
  */
 package org.red5.server.sctp;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.nio.channels.spi.SelectorProvider;
 
-public abstract class SctpChannel extends AbstractSelectableChannel {
+public class SctpChannel extends AbstractSelectableChannel {
 	
 	public static enum State {
-		INIT,
-		INIT_RECEIVED,
-		COOKIE_ECHO_RECEIVED,
-		ESTABLISH
+		CLOSED,
+		COOKIE_WAIT,
+		COOKIE_ECHOED,
+		ESTABLISHED
 	}
+	
+	private int verificationTag;
+	
+	private short port;
+	
+	private InetAddress ipAddress;
 	
 	private State state;
 
-	protected SctpChannel(SelectorProvider provider) {
+	public SctpChannel(SelectorProvider provider, final int verificationTag) {
 		super(provider);
-		setState(State.INIT);
+		setState(State.CLOSED);
+		this.verificationTag = verificationTag;
 	}
 
 	public State getState() {
@@ -43,5 +52,25 @@ public abstract class SctpChannel extends AbstractSelectableChannel {
 
 	public void setState(State state) {
 		this.state = state;
+	}
+
+	public int getVerificationTag() {
+		return verificationTag;
+	}
+
+	@Override
+	protected void implCloseSelectableChannel() throws IOException {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	protected void implConfigureBlocking(boolean block) throws IOException {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public int validOps() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

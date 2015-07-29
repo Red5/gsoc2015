@@ -20,21 +20,23 @@ package org.red5.server.sctp.packet;
 
 import java.nio.ByteBuffer;
 
+import org.red5.server.sctp.SctpException;
+
 /*
  * see https://tools.ietf.org/html/rfc4960#section-3.1
  */
-public class SctpHeader {
+public final class SctpHeader {
 	
-	private short sourcePort;
+	private int sourcePort;
 	
-	private short destinationPort;
+	private int destinationPort;
 	
 	private int verificationTag;
 	
 	private int checksum;
 	
-	// sourcePort(16 bit) + destinationPort(16 bit) + verificationTag(32 bit) + checksum(32 bit)
-	private static final int HEADER_SIZE = 96;
+	// sourcePort(2 byte) + destinationPort(2 byte) + verificationTag(4 byte) + checksum(4 byte)
+	private static final int HEADER_SIZE = 12;
 	
 	public SctpHeader(
 			final short sourcePort,
@@ -47,6 +49,17 @@ public class SctpHeader {
 		this.verificationTag = verificationTag;
 		this.checksum = checksum;
 	}
+	
+	public SctpHeader(final byte[] data) throws SctpException {
+		if (data.length < HEADER_SIZE) {
+			throw new SctpException("not enough data for parsing Sctp header : " + data);
+		}
+		ByteBuffer byteBuffer = ByteBuffer.wrap(data, 0, HEADER_SIZE);
+		sourcePort = byteBuffer.getShort() & 0x0ffff;
+		destinationPort = byteBuffer.getShort() & 0x0ffff;
+		verificationTag = byteBuffer.getInt();
+		checksum = byteBuffer.getInt();
+	}
 
 	public int getSize() {
 		return HEADER_SIZE;
@@ -54,11 +67,23 @@ public class SctpHeader {
 
 	public byte[] getBytes() {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_SIZE);
-		byteBuffer.putShort(sourcePort);
-		byteBuffer.putShort(destinationPort);
-		byteBuffer.putInt(verificationTag);
+		byteBuffer.putShort((short)getSourcePort());
+		byteBuffer.putShort((short)getDestinationPort());
+		byteBuffer.putInt(getVerificationTag());
 		byteBuffer.putInt(checksum);
 		
 		return byteBuffer.array();
+	}
+
+	public int getSourcePort() {
+		return sourcePort;
+	}
+
+	public int getDestinationPort() {
+		return destinationPort;
+	}
+
+	public int getVerificationTag() {
+		return verificationTag;
 	}
 }

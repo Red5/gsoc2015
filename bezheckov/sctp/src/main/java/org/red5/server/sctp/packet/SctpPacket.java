@@ -20,23 +20,27 @@ package org.red5.server.sctp.packet;
 
 import java.util.ArrayList;
 
+import org.red5.server.sctp.SctpException;
+import org.red5.server.sctp.packet.chunks.Chunk;
+import org.red5.server.sctp.packet.chunks.ChunkFactory;
+
 public class SctpPacket {
 	
 	private SctpHeader header;
 	
-	private ArrayList<Chunk> chunks;
+	private ArrayList<Chunk> chunks = new ArrayList<>();
 	
 	public byte[] getBytes() {
-		int resultSize = header.getSize();
+		int resultSize = getHeader().getSize();
 		
-		for (Chunk chunk : chunks) {
+		for (Chunk chunk : getChunks()) {
 			resultSize += chunk.getSize();
 		}
 		
 		byte[] result = new byte[resultSize];
-		System.arraycopy(header.getBytes(), 0, result, 0, header.getSize());
-		int previousSize = header.getSize();
-		for (Chunk chunk : chunks) {
+		System.arraycopy(getHeader().getBytes(), 0, result, 0, getHeader().getSize());
+		int previousSize = getHeader().getSize();
+		for (Chunk chunk : getChunks()) {
 			System.arraycopy(chunk.getBytes(), 0, result, previousSize, chunk.getSize());
 			previousSize += chunk.getSize();
 		}
@@ -44,4 +48,20 @@ public class SctpPacket {
 		return result;
 	}
 	
+	public SctpPacket(final byte[] data) throws SctpException {
+		header = new SctpHeader(data);
+		Chunk chunk = null;
+		for (int i = header.getSize(); i < data.length; i += chunk.getSize()) {
+			chunk = ChunkFactory.createChunk(data, i);
+			getChunks().add(chunk);
+		}
+	}
+
+	public SctpHeader getHeader() {
+		return header;
+	}
+
+	public ArrayList<Chunk> getChunks() {
+		return chunks;
+	}
 }

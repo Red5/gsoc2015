@@ -23,17 +23,33 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.nio.channels.spi.SelectorProvider;
+import java.util.HashMap;
+import java.util.Random;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.red5.server.sctp.packet.SctpPacket;
+import org.red5.server.sctp.packet.chunks.Init;
+import org.red5.server.sctp.packet.chunks.InitAck;
 
 public class SctpServerChanneOverUDP extends SctpServerChannel {
 	
-	private static final int BUFFER_SIZE = 1024;
+	private final static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	
+	private static final int BUFFER_SIZE = 2048;
 	
 	private byte[] buffer = new byte[BUFFER_SIZE];
 	
 	private DatagramSocket serverSocket;
 	
-	private SctpChannel[] pendingChannels;
+	private HashMap<Integer, SctpChannel> pendingChannels;
+	
+	private HashMap<Integer, Integer> verificationTagForChannel = new HashMap<>();
+	
+	private int maxNumberOfPendingChannels;
+	
+	private Random random = new Random();
 
 	protected SctpServerChanneOverUDP(SelectorProvider provider) {
 		super(provider);
@@ -41,21 +57,49 @@ public class SctpServerChanneOverUDP extends SctpServerChannel {
 
 	@Override
 	public SctpChannel accept() throws IOException {
+		logger.setLevel(Level.INFO);
 		
-		/*
-		 * TODO
-		 * 1. wait INIT
-		 * 2. send INIT_ACK 
-		 * 3. wait COOKIE_ECHO
-		 * 4. send COOKIE_ACK
-		 */
-		
-		return null;
+		while (true) {
+			
+			/*
+			 * 1. wait INIT
+			 * 2. send INIT_ACK
+			 * 3. wait COOKIE_ECHO
+			 * 4. send COOKIE_ACK
+			 */
+			
+			DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
+			serverSocket.receive(receivePacket);
+			byte[] data = new byte[receivePacket.getLength()];
+			System.arraycopy(receivePacket.getData(), 0, data, 0, data.length);
+			SctpPacket packet = null;
+			try {
+				packet = new SctpPacket(data);
+			} catch (SctpException e) {
+				e.printStackTrace();
+			}
+			
+			int tag = packet.getHeader().getVerificationTag();
+			SctpChannel channel = pendingChannels.get(tag);
+			if (channel != null) {
+				handleAssociation(channel, packet, receivePacket);
+			}
+			else if (tag == 0 && pendingChannels.size() < maxNumberOfPendingChannels) {
+				handleAssociation(channel, packet, receivePacket);
+			}
+			else if (pendingChannels.size() < maxNumberOfPendingChannels) {
+				logger.info("skip association");
+			}
+			else {
+				logger.info("bad association" + channel);
+			}
+		}
 	}
 
 	@Override
 	public SctpServerChannel bind(SocketAddress local, int backlog) throws IOException {
-		pendingChannels = new SctpChannel[backlog];
+		maxNumberOfPendingChannels = backlog + 1;
+		pendingChannels = new HashMap<>();
 		if (serverSocket == null) {
 			serverSocket = new DatagramSocket(local);
 		}
@@ -103,5 +147,32 @@ public class SctpServerChanneOverUDP extends SctpServerChannel {
 	public Set<SctpSocketOption<?>> supportedOptions() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	private void handleAssociation(SctpChannel channel, SctpPacket packet, DatagramPacket receivePacket)
+			throws IOException {
+		if (channel == null) {
+			logger.info("create new association");
+			
+			Init init = (Init) packet.getChunks().get(0);
+			channel = new SctpChannel(null, init.getInitiateTag());
+			pendingChannels.put(init.getInitiateTag(), channel);
+			int tag = random.nextInt();
+			verificationTagForChannel.put(init.getInitiateTag(), tag);
+			
+			// send INIT_ACK
+			int TSN = random.nextInt();
+			InitAck initAck = new InitAck(tag, BUFFER_SIZE, (short)1, (short)1, TSN);
+			byte[] data = initAck.getBytes();
+			DatagramPacket sendPacket = new DatagramPacket(data, data.length,
+					receivePacket.getAddress(), receivePacket.getPort());
+			serverSocket.send(sendPacket);
+			
+			return;
+		}
+		
+		// TODO handle other packet
+		
+		return;
 	}
 }

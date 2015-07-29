@@ -18,22 +18,13 @@
  */
 package org.red5.server.sctp;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+public class SctpException extends Exception {
 
-public class App {
-    public static void main(String[] args) throws IOException {
-    	
-    	// example server
-    	SocketAddress serverSocketAddress = new InetSocketAddress(65125); 
-    	System.out.println("create and bind for sctp address");
-    	SctpServerChannel sctpServerChannel = SctpServerChannel.open().bind(serverSocketAddress); 
-    	System.out.println("address bind process finished successfully");
-    	
-    	SctpChannel sctpChannel = null;
-    	while ((sctpChannel = sctpServerChannel.accept()) != null) { 
-    		System.out.println("client connection received");
-        }
-    }
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	public SctpException() { super(); }
+	public SctpException(String message) { super(message); }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp.packet;
+package org.red5.server.sctp.packet.chunks;
 
 import java.nio.ByteBuffer;
 
@@ -25,8 +25,8 @@ import java.nio.ByteBuffer;
  */
 public class Chunk {
 	
-	// type(8 bit) + flags(8 bit) + length(16 bit)
-	protected static final int CHUNK_HEADER_SIZE = 32;
+	// type(1 byte) + flags(1 byte) + length(2 byte)
+	protected static final int CHUNK_HEADER_SIZE = 4;
 	
 	private byte[] data;
 	
@@ -36,16 +36,12 @@ public class Chunk {
 	
 	private short length;
 	
-	public void parse(byte[] data, int offset) {
+	public Chunk(byte[] data, int offset) {
 		// parse common header
 		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset, CHUNK_HEADER_SIZE);
 		type = ChunkType.values()[byteBuffer.get()];
 		flags = byteBuffer.get();
 		length = byteBuffer.getShort();
-	}
-	
-	public Chunk(byte[] data, int offset) {
-		parse(data, offset);
 	}
 	
 	public Chunk(final ChunkType type, final byte flags, final short length, final byte[] data) {
@@ -54,18 +50,33 @@ public class Chunk {
 		this.length = length;
 		this.data = data;
 	}
+	
+	public Chunk(final ChunkType type, final byte flags) {
+		this.type = type;
+		this.flags = flags;
+	}
 
 	public int getSize() {
 		return CHUNK_HEADER_SIZE + length;
 	}
 
 	public byte[] getBytes() {
-		ByteBuffer byteBuffer = ByteBuffer.allocate(getSize());
+		ByteBuffer byteBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE);
 		byteBuffer.put((byte)type.getValue());
 		byteBuffer.put(flags);
 		byteBuffer.putShort(length);
-		byteBuffer.put(data);
+		byte[] data = new byte[byteBuffer.limit()];
+		byteBuffer.flip();
+		byteBuffer.get(data);
 		
-		return byteBuffer.array();
+		return data;
+	}
+	
+	protected void setLength(short length) {
+		this.length = length;
+	}
+	
+	protected void setData(byte[] data) {
+		this.data = data;
 	}
 }
