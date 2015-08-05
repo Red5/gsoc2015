@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.red5.server.sctp.IChannelControl;
+import org.red5.server.sctp.IServerChannelControl;
 import org.red5.server.sctp.SctpException;
 import org.red5.server.sctp.packet.chunks.Chunk;
 import org.red5.server.sctp.packet.chunks.ChunkFactory;
@@ -32,11 +33,12 @@ public class SctpPacket {
 	
 	private ArrayList<Chunk> chunks = new ArrayList<>();
 	
-	public SctpPacket(final byte[] data, int offset, int length) throws SctpException {
+	public SctpPacket(final byte[] data, int offset, int length, IServerChannelControl server)
+			throws SctpException {
 		header = new SctpHeader(data, offset, length);
 		Chunk chunk = null;
 		for (int i = header.getSize() + offset; i < length; i += chunk.getSize()) {
-			chunk = ChunkFactory.createChunk(data, i, length);
+			chunk = ChunkFactory.createChunk(data, i, length, server);
 			chunks.add(chunk);
 		}
 	}

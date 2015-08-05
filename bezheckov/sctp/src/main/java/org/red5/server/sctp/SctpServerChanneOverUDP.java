@@ -75,7 +75,7 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 			serverSocket.receive(receivePacket);
 			SctpPacket packet = null;
 			try {
-				packet = new SctpPacket(buffer, 0, receivePacket.getLength());
+				packet = new SctpPacket(buffer, 0, receivePacket.getLength(), this);
 			} catch (SctpException e) {
 				logger.log(Level.WARNING, e.getMessage());
 				continue;

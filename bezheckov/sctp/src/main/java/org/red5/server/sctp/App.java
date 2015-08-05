@@ -21,9 +21,11 @@ package org.red5.server.sctp;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 public class App {
-    public static void main(String[] args) throws IOException, SctpException {
+    public static void main(String[] args) throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
     	
     	// example server
     	SocketAddress serverSocketAddress = new InetSocketAddress(65125); 

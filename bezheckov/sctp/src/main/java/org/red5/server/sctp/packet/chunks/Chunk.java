@@ -43,7 +43,7 @@ public abstract class Chunk {
 	
 	private IServerChannelControl server;
 	
-	public Chunk(byte[] data, int offset, int length) throws SctpException {
+	public Chunk(byte[] data, int offset, int length, IServerChannelControl server) throws SctpException {
 		// parse common header
 		if (length < CHUNK_HEADER_SIZE) {
 			throw new SctpException("not enough data for parse chunk common header " + data);
@@ -52,6 +52,7 @@ public abstract class Chunk {
 		type = ChunkType.values()[byteBuffer.get()];
 		flags = byteBuffer.get();
 		this.length = byteBuffer.getShort() & 0xffff;
+		this.server = server;
 	}
 	
 	public Chunk(final ChunkType type, final byte flags, final short length, final byte[] data) {
@@ -90,5 +91,9 @@ public abstract class Chunk {
 	
 	protected void setData(byte[] data) {
 		this.data = data;
+	}
+
+	protected IServerChannelControl getServer() {
+		return server;
 	}
 }

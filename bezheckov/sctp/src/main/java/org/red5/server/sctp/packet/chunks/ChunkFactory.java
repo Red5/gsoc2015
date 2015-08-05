@@ -18,16 +18,18 @@
  */
 package org.red5.server.sctp.packet.chunks;
 
+import org.red5.server.sctp.IServerChannelControl;
 import org.red5.server.sctp.SctpException;
 
 public class ChunkFactory {
-	public static Chunk createChunk(final byte[] data, int offset, int length) throws SctpException {
+	public static Chunk createChunk(final byte[] data, int offset, int length, IServerChannelControl server)
+			throws SctpException {
 		assert length > 0;
 		switch (ChunkType.values()[data[offset]]) {
 		case INIT:
-			return new Init(data, offset, length);
+			return new Init(data, offset, length, server);
 		case INIT_ACK:
-			return new InitAck(data, offset, length);
+			return new InitAck(data, offset, length, server);
 		default:
 			throw new SctpException("not supported chunk type " + data);
 		}

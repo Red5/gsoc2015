@@ -21,6 +21,7 @@ package org.red5.server.sctp.packet.chunks;
 import java.nio.ByteBuffer;
 
 import org.red5.server.sctp.IChannelControl;
+import org.red5.server.sctp.IServerChannelControl;
 import org.red5.server.sctp.SctpException;
 
 public final class InitAck extends Chunk {
@@ -75,8 +76,8 @@ public final class InitAck extends Chunk {
 		return byteBuffer.toString().getBytes();
 	}
 	
-	public InitAck(final byte[] data, int offset, int length) throws SctpException {
-		super(data, offset, length);
+	public InitAck(final byte[] data, int offset, int length, IServerChannelControl server) throws SctpException {
+		super(data, offset, length, server);
 		assert length - offset - CHUNK_HEADER_SIZE > MANDATORY_FIELD_SIZE;
 		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset + CHUNK_HEADER_SIZE, length - offset - CHUNK_HEADER_SIZE);
 		initiateTag = byteBuffer.getInt();
