@@ -18,8 +18,10 @@
  */
 package org.red5.server.sctp.packet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
+import org.red5.server.sctp.IChannelControl;
 import org.red5.server.sctp.SctpException;
 import org.red5.server.sctp.packet.chunks.Chunk;
 import org.red5.server.sctp.packet.chunks.ChunkFactory;
@@ -30,38 +32,44 @@ public class SctpPacket {
 	
 	private ArrayList<Chunk> chunks = new ArrayList<>();
 	
+	public SctpPacket(final byte[] data, int offset, int length) throws SctpException {
+		header = new SctpHeader(data, offset, length);
+		Chunk chunk = null;
+		for (int i = header.getSize() + offset; i < length; i += chunk.getSize()) {
+			chunk = ChunkFactory.createChunk(data, i, length);
+			chunks.add(chunk);
+		}
+	}
+	
+	public void apply(IChannelControl channel) throws SctpException, IOException {
+		for (Chunk chunk : chunks) {
+			chunk.apply(channel);
+		} 
+	}
+	
 	public byte[] getBytes() {
-		int resultSize = getHeader().getSize();
+		int resultSize = header.getSize();
 		
-		for (Chunk chunk : getChunks()) {
+		for (Chunk chunk : chunks) {
 			resultSize += chunk.getSize();
 		}
 		
 		byte[] result = new byte[resultSize];
-		System.arraycopy(getHeader().getBytes(), 0, result, 0, getHeader().getSize());
-		int previousSize = getHeader().getSize();
-		for (Chunk chunk : getChunks()) {
+		System.arraycopy(header.getBytes(), 0, result, 0, header.getSize());
+		int previousSize = header.getSize();
+		for (Chunk chunk : chunks) {
 			System.arraycopy(chunk.getBytes(), 0, result, previousSize, chunk.getSize());
 			previousSize += chunk.getSize();
 		}
 		
 		return result;
 	}
+
+	public int getSourcePort() {
+		return header.getSourcePort();
+	}
 	
-	public SctpPacket(final byte[] data) throws SctpException {
-		header = new SctpHeader(data);
-		Chunk chunk = null;
-		for (int i = header.getSize(); i < data.length; i += chunk.getSize()) {
-			chunk = ChunkFactory.createChunk(data, i);
-			getChunks().add(chunk);
-		}
-	}
-
-	public SctpHeader getHeader() {
-		return header;
-	}
-
-	public ArrayList<Chunk> getChunks() {
-		return chunks;
+	public int getVerificationTag() {
+		return header.getVerificationTag();
 	}
 }

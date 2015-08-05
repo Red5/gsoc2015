@@ -18,22 +18,13 @@
  */
 package org.red5.server.sctp;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import javax.crypto.Mac;
 
-public class App {
-    public static void main(String[] args) throws IOException, SctpException {
-    	
-    	// example server
-    	SocketAddress serverSocketAddress = new InetSocketAddress(65125); 
-    	System.out.println("create and bind for sctp address");
-    	SctpServerChannel sctpServerChannel = SctpServerChannel.open().bind(serverSocketAddress); 
-    	System.out.println("address bind process finished successfully");
-    	
-    	SctpChannel sctpChannel = null;
-    	while ((sctpChannel = sctpServerChannel.accept()) != null) {
-    		System.out.println("client connection received");
-        }
-    }
+public interface IServerChannelControl {
+	void removePendingChannel(SocketAddress address);
+	
+	void add(SctpChannel channel);
+	
+	Mac getMac();
 }

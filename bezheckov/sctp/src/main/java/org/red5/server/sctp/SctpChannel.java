@@ -19,58 +19,60 @@
 package org.red5.server.sctp;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.nio.channels.spi.AbstractSelectableChannel;
-import java.nio.channels.spi.SelectorProvider;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.sql.Timestamp;
+import java.util.Random;
 
-public class SctpChannel extends AbstractSelectableChannel {
+import org.red5.server.sctp.packet.SctpPacket;
+
+public class SctpChannel implements IChannelControl {
 	
-	public static enum State {
-		CLOSED,
-		COOKIE_WAIT,
-		COOKIE_ECHOED,
-		ESTABLISHED
-	}
+	private static final int validCookieTime = 60; // in seconds
+	
+	private Timestamp creationTimestamp;
+	
+	private int verificationTagItself;
 	
 	private int verificationTag;
 	
-	private short port;
-	
-	private InetAddress ipAddress;
-	
 	private State state;
+	
+	private DatagramSocket destination;
 
-	public SctpChannel(SelectorProvider provider, final int verificationTag) {
-		super(provider);
+	public SctpChannel(final Random random, SocketAddress destinationAddress) throws SocketException {
 		setState(State.CLOSED);
-		this.verificationTag = verificationTag;
+		setVerificationTagItself(random.nextInt());
+		destination = new DatagramSocket(destinationAddress);
+		creationTimestamp = new Timestamp(System.currentTimeMillis());
 	}
 
 	public State getState() {
 		return state;
 	}
-
-	public void setState(State state) {
-		this.state = state;
-	}
-
+	
 	public int getVerificationTag() {
 		return verificationTag;
 	}
 
 	@Override
-	protected void implCloseSelectableChannel() throws IOException {
-		// TODO Auto-generated method stub
+	public void setState(State state) {
+		this.state = state;
 	}
 
 	@Override
-	protected void implConfigureBlocking(boolean block) throws IOException {
-		// TODO Auto-generated method stub
+	public void sendPacket(SctpPacket packet) throws IOException {
+		byte[] data = packet.getBytes();
+		destination.send(new DatagramPacket(data, data.length));
 	}
 
-	@Override
-	public int validOps() {
-		// TODO Auto-generated method stub
-		return 0;
+	public int getVerificationTagItself() {
+		return verificationTagItself;
+	}
+
+	public void setVerificationTagItself(int verificationTagItself) {
+		this.verificationTagItself = verificationTagItself;
 	}
 }

@@ -32,7 +32,7 @@ public abstract class SctpServerChannel extends AbstractSelectableChannel {
 		super(provider);
 	}
 
-	public abstract SctpChannel accept() throws IOException;
+	public abstract SctpChannel accept() throws IOException, SctpException;
 	
 	public abstract SctpServerChannel bind(SocketAddress local, int backlog) throws IOException;
 	

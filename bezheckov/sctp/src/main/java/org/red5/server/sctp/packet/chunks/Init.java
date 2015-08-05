@@ -18,7 +18,15 @@
  */
 package org.red5.server.sctp.packet.chunks;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
 import java.nio.ByteBuffer;
+
+import org.red5.server.sctp.IChannelControl;
+import org.red5.server.sctp.IChannelControl.State;
+import org.red5.server.sctp.packet.SctpPacket;
+import org.red5.server.sctp.SctpChannel;
+import org.red5.server.sctp.SctpException;
 
 public class Init extends Chunk {
 
@@ -36,8 +44,8 @@ public class Init extends Chunk {
 		super(ChunkType.INIT, (byte) 0x00, length, data);
 	}
 	
-	public Init(final byte[] data, final int offset) {
-		super(data, offset);
+	public Init(final byte[] data, int offset, int length) throws SctpException {
+		super(data, offset, length);
 		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset + CHUNK_HEADER_SIZE, data.length - (offset + CHUNK_HEADER_SIZE));
 		setLength((short)(data.length - (offset + CHUNK_HEADER_SIZE)));
 		initiateTag = byteBuffer.getInt();
@@ -65,5 +73,19 @@ public class Init extends Chunk {
 
 	public int getInitialTSN() {
 		return initialTSN;
+	}
+
+	@Override
+	public void apply(IChannelControl channel) throws SctpException, IOException {
+		System.out.println("in init packet");
+		if (channel.getState() != State.CLOSED) {
+			throw new SctpException("wrong state on init chunk");
+		}
+		
+		// 1. generate init_ack
+		SctpPacket initAck = null; //new InitAck(0,0,0,0,0);
+		
+		// 2. send init_ack
+		channel.sendPacket(initAck);
 	}
 }
