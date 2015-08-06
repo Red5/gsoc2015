@@ -19,9 +19,12 @@
 package org.red5.server.sctp.packet.chunks;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
-import org.red5.server.sctp.IChannelControl;
+import org.red5.server.sctp.IAssociationControl;
 import org.red5.server.sctp.IServerChannelControl;
 import org.red5.server.sctp.SctpException;
 
@@ -41,9 +44,7 @@ public abstract class Chunk {
 	
 	private int length;
 	
-	private IServerChannelControl server;
-	
-	public Chunk(byte[] data, int offset, int length, IServerChannelControl server) throws SctpException {
+	public Chunk(byte[] data, int offset, int length) throws SctpException {
 		// parse common header
 		if (length < CHUNK_HEADER_SIZE) {
 			throw new SctpException("not enough data for parse chunk common header " + data);
@@ -52,7 +53,6 @@ public abstract class Chunk {
 		type = ChunkType.values()[byteBuffer.get()];
 		flags = byteBuffer.get();
 		this.length = byteBuffer.getShort() & 0xffff;
-		this.server = server;
 	}
 	
 	public Chunk(final ChunkType type, final byte flags, final short length, final byte[] data) {
@@ -62,7 +62,10 @@ public abstract class Chunk {
 		this.data = data;
 	}
 	
-	public abstract void apply(IChannelControl channel) throws SctpException, IOException;
+	public abstract void apply(IAssociationControl channel) throws SctpException, IOException;
+	
+	public abstract void apply(InetSocketAddress address, IServerChannelControl server)
+			throws SctpException, InvalidKeyException, NoSuchAlgorithmException, IOException;
 	
 	public Chunk(final ChunkType type, final byte flags) {
 		this.type = type;
@@ -91,9 +94,5 @@ public abstract class Chunk {
 	
 	protected void setData(byte[] data) {
 		this.data = data;
-	}
-
-	protected IServerChannelControl getServer() {
-		return server;
 	}
 }

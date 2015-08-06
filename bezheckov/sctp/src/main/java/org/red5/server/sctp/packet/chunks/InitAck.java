@@ -18,15 +18,21 @@
  */
 package org.red5.server.sctp.packet.chunks;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-
-import org.red5.server.sctp.IChannelControl;
+import org.red5.server.sctp.IAssociationControl;
 import org.red5.server.sctp.IServerChannelControl;
 import org.red5.server.sctp.SctpException;
 
 public final class InitAck extends Chunk {
 	
-	private static int MANDATORY_FIELD_SIZE = 16;
+	private static final int MANDATORY_FIELD_SIZE = 16;
+	
+	private static final int DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT = 1024;
+	
+	private static final int DEFAULT_NUMBER_OF_OUTBOUND_STREAM = 1;
+	
+	private static final int DEFAULT_NUMBER_OF_INBOUND_STREAM = 1;
 	
 	private int initiateTag;
 	
@@ -44,19 +50,25 @@ public final class InitAck extends Chunk {
 		super(ChunkType.INIT_ACK, flags, length, data);
 	}
 	
-	public InitAck(
-			int initiateTag,
-			int advertisedReceiverWindowCredit,
-			short numberOfOutboundStreams,
-			short numberOfInboundStreams,
-			int initialTSN,
-			byte[] stateCookie) {
+	public InitAck(final byte[] data, int offset, int length) throws SctpException {
+		super(data, offset, length);
+		assert length - offset - CHUNK_HEADER_SIZE > MANDATORY_FIELD_SIZE;
+		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset + CHUNK_HEADER_SIZE, length - offset - CHUNK_HEADER_SIZE);
+		initiateTag = byteBuffer.getInt();
+		advertisedReceiverWindowCredit = byteBuffer.getInt();
+		numberOfOutboundStreams = byteBuffer.getShort() & 0xffff;
+		numberOfInboundStreams = byteBuffer.getShort() & 0xffff;
+		initialTSN = byteBuffer.getInt();
+		stateCookie = new StateCookie(data, offset, length);
+	}
+	
+	public InitAck(int initiateTag, int initialTSN, byte[] stateCookie) {
 		super(ChunkType.INIT_ACK, (byte)0x00);
-		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE);
+		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE + stateCookie.length);
 		byteBuffer.putInt(initiateTag);
-		byteBuffer.putInt(advertisedReceiverWindowCredit);
-		byteBuffer.putShort(numberOfOutboundStreams);
-		byteBuffer.putShort(numberOfInboundStreams);
+		byteBuffer.putInt(DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT);
+		byteBuffer.putShort((short) DEFAULT_NUMBER_OF_OUTBOUND_STREAM);
+		byteBuffer.putShort((short) DEFAULT_NUMBER_OF_INBOUND_STREAM);
 		byteBuffer.putInt(initialTSN);
 		byteBuffer.put(stateCookie);
 		super.setData(byteBuffer.toString().getBytes());
@@ -76,16 +88,14 @@ public final class InitAck extends Chunk {
 		return byteBuffer.toString().getBytes();
 	}
 	
-	public InitAck(final byte[] data, int offset, int length, IServerChannelControl server) throws SctpException {
-		super(data, offset, length, server);
-		assert length - offset - CHUNK_HEADER_SIZE > MANDATORY_FIELD_SIZE;
-		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset + CHUNK_HEADER_SIZE, length - offset - CHUNK_HEADER_SIZE);
-		initiateTag = byteBuffer.getInt();
-		advertisedReceiverWindowCredit = byteBuffer.getInt();
-		numberOfOutboundStreams = byteBuffer.getShort() & 0xffff;
-		numberOfInboundStreams = byteBuffer.getShort() & 0xffff;
-		initialTSN = byteBuffer.getInt();
-		stateCookie = new StateCookie(data, offset, length);
+	@Override
+	public void apply(IAssociationControl channel) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void apply(InetSocketAddress address, IServerChannelControl server) {
+		// TODO Auto-generated method stub
 	}
 	
 	public int getInitiateTag() {
@@ -106,10 +116,5 @@ public final class InitAck extends Chunk {
 
 	public int getInitialTSN() {
 		return initialTSN;
-	}
-
-	@Override
-	public void apply(IChannelControl channel) {
-		// TODO Auto-generated method stub
 	}
 }

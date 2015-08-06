@@ -25,17 +25,38 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 public class App {
+	
+	private static final int SERVER_PORT = 65125;
+	
+	private static final int CLIENT_PORT = 6050;
+	
     public static void main(String[] args) throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
     	
-    	// example server
-    	SocketAddress serverSocketAddress = new InetSocketAddress(65125); 
-    	System.out.println("create and bind for sctp address");
-    	SctpServerChannel sctpServerChannel = SctpServerChannel.open().bind(serverSocketAddress); 
-    	System.out.println("address bind process finished successfully");
+    	if (args.length == 2) {
+    		System.out.println("usage java -jar " + args[0] + " server/client");
+    	}
     	
-    	SctpChannel sctpChannel = null;
-    	while ((sctpChannel = sctpServerChannel.accept()) != null) {
-    		System.out.println("client connection received");
+    	if ("server".equals(args[1])) {
+        	// example server
+        	SocketAddress serverSocketAddress = new InetSocketAddress(SERVER_PORT);
+        	System.out.println("create and bind for sctp address");
+        	SctpServerChannel sctpServerChannel = SctpServerChannel.open().bind(serverSocketAddress); 
+        	System.out.println("address bind process finished successfully");
+        	
+        	SctpChannel sctpChannel = null;
+        	while ((sctpChannel = sctpServerChannel.accept()) != null) {
+        		System.out.println("client connection received");
+            }
+    	}
+    	else if ("client".equals(args[1])) {
+    		// example client
+    		SocketAddress socketAddress = new InetSocketAddress(SERVER_PORT);
+            SctpChannel sctpChannel = SctpChannel.open();
+            sctpChannel.bind(new InetSocketAddress(CLIENT_PORT));
+            sctpChannel.connect(socketAddress);
         }
+    	else {
+    		System.out.println("usage java -jar " + args[0] + " server/client");
+    	}
     }
 }

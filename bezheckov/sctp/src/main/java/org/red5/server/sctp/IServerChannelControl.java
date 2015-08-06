@@ -18,13 +18,27 @@
  */
 package org.red5.server.sctp;
 
-import java.net.SocketAddress;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
+import java.util.Random;
+
 import javax.crypto.Mac;
 
+import org.red5.server.sctp.packet.SctpPacket;
+
 public interface IServerChannelControl {
-	void removePendingChannel(SocketAddress address);
+	void removePendingChannel(InetSocketAddress address);
 	
-	void add(SctpChannel channel);
+	boolean addPendingChannel(InetSocketAddress address) throws SocketException;
+	
+	IAssociationControl getPendingChannel(InetSocketAddress address);
 	
 	Mac getMac();
+	
+	Random getRandom();
+	
+	int getPort();
+	
+	void send(SctpPacket packet) throws IOException;
 }

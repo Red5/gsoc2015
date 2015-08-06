@@ -31,23 +31,26 @@ public class StateCookie {
 	//	creationTimestamp : Long
 	//	lifespan : short
 	//	verificationTag : int
+	//	initialTSN : int
 	
-	// creationTimestamp(8 bytes) + lifespan(2 bytes) + verificationTag(4 bytes)  
-	private static final int STATE_COOKIE_SIZE = 14;
+	// creationTimestamp(8 bytes) + lifespan(2 bytes) + verificationTag(4 bytes) + initialTSN(4 bytes)
+	private static final int STATE_COOKIE_SIZE = 18;
 	
 	private static final short LIFESPAN = 60; // in seconds
 	
-	private long creationTimestamp =
-			System.currentTimeMillis() / 1000L; // in seconds
+	private long creationTimestamp = System.currentTimeMillis() / 1000L; // in seconds
 	
 	private short currentLifespan;
 	
 	private int verificationTag;
 	
+	private int initialTSN;
+	
 	private byte[] mac;
 	
-	public StateCookie(int verificationTag) {
+	public StateCookie(int verificationTag, int initialTSN) {
 		this.verificationTag = verificationTag;
+		this.initialTSN = initialTSN;
 	}
 	
 	public StateCookie(byte[] data, int offset, int length) {
@@ -60,17 +63,19 @@ public class StateCookie {
 		creationTimestamp = byteBuffer.getLong();
 		currentLifespan = byteBuffer.getShort();
 		verificationTag = byteBuffer.getInt();
+		initialTSN = byteBuffer.getInt();
 	}
 	
-	public byte[] getBytes(Mac messageAuthenticationCode, String algorithmName) throws InvalidKeyException, NoSuchAlgorithmException {
+	public byte[] getBytes(Mac messageAuthenticationCode) throws InvalidKeyException, NoSuchAlgorithmException {
 		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(STATE_COOKIE_SIZE);
 		byteBuffer.putLong(creationTimestamp);
 		byteBuffer.putShort(LIFESPAN);
 		byteBuffer.putInt(getVerificationTag());
+		byteBuffer.putInt(getInitialTSN());
 		byte[] data = byteBuffer.toString().getBytes();
 		
 		byte[] mac = messageAuthenticationCode.doFinal(data);
-		byte[] macLength = ByteBuffer.allocate(4).putInt(mac.length).array(); // 4 for int
+		byte[] macLength = ByteBuffer.allocate(4).putInt(mac.length).array(); // 4 for int length
 		byte[] resultData = new byte[mac.length + data.length + mac.length];
 		System.arraycopy(macLength, 0, resultData, 0, macLength.length);
 		System.arraycopy(mac, 0, resultData, macLength.length, mac.length);
@@ -81,6 +86,10 @@ public class StateCookie {
 
 	public int getVerificationTag() {
 		return verificationTag;
+	}
+	
+	public int getInitialTSN() {
+		return initialTSN;
 	}
 
 	public byte[] getMac() {

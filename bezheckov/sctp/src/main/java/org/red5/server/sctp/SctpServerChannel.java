@@ -34,7 +34,8 @@ public abstract class SctpServerChannel extends AbstractSelectableChannel {
 		super(provider);
 	}
 
-	public abstract SctpChannel accept() throws IOException, SctpException;
+	public abstract SctpChannel accept()
+			throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException;
 	
 	public abstract SctpServerChannel bind(SocketAddress local, int backlog) throws IOException;
 	

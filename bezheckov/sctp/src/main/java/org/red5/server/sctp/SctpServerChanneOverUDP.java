@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.channels.spi.SelectorProvider;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -36,6 +38,7 @@ import java.util.logging.Logger;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.red5.server.sctp.IAssociationControl.State;
 import org.red5.server.sctp.packet.SctpPacket;
 
 public class SctpServerChanneOverUDP extends SctpServerChannel implements IServerChannelControl {
@@ -50,7 +53,7 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 	
 	private DatagramSocket serverSocket;
 	
-	private HashMap<SocketAddress, SctpChannel> pendingChannels;
+	private HashMap<InetSocketAddress, Association> pendingAssociations;
 	
 	private int maxNumberOfPendingChannels;
 	
@@ -67,7 +70,7 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 	}
 
 	@Override
-	public SctpChannel accept() throws IOException, SctpException {
+	public SctpChannel accept() throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
 		logger.setLevel(Level.INFO);
 		
 		while (true) {
@@ -75,31 +78,26 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 			serverSocket.receive(receivePacket);
 			SctpPacket packet = null;
 			try {
-				packet = new SctpPacket(buffer, 0, receivePacket.getLength(), this);
+				packet = new SctpPacket(buffer, 0, receivePacket.getLength());
 			} catch (SctpException e) {
 				logger.log(Level.WARNING, e.getMessage());
 				continue;
 			}
 			
+			InetSocketAddress address = new InetSocketAddress(receivePacket.getAddress(), receivePacket.getPort());
+			packet.apply(address, this);
 			
-			SctpChannel channel = pendingChannels.get(receivePacket.getSocketAddress());
-			if (channel == null && pendingChannels.size() < maxNumberOfPendingChannels) {
-				SocketAddress address = receivePacket.getSocketAddress();
-				channel = new SctpChannel(random, address);
-				pendingChannels.put(address, channel);
+			Association association = pendingAssociations.get(address);
+			if (association != null && association.getState() == State.ESTABLISHED) {
+				return new SctpChannel(association);
 			}
-			else if (channel == null && pendingChannels.size() >= maxNumberOfPendingChannels) {
-				logger.info("skip association");
-				continue;
-			}
-			packet.apply(channel);
 		}
 	}
 
 	@Override
 	public SctpServerChannel bind(SocketAddress local, int backlog) throws IOException {
 		maxNumberOfPendingChannels = backlog + 1;
-		pendingChannels = new HashMap<>();
+		pendingAssociations = new HashMap<>();
 		if (serverSocket == null) {
 			serverSocket = new DatagramSocket(local);
 		}
@@ -115,12 +113,39 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 	}
 	
 	@Override
-	public void removePendingChannel(SocketAddress address) {
-		// TODO Auto-generated method stub
+	public boolean addPendingChannel(InetSocketAddress address) throws SocketException {
+		if (pendingAssociations.size() < maxNumberOfPendingChannels) {
+			Association channel = new Association(random, address);
+			pendingAssociations.put(address, channel);
+			return true;
+		}
+		
+		return false;
 	}
-
+	
 	@Override
-	public void add(SctpChannel channel) {
+	public IAssociationControl getPendingChannel(InetSocketAddress address) {
+		return pendingAssociations.get(address);
+	}
+	
+	@Override
+	public int getPort() {
+		return serverSocket.getPort();
+	}
+	
+	@Override
+	public void send(SctpPacket packet) throws IOException {
+		byte[] data = packet.getBytes();
+		serverSocket.send(new DatagramPacket(data, data.length));
+	}
+	
+	@Override
+	public Random getRandom() {
+		return random;
+	}
+	
+	@Override
+	public void removePendingChannel(InetSocketAddress address) {
 		// TODO Auto-generated method stub
 	}
 

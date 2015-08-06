@@ -22,14 +22,14 @@ import org.red5.server.sctp.IServerChannelControl;
 import org.red5.server.sctp.SctpException;
 
 public class ChunkFactory {
-	public static Chunk createChunk(final byte[] data, int offset, int length, IServerChannelControl server)
+	public static Chunk createChunk(final byte[] data, int offset, int length)
 			throws SctpException {
 		assert length > 0;
 		switch (ChunkType.values()[data[offset]]) {
 		case INIT:
-			return new Init(data, offset, length, server);
+			return new Init(data, offset, length);
 		case INIT_ACK:
-			return new InitAck(data, offset, length, server);
+			return new InitAck(data, offset, length);
 		default:
 			throw new SctpException("not supported chunk type " + data);
 		}

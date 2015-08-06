@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import org.red5.server.sctp.packet.SctpPacket;
 
-public interface IChannelControl {
+public interface IAssociationControl {
 	
 	public static enum State {
 		CLOSED,

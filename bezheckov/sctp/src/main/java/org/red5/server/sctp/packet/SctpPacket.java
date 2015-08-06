@@ -19,9 +19,12 @@
 package org.red5.server.sctp.packet;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
-import org.red5.server.sctp.IChannelControl;
+import org.red5.server.sctp.IAssociationControl;
 import org.red5.server.sctp.IServerChannelControl;
 import org.red5.server.sctp.SctpException;
 import org.red5.server.sctp.packet.chunks.Chunk;
@@ -33,19 +36,30 @@ public class SctpPacket {
 	
 	private ArrayList<Chunk> chunks = new ArrayList<>();
 	
-	public SctpPacket(final byte[] data, int offset, int length, IServerChannelControl server)
-			throws SctpException {
+	public SctpPacket(final byte[] data, int offset, int length) throws SctpException {
 		header = new SctpHeader(data, offset, length);
 		Chunk chunk = null;
 		for (int i = header.getSize() + offset; i < length; i += chunk.getSize()) {
-			chunk = ChunkFactory.createChunk(data, i, length, server);
+			chunk = ChunkFactory.createChunk(data, i, length);
 			chunks.add(chunk);
 		}
 	}
 	
-	public void apply(IChannelControl channel) throws SctpException, IOException {
+	public SctpPacket(short sourcePort, short destinationPort, int verificationTag, Chunk chunk) {
+		header = new SctpHeader(sourcePort, destinationPort, verificationTag, 0);
+		chunks.add(chunk);
+	}
+	
+	public void apply(InetSocketAddress address, IServerChannelControl server)
+			throws SctpException, IOException, InvalidKeyException, NoSuchAlgorithmException {
 		for (Chunk chunk : chunks) {
-			chunk.apply(channel);
+			chunk.apply(address, server);
+		} 
+	}
+	
+	public void apply(IAssociationControl association) throws SctpException, IOException {
+		for (Chunk chunk : chunks) {
+			chunk.apply(association);
 		} 
 	}
 	

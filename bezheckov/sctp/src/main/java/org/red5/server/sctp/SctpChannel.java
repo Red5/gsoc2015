@@ -18,61 +18,36 @@
  */
 package org.red5.server.sctp;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.SocketAddress;
-import java.net.SocketException;
-import java.sql.Timestamp;
-import java.util.Random;
 
-import org.red5.server.sctp.packet.SctpPacket;
-
-public class SctpChannel implements IChannelControl {
+public class SctpChannel {
 	
-	private static final int validCookieTime = 60; // in seconds
+	private Association association;
 	
-	private Timestamp creationTimestamp;
-	
-	private int verificationTagItself;
-	
-	private int verificationTag;
-	
-	private State state;
-	
-	private DatagramSocket destination;
-
-	public SctpChannel(final Random random, SocketAddress destinationAddress) throws SocketException {
-		setState(State.CLOSED);
-		setVerificationTagItself(random.nextInt());
-		destination = new DatagramSocket(destinationAddress);
-		creationTimestamp = new Timestamp(System.currentTimeMillis());
-	}
-
-	public State getState() {
-		return state;
+	public SctpChannel(Association association) {
+		this.association = association;
 	}
 	
-	public int getVerificationTag() {
-		return verificationTag;
+	public SctpChannel bind(SocketAddress address) {
+		// TODO
+		return null;
+	}
+	
+	public boolean connect(SocketAddress address) {
+		// TODO
+		return false;
+	}
+	
+	public void send(byte[] data, int offset, int lenght) {
+		// TODO
+	}
+	
+	public byte[] receive() {
+		// TODO
+		return null;
 	}
 
-	@Override
-	public void setState(State state) {
-		this.state = state;
-	}
-
-	@Override
-	public void sendPacket(SctpPacket packet) throws IOException {
-		byte[] data = packet.getBytes();
-		destination.send(new DatagramPacket(data, data.length));
-	}
-
-	public int getVerificationTagItself() {
-		return verificationTagItself;
-	}
-
-	public void setVerificationTagItself(int verificationTagItself) {
-		this.verificationTagItself = verificationTagItself;
+	public static SctpChannel open() {
+		return new SctpChannel(null);
 	}
 }
