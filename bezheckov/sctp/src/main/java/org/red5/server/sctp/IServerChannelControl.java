@@ -16,22 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp.packet.chunks;
+package org.red5.server.sctp;
 
-import org.red5.server.sctp.IServerChannelControl;
-import org.red5.server.sctp.SctpException;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
+import java.util.Random;
 
-public class ChunkFactory {
-	public static Chunk createChunk(final byte[] data, int offset, int length)
-			throws SctpException {
-		assert length > 0;
-		switch (ChunkType.values()[data[offset]]) {
-		case INIT:
-			return new Init(data, offset, length);
-		case INIT_ACK:
-			return new InitAck(data, offset, length);
-		default:
-			throw new SctpException("not supported chunk type " + data);
-		}
-	}
+import javax.crypto.Mac;
+
+import org.red5.server.sctp.packet.SctpPacket;
+
+public interface IServerChannelControl {
+	void removePendingChannel(InetSocketAddress address);
+	
+	boolean addPendingChannel(InetSocketAddress address) throws SocketException;
+	
+	IAssociationControl getPendingChannel(InetSocketAddress address);
+	
+	Mac getMac();
+	
+	Random getRandom();
+	
+	int getPort();
+	
+	void send(SctpPacket packet) throws IOException;
 }

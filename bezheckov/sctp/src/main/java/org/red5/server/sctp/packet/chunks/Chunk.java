@@ -18,12 +18,20 @@
  */
 package org.red5.server.sctp.packet.chunks;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import org.red5.server.sctp.IAssociationControl;
+import org.red5.server.sctp.IServerChannelControl;
+import org.red5.server.sctp.SctpException;
 
 /*
  * see https://tools.ietf.org/html/rfc4960#section-3.2
  */
-public class Chunk {
+public abstract class Chunk {
 	
 	// type(1 byte) + flags(1 byte) + length(2 byte)
 	protected static final int CHUNK_HEADER_SIZE = 4;
@@ -34,14 +42,17 @@ public class Chunk {
 	
 	private byte flags;
 	
-	private short length;
+	private int length;
 	
-	public Chunk(byte[] data, int offset) {
+	public Chunk(byte[] data, int offset, int length) throws SctpException {
 		// parse common header
+		if (length < CHUNK_HEADER_SIZE) {
+			throw new SctpException("not enough data for parse chunk common header " + data);
+		}
 		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset, CHUNK_HEADER_SIZE);
 		type = ChunkType.values()[byteBuffer.get()];
 		flags = byteBuffer.get();
-		length = byteBuffer.getShort();
+		this.length = byteBuffer.getShort() & 0xffff;
 	}
 	
 	public Chunk(final ChunkType type, final byte flags, final short length, final byte[] data) {
@@ -50,6 +61,11 @@ public class Chunk {
 		this.length = length;
 		this.data = data;
 	}
+	
+	public abstract void apply(IAssociationControl channel) throws SctpException, IOException;
+	
+	public abstract void apply(InetSocketAddress address, IServerChannelControl server)
+			throws SctpException, InvalidKeyException, NoSuchAlgorithmException, IOException;
 	
 	public Chunk(final ChunkType type, final byte flags) {
 		this.type = type;
@@ -64,7 +80,7 @@ public class Chunk {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE);
 		byteBuffer.put((byte)type.getValue());
 		byteBuffer.put(flags);
-		byteBuffer.putShort(length);
+		byteBuffer.putShort((short)length);
 		byte[] data = new byte[byteBuffer.limit()];
 		byteBuffer.flip();
 		byteBuffer.get(data);
@@ -72,7 +88,7 @@ public class Chunk {
 		return data;
 	}
 	
-	protected void setLength(short length) {
+	protected void setLength(int length) {
 		this.length = length;
 	}
 	

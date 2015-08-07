@@ -17,25 +17,35 @@
  * under the License.
  */
 package org.red5.server.sctp;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.channels.spi.SelectorProvider;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.red5.server.sctp.packet.SctpPacket;
-import org.red5.server.sctp.packet.chunks.Init;
-import org.red5.server.sctp.packet.chunks.InitAck;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
-public class SctpServerChanneOverUDP extends SctpServerChannel {
+import org.red5.server.sctp.IAssociationControl.State;
+import org.red5.server.sctp.packet.SctpPacket;
+
+public class SctpServerChanneOverUDP extends SctpServerChannel implements IServerChannelControl {
 	
 	private final static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	
+	private static final String MAC_ALGORITHM_NAME = "HmacSHA256";
 	
 	private static final int BUFFER_SIZE = 2048;
 	
@@ -43,55 +53,43 @@ public class SctpServerChanneOverUDP extends SctpServerChannel {
 	
 	private DatagramSocket serverSocket;
 	
-	private HashMap<Integer, SctpChannel> pendingChannels;
-	
-	private HashMap<Integer, Integer> verificationTagForChannel = new HashMap<>();
+	private HashMap<InetSocketAddress, Association> pendingAssociations;
 	
 	private int maxNumberOfPendingChannels;
 	
 	private Random random = new Random();
+	
+	private final Mac messageAuthenticationCode;
 
-	protected SctpServerChanneOverUDP(SelectorProvider provider) {
+	protected SctpServerChanneOverUDP(SelectorProvider provider)
+			throws NoSuchAlgorithmException, InvalidKeyException {
 		super(provider);
+		SecretKeySpec secretKey = new SecretKeySpec(UUID.randomUUID().toString().getBytes(), MAC_ALGORITHM_NAME);
+		messageAuthenticationCode = Mac.getInstance(MAC_ALGORITHM_NAME);
+		messageAuthenticationCode.init(secretKey);
 	}
 
 	@Override
-	public SctpChannel accept() throws IOException {
+	public SctpChannel accept() throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
 		logger.setLevel(Level.INFO);
 		
 		while (true) {
-			
-			/*
-			 * 1. wait INIT
-			 * 2. send INIT_ACK
-			 * 3. wait COOKIE_ECHO
-			 * 4. send COOKIE_ACK
-			 */
-			
 			DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
 			serverSocket.receive(receivePacket);
-			byte[] data = new byte[receivePacket.getLength()];
-			System.arraycopy(receivePacket.getData(), 0, data, 0, data.length);
 			SctpPacket packet = null;
 			try {
-				packet = new SctpPacket(data);
+				packet = new SctpPacket(buffer, 0, receivePacket.getLength());
 			} catch (SctpException e) {
-				e.printStackTrace();
+				logger.log(Level.WARNING, e.getMessage());
+				continue;
 			}
 			
-			int tag = packet.getHeader().getVerificationTag();
-			SctpChannel channel = pendingChannels.get(tag);
-			if (channel != null) {
-				handleAssociation(channel, packet, receivePacket);
-			}
-			else if (tag == 0 && pendingChannels.size() < maxNumberOfPendingChannels) {
-				handleAssociation(channel, packet, receivePacket);
-			}
-			else if (pendingChannels.size() < maxNumberOfPendingChannels) {
-				logger.info("skip association");
-			}
-			else {
-				logger.info("bad association" + channel);
+			InetSocketAddress address = new InetSocketAddress(receivePacket.getAddress(), receivePacket.getPort());
+			packet.apply(address, this);
+			
+			Association association = pendingAssociations.get(address);
+			if (association != null && association.getState() == State.ESTABLISHED) {
+				return new SctpChannel(association);
 			}
 		}
 	}
@@ -99,7 +97,7 @@ public class SctpServerChanneOverUDP extends SctpServerChannel {
 	@Override
 	public SctpServerChannel bind(SocketAddress local, int backlog) throws IOException {
 		maxNumberOfPendingChannels = backlog + 1;
-		pendingChannels = new HashMap<>();
+		pendingAssociations = new HashMap<>();
 		if (serverSocket == null) {
 			serverSocket = new DatagramSocket(local);
 		}
@@ -107,6 +105,48 @@ public class SctpServerChanneOverUDP extends SctpServerChannel {
 			throw new IOException("already bound");
 		}
 		return this;
+	}
+	
+	@Override
+	public Mac getMac() {
+		return messageAuthenticationCode;
+	}
+	
+	@Override
+	public boolean addPendingChannel(InetSocketAddress address) throws SocketException {
+		if (pendingAssociations.size() < maxNumberOfPendingChannels) {
+			Association channel = new Association(random, address);
+			pendingAssociations.put(address, channel);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public IAssociationControl getPendingChannel(InetSocketAddress address) {
+		return pendingAssociations.get(address);
+	}
+	
+	@Override
+	public int getPort() {
+		return serverSocket.getPort();
+	}
+	
+	@Override
+	public void send(SctpPacket packet) throws IOException {
+		byte[] data = packet.getBytes();
+		serverSocket.send(new DatagramPacket(data, data.length));
+	}
+	
+	@Override
+	public Random getRandom() {
+		return random;
+	}
+	
+	@Override
+	public void removePendingChannel(InetSocketAddress address) {
+		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -147,32 +187,5 @@ public class SctpServerChanneOverUDP extends SctpServerChannel {
 	public Set<SctpSocketOption<?>> supportedOptions() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-	
-	private void handleAssociation(SctpChannel channel, SctpPacket packet, DatagramPacket receivePacket)
-			throws IOException {
-		if (channel == null) {
-			logger.info("create new association");
-			
-			Init init = (Init) packet.getChunks().get(0);
-			channel = new SctpChannel(null, init.getInitiateTag());
-			pendingChannels.put(init.getInitiateTag(), channel);
-			int tag = random.nextInt();
-			verificationTagForChannel.put(init.getInitiateTag(), tag);
-			
-			// send INIT_ACK
-			int TSN = random.nextInt();
-			InitAck initAck = new InitAck(tag, BUFFER_SIZE, (short)1, (short)1, TSN);
-			byte[] data = initAck.getBytes();
-			DatagramPacket sendPacket = new DatagramPacket(data, data.length,
-					receivePacket.getAddress(), receivePacket.getPort());
-			serverSocket.send(sendPacket);
-			
-			return;
-		}
-		
-		// TODO handle other packet
-		
-		return;
 	}
 }

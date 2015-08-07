@@ -24,6 +24,8 @@ import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.nio.channels.spi.SelectorProvider;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 
 public abstract class SctpServerChannel extends AbstractSelectableChannel {
@@ -32,7 +34,8 @@ public abstract class SctpServerChannel extends AbstractSelectableChannel {
 		super(provider);
 	}
 
-	public abstract SctpChannel accept() throws IOException;
+	public abstract SctpChannel accept()
+			throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException;
 	
 	public abstract SctpServerChannel bind(SocketAddress local, int backlog) throws IOException;
 	
@@ -46,7 +49,7 @@ public abstract class SctpServerChannel extends AbstractSelectableChannel {
 	
 	public abstract Set<SctpSocketOption<?>> supportedOptions();
 	
-	public static SctpServerChannel open() throws IOException {
+	public static SctpServerChannel open() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
 		return new SctpServerChanneOverUDP((SelectorProvider)null);
 	}
 	

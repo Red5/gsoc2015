@@ -18,59 +18,36 @@
  */
 package org.red5.server.sctp;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.nio.channels.spi.AbstractSelectableChannel;
-import java.nio.channels.spi.SelectorProvider;
+import java.net.SocketAddress;
 
-public class SctpChannel extends AbstractSelectableChannel {
+public class SctpChannel {
 	
-	public static enum State {
-		CLOSED,
-		COOKIE_WAIT,
-		COOKIE_ECHOED,
-		ESTABLISHED
+	private Association association;
+	
+	public SctpChannel(Association association) {
+		this.association = association;
 	}
 	
-	private int verificationTag;
+	public SctpChannel bind(SocketAddress address) {
+		// TODO
+		return null;
+	}
 	
-	private short port;
+	public boolean connect(SocketAddress address) {
+		// TODO
+		return false;
+	}
 	
-	private InetAddress ipAddress;
+	public void send(byte[] data, int offset, int lenght) {
+		// TODO
+	}
 	
-	private State state;
-
-	public SctpChannel(SelectorProvider provider, final int verificationTag) {
-		super(provider);
-		setState(State.CLOSED);
-		this.verificationTag = verificationTag;
+	public byte[] receive() {
+		// TODO
+		return null;
 	}
 
-	public State getState() {
-		return state;
-	}
-
-	public void setState(State state) {
-		this.state = state;
-	}
-
-	public int getVerificationTag() {
-		return verificationTag;
-	}
-
-	@Override
-	protected void implCloseSelectableChannel() throws IOException {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	protected void implConfigureBlocking(boolean block) throws IOException {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public int validOps() {
-		// TODO Auto-generated method stub
-		return 0;
+	public static SctpChannel open() {
+		return new SctpChannel(null);
 	}
 }

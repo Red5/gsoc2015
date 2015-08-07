@@ -50,13 +50,13 @@ public final class SctpHeader {
 		this.checksum = checksum;
 	}
 	
-	public SctpHeader(final byte[] data) throws SctpException {
-		if (data.length < HEADER_SIZE) {
+	public SctpHeader(final byte[] data, int offset, int length) throws SctpException {
+		if (length < HEADER_SIZE) {
 			throw new SctpException("not enough data for parsing Sctp header : " + data);
 		}
-		ByteBuffer byteBuffer = ByteBuffer.wrap(data, 0, HEADER_SIZE);
-		sourcePort = byteBuffer.getShort() & 0x0ffff;
-		destinationPort = byteBuffer.getShort() & 0x0ffff;
+		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset, HEADER_SIZE);
+		sourcePort = byteBuffer.getShort() & 0xffff;
+		destinationPort = byteBuffer.getShort() & 0xffff;
 		verificationTag = byteBuffer.getInt();
 		checksum = byteBuffer.getInt();
 	}

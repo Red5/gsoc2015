@@ -16,22 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp.packet.chunks;
+package org.red5.server.sctp;
 
-import org.red5.server.sctp.IServerChannelControl;
-import org.red5.server.sctp.SctpException;
+import java.io.IOException;
 
-public class ChunkFactory {
-	public static Chunk createChunk(final byte[] data, int offset, int length)
-			throws SctpException {
-		assert length > 0;
-		switch (ChunkType.values()[data[offset]]) {
-		case INIT:
-			return new Init(data, offset, length);
-		case INIT_ACK:
-			return new InitAck(data, offset, length);
-		default:
-			throw new SctpException("not supported chunk type " + data);
-		}
+import org.red5.server.sctp.packet.SctpPacket;
+
+public interface IAssociationControl {
+	
+	public static enum State {
+		CLOSED,
+		COOKIE_WAIT,
+		COOKIE_ECHOED,
+		ESTABLISHED
 	}
+	
+	State getState();
+	
+	void setState(State state);
+	
+	void sendPacket(SctpPacket packet) throws IOException;
+	
+	int getVerificationTag();
 }
