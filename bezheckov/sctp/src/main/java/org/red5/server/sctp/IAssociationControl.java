@@ -31,6 +31,14 @@ public interface IAssociationControl {
 		ESTABLISHED
 	}
 	
+	static final int VALID_COOKIE_TIME = 60; // in seconds
+	
+	static final int DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT = 1024;
+	
+	static final int DEFAULT_NUMBER_OF_OUTBOUND_STREAM = 1;
+	
+	static final int DEFAULT_NUMBER_OF_INBOUND_STREAM = 1;
+	
 	State getState();
 	
 	void setState(State state);

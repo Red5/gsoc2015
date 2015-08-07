@@ -134,9 +134,9 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 	}
 	
 	@Override
-	public void send(SctpPacket packet) throws IOException {
+	public void send(SctpPacket packet, InetSocketAddress address) throws IOException {
 		byte[] data = packet.getBytes();
-		serverSocket.send(new DatagramPacket(data, data.length));
+		serverSocket.send(new DatagramPacket(data, data.length, address));
 	}
 	
 	@Override

@@ -20,6 +20,11 @@ package org.red5.server.sctp.packet.chunks;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.Mac;
+
 import org.red5.server.sctp.IAssociationControl;
 import org.red5.server.sctp.IServerChannelControl;
 import org.red5.server.sctp.SctpException;
@@ -27,12 +32,6 @@ import org.red5.server.sctp.SctpException;
 public final class InitAck extends Chunk {
 	
 	private static final int MANDATORY_FIELD_SIZE = 16;
-	
-	private static final int DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT = 1024;
-	
-	private static final int DEFAULT_NUMBER_OF_OUTBOUND_STREAM = 1;
-	
-	private static final int DEFAULT_NUMBER_OF_INBOUND_STREAM = 1;
 	
 	private int initiateTag;
 	
@@ -45,6 +44,8 @@ public final class InitAck extends Chunk {
 	private int initialTSN;
 	
 	StateCookie stateCookie;
+	
+	byte[] stateCookieBytes;
 	
 	public InitAck(byte flags, short length, byte[] data) {
 		super(ChunkType.INIT_ACK, flags, length, data);
@@ -62,22 +63,24 @@ public final class InitAck extends Chunk {
 		stateCookie = new StateCookie(data, offset, length);
 	}
 	
-	public InitAck(int initiateTag, int initialTSN, byte[] stateCookie) {
+	public InitAck(int initiateTag, int initialTSN, StateCookie stateCookie, Mac mac) throws InvalidKeyException, NoSuchAlgorithmException {
 		super(ChunkType.INIT_ACK, (byte)0x00);
-		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE + stateCookie.length);
+		this.stateCookie = stateCookie;
+		stateCookieBytes = stateCookie.getBytes(mac);
+		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE + stateCookieBytes.length);
 		byteBuffer.putInt(initiateTag);
-		byteBuffer.putInt(DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT);
-		byteBuffer.putShort((short) DEFAULT_NUMBER_OF_OUTBOUND_STREAM);
-		byteBuffer.putShort((short) DEFAULT_NUMBER_OF_INBOUND_STREAM);
+		byteBuffer.putInt(IAssociationControl.DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT);
+		byteBuffer.putShort((short) IAssociationControl.DEFAULT_NUMBER_OF_OUTBOUND_STREAM);
+		byteBuffer.putShort((short) IAssociationControl.DEFAULT_NUMBER_OF_INBOUND_STREAM);
 		byteBuffer.putInt(initialTSN);
-		byteBuffer.put(stateCookie);
+		byteBuffer.put(stateCookieBytes);
 		super.setData(byteBuffer.toString().getBytes());
-		super.setLength(MANDATORY_FIELD_SIZE + stateCookie.length);
+		super.setLength(MANDATORY_FIELD_SIZE + stateCookieBytes.length);
 	}
 	
 	@Override
 	public byte[] getBytes() {
-		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE + CHUNK_HEADER_SIZE);
+		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE + CHUNK_HEADER_SIZE + stateCookieBytes.length);
 		byte[] data = super.getBytes();
 		byteBuffer.put(data);
 		byteBuffer.putInt(initiateTag);
@@ -85,7 +88,12 @@ public final class InitAck extends Chunk {
 		byteBuffer.putShort((short) numberOfOutboundStreams);
 		byteBuffer.putShort((short) numberOfInboundStreams);
 		byteBuffer.putInt(initialTSN);
-		return byteBuffer.toString().getBytes();
+		byteBuffer.put(stateCookieBytes);
+		
+		byteBuffer.clear();
+		byte[] result = new byte[byteBuffer.capacity()];
+		byteBuffer.get(result, 0, result.length);
+		return result;
 	}
 	
 	@Override

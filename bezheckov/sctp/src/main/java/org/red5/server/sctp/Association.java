@@ -27,34 +27,61 @@ import java.sql.Timestamp;
 import java.util.Random;
 
 import org.red5.server.sctp.packet.SctpPacket;
+import org.red5.server.sctp.packet.chunks.Init;
 
 public class Association implements IAssociationControl {
 	
-	private static final int validCookieTime = 60; // in seconds
-	
 	private Timestamp creationTimestamp;
 	
-	private int verificationTagItself;
+	private int verificationTagSource;
 	
-	private int verificationTag;
+	private int verificationTagDestination;
+	
+	private int initialTSNSource;
+	
+	private int initialTSNDestination;
 	
 	private State state;
 	
+	private DatagramSocket source;
+	
 	private DatagramSocket destination;
+	
+	private Random random;
 
-	public Association(final Random random, InetSocketAddress destinationAddress) throws SocketException {
+	public Association(final Random random, InetSocketAddress sourceAddress) throws SocketException {
+		this.random = random;
 		setState(State.CLOSED);
 		setVerificationTagItself(random.nextInt());
-		destination = new DatagramSocket(destinationAddress);
+		destination = new DatagramSocket(sourceAddress);
 		creationTimestamp = new Timestamp(System.currentTimeMillis());
+	}
+	
+	public boolean setUp(InetSocketAddress address) throws IOException {
+		initialTSNSource = random.nextInt();
+		Init initChunk = new Init(verificationTagSource, initialTSNSource);
+		SctpPacket packet = new SctpPacket((short) source.getPort(), (short)destination.getPort(), 0, initChunk);
+		byte[] data = packet.getBytes();
+		source.send(new DatagramPacket(data, data.length, address));
+		
+		// wait init_ack
+		// receive init_ack
+		// send cookie_echo
+		// receive cookie_ack
+		
+		return true;
 	}
 
 	public State getState() {
 		return state;
 	}
 	
+	public void setDestination(DatagramSocket destination) {
+		this.destination = destination;
+	}
+	
 	public int getVerificationTag() {
-		return verificationTag;
+		return verificationTagDestination;
 	}
 
 	@Override
@@ -69,10 +96,10 @@ public class Association implements IAssociationControl {
 	}
 
 	public int getVerificationTagItself() {
-		return verificationTagItself;
+		return verificationTagSource;
 	}
 
 	public void setVerificationTagItself(int verificationTagItself) {
-		this.verificationTagItself = verificationTagItself;
+		this.verificationTagSource = verificationTagItself;
 	}
 }

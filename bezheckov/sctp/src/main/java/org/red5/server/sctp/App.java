@@ -32,8 +32,9 @@ public class App {
 	
     public static void main(String[] args) throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
     	
-    	if (args.length == 2) {
-    		System.out.println("usage java -jar " + args[0] + " server/client");
+    	if (args.length != 2) {
+    		System.out.println("usage java -jar path/to/jar server/client");
+    		return;
     	}
     	
     	if ("server".equals(args[1])) {
@@ -50,7 +51,7 @@ public class App {
     	}
     	else if ("client".equals(args[1])) {
     		// example client
-    		SocketAddress socketAddress = new InetSocketAddress(SERVER_PORT);
+    		InetSocketAddress socketAddress = new InetSocketAddress(SERVER_PORT);
             SctpChannel sctpChannel = SctpChannel.open();
             sctpChannel.bind(new InetSocketAddress(CLIENT_PORT));
             sctpChannel.connect(socketAddress);

@@ -18,7 +18,6 @@
  */
 package org.red5.server.sctp.packet.chunks;
 
-import org.red5.server.sctp.IServerChannelControl;
 import org.red5.server.sctp.SctpException;
 
 public class ChunkFactory {

@@ -72,7 +72,9 @@ public class StateCookie {
 		byteBuffer.putShort(LIFESPAN);
 		byteBuffer.putInt(getVerificationTag());
 		byteBuffer.putInt(getInitialTSN());
-		byte[] data = byteBuffer.toString().getBytes();
+		byteBuffer.clear();
+		byte[] data = new byte[byteBuffer.capacity()];
+		byteBuffer.get(data, 0, data.length);
 		
 		byte[] mac = messageAuthenticationCode.doFinal(data);
 		byte[] macLength = ByteBuffer.allocate(4).putInt(mac.length).array(); // 4 for int length

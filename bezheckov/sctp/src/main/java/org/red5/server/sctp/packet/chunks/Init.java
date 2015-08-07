@@ -30,6 +30,9 @@ import org.red5.server.sctp.packet.SctpPacket;
 import org.red5.server.sctp.SctpException;
 
 public class Init extends Chunk {
+	
+	// initiateTag(4 byte) + advertisedReceiverWindowCredit(4 byte) + numberOfOutboundStreams(2 byte) + numberOfInboundStreams(2 byte) + TSN(4 byte) 
+	private static final int MANDATORY_FIELD_SIZE = 16;
 
 	private int initiateTag;
 	
@@ -43,6 +46,18 @@ public class Init extends Chunk {
 	
 	public Init(short length, byte[] data) {
 		super(ChunkType.INIT, (byte) 0x00, length, data);
+	}
+	
+	public Init(int initialTSN, int initiateTag) {
+		super(ChunkType.INIT, (byte)0x00);
+		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE);
+		byteBuffer.putInt(initiateTag);
+		byteBuffer.putInt(IAssociationControl.DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT);
+		byteBuffer.putShort((short) IAssociationControl.DEFAULT_NUMBER_OF_OUTBOUND_STREAM);
+		byteBuffer.putShort((short) IAssociationControl.DEFAULT_NUMBER_OF_INBOUND_STREAM);
+		byteBuffer.putInt(initialTSN);
+		super.setData(byteBuffer.toString().getBytes());
+		super.setLength(MANDATORY_FIELD_SIZE);
 	}
 	
 	public Init(final byte[] data, int offset, int length) throws SctpException {
@@ -87,13 +102,13 @@ public class Init extends Chunk {
 		// 1. generate state cookie & initAck chunk
 		int verificationTag = server.getRandom().nextInt();
 		int initialTSN = server.getRandom().nextInt();
-		byte[] stateCookie = new StateCookie(verificationTag, initialTSN).getBytes(server.getMac());
-		Chunk initAck = new InitAck(verificationTag, initialTSN, stateCookie);
+		StateCookie stateCookie = new StateCookie(verificationTag, initialTSN);
+		Chunk initAck = new InitAck(verificationTag, initialTSN, stateCookie, server.getMac());
 		
 		// 2. pack and send packet with initAck inside
 		short sourcePort = (short)server.getPort();
 		SctpPacket packet = new SctpPacket(sourcePort, (short)address.getPort(), verificationTag, initAck);
-		server.send(packet);
+		server.send(packet, address);
 	}
 
 	@Override

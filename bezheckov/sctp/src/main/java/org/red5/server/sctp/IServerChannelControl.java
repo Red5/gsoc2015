@@ -40,5 +40,5 @@ public interface IServerChannelControl {
 	
 	int getPort();
 	
-	void send(SctpPacket packet) throws IOException;
+	void send(SctpPacket packet, InetSocketAddress address) throws IOException;
 }

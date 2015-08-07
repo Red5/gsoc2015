@@ -18,7 +18,11 @@
  */
 package org.red5.server.sctp;
 
-import java.net.SocketAddress;
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
+import java.util.Random;
 
 public class SctpChannel {
 	
@@ -28,14 +32,13 @@ public class SctpChannel {
 		this.association = association;
 	}
 	
-	public SctpChannel bind(SocketAddress address) {
-		// TODO
-		return null;
+	public SctpChannel bind(InetSocketAddress address) throws SocketException {
+		association.setDestination(new DatagramSocket(address));
+		return this;
 	}
 	
-	public boolean connect(SocketAddress address) {
-		// TODO
-		return false;
+	public boolean connect(InetSocketAddress address) throws IOException {
+		return association.setUp(address);
 	}
 	
 	public void send(byte[] data, int offset, int lenght) {
@@ -47,7 +50,7 @@ public class SctpChannel {
 		return null;
 	}
 
-	public static SctpChannel open() {
-		return new SctpChannel(null);
+	public static SctpChannel open() throws SocketException {
+		return new SctpChannel(new Association(new Random(), null));
 	}
 }
