@@ -21,6 +21,7 @@ package org.red5.server.plugin.webm2flv;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import org.red5.io.matroska.ConverterException;
 import org.red5.server.plugin.Red5Plugin;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;

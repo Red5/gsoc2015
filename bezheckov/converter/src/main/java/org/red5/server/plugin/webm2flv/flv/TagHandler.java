@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.red5.server.plugin.webm2flv.ConverterException;
-import org.red5.server.plugin.webm2flv.matroska.dtd.Tag;
+import org.red5.io.matroska.ConverterException;
+import org.red5.io.matroska.dtd.Tag;
 
 public interface TagHandler {
 	void handle(Tag tag, InputStream input, OutputStream output) throws IOException, ConverterException;

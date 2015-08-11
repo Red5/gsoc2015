@@ -18,7 +18,7 @@
  */
 package org.red5.server.plugin.webm2flv.flv;
 
-import org.red5.server.plugin.webm2flv.ConverterException;
+import org.red5.io.matroska.ConverterException;
 
 /**
  * 

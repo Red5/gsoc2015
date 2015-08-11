@@ -16,16 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.plugin.webm2flv;
+package org.red5.io.matroska;
 
-public class ConverterException extends Exception {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -9200184118058503138L;
+/**
+ * variable size integer class
+ * <a href="http://matroska.org/technical/specs/rfc/index.html">EBML RFC</a>
+ */
+public class VINT {
+	private long binaryValue;
 	
-	public ConverterException() { super(); }
-	public ConverterException(String message) { super(message); }
-
+	private byte length;
+	
+	private long value;
+	
+	public VINT(long binaryValue, byte length, long value) {
+		this.binaryValue = binaryValue;
+		this.length = length;
+		this.value = value;
+	}
+	
+	public byte getLength() {
+		return length;
+	}
+	
+	public long getBinary() {
+		return binaryValue;
+	}
+	
+	public long getValue() {
+		return value;
+	}
 }

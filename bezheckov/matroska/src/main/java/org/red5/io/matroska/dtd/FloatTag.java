@@ -16,34 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.plugin.webm2flv.matroska;
+package org.red5.io.matroska.dtd;
 
-/**
- * variable size integer class
- * <a href="http://matroska.org/technical/specs/rfc/index.html">EBML RFC</a>
- */
-public class VINT {
-	private long binaryValue;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.red5.io.matroska.ParserUtils;
+import org.red5.io.matroska.VINT;
+
+
+public class FloatTag extends Tag {
+
+	private double value;
 	
-	private byte length;
-	
-	private long value;
-	
-	public VINT(long binaryValue, byte length, long value) {
-		this.binaryValue = binaryValue;
-		this.length = length;
-		this.value = value;
+	public FloatTag(String name, VINT id, VINT size) {
+		super(name, id, size);
+	}
+
+	@Override
+	public void parse(InputStream inputStream) throws IOException {
+		value = ParserUtils.parseFloat(inputStream, (int) getSize());
 	}
 	
-	public byte getLength() {
-		return length;
-	}
-	
-	public long getBinary() {
-		return binaryValue;
-	}
-	
-	public long getValue() {
+	public double getValue() {
 		return value;
 	}
+	
+	public String toString() {
+		return (getName() + " = " + value);
+	}
+
 }

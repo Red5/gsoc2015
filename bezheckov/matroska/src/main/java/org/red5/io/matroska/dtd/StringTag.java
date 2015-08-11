@@ -16,46 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.plugin.webm2flv.matroska.dtd;
+package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.red5.server.plugin.webm2flv.matroska.ParserUtils;
-import org.red5.server.plugin.webm2flv.matroska.VINT;
+import org.red5.io.matroska.ParserUtils;
+import org.red5.io.matroska.VINT;
 
 
-public class BinaryTag extends Tag {
+public class StringTag extends Tag {
 	
-	private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
+	private String value;
 	
-	private byte[] value;
-
-	public BinaryTag(String name, VINT id, VINT size) {
+	public StringTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 	
-	public static String bytesToHex(byte[] bytes) {
-		char[] hexChars = new char[bytes.length * 2];
-		for ( int j = 0; j < bytes.length; j++ ) {
-			int v = bytes[j] & 0xFF;
-			hexChars[j * 2] = hexArray[v >>> 4];
-			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-		}
-		return new String(hexChars);
+	public String getValue() {
+		return value;
 	}
 
 	@Override
 	public void parse(InputStream inputStream) throws IOException {
-		value = ParserUtils.parseBinary(inputStream, (int) getSize());
-	}
-
-	public byte[] getValue() {
-		return value;
+		value = ParserUtils.parseString(inputStream, (int) getSize());
 	}
 	
 	public String toString() {
-		return (getName() + " = binary " + (int) getSize());
+		return (getName() + " = " + value);
 	}
 
 }

@@ -16,40 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.plugin.webm2flv.matroska.dtd;
+package org.red5.io.matroska;
 
-import java.io.IOException;
-import java.io.InputStream;
+public class ConverterException extends Exception {
 
-import org.red5.server.plugin.webm2flv.ConverterException;
-import org.red5.server.plugin.webm2flv.matroska.VINT;
-
-
-public abstract class Tag {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9200184118058503138L;
 	
-	private String name;
-	
-	private VINT id;
-	
-	private VINT size;
-	
-	public Tag(String name, VINT id, VINT size) {
-		this.name = name;
-		this.id = id;
-		this.size = size;
-	}
-	
-	public abstract void parse(InputStream inputStream) throws IOException, ConverterException;
+	public ConverterException() { super(); }
+	public ConverterException(String message) { super(message); }
 
-	public String getName() {
-		return name;
-	}
-
-	public long getId() {
-		return id.getBinary();
-	}
-
-	public long getSize() {
-		return size.getValue();
-	}
 }

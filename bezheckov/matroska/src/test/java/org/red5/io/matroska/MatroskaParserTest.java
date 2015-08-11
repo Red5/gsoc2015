@@ -16,22 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.plugin.webm2flv.matroska;
+package org.red5.io.matroska;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.red5.server.plugin.webm2flv.ConverterException;
-import org.red5.server.plugin.webm2flv.matroska.ParserUtils;
-import org.red5.server.plugin.webm2flv.matroska.dtd.StringTag;
-import org.red5.server.plugin.webm2flv.matroska.dtd.Tag;
-import org.red5.server.plugin.webm2flv.matroska.dtd.UnsignedIntegerTag;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.red5.io.matroska.ConverterException;
+import org.red5.io.matroska.ParserUtils;
+import org.red5.io.matroska.dtd.StringTag;
+import org.red5.io.matroska.dtd.Tag;
+import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 
-public class MatroskaParserTest extends TestCase {
+public class MatroskaParserTest {
 	
 	// size = 1, value = 0x37
 	byte[] ebmlTagBytes = {0x1A, 0x45, (byte) 0xdf, (byte) 0xa3, (byte) 0x81, 0x37};
@@ -52,68 +53,72 @@ public class MatroskaParserTest extends TestCase {
 	// size = 4, value = "arch" -> negative scenario
 	byte[] ebmlDocTypeTagBytesArch = {0x42, (byte) 0x82, (byte) 0x84, 0x61, 0x72, 0x63, 0x68};
 	
+	@Test
 	public void testParseTagEBML() throws IOException, ConverterException {
 		InputStream inputStream = new ByteArrayInputStream(ebmlTagBytes);
 		
 		Tag tag = ParserUtils.parseTag(inputStream);
 		
 		// by specification
-		Assert.assertEquals("EBML", tag.getName());
-		Assert.assertEquals(0x1a45dfa3, tag.getId());
-		Assert.assertEquals(1, tag.getSize());
+		assertEquals("EBML", tag.getName());
+		assertEquals(0x1a45dfa3, tag.getId());
+		assertEquals(1, tag.getSize());
 	}
 	
+	@Test
 	public void testParseTagEBMLVersion() throws IOException, ConverterException {
 		InputStream inputStream = new ByteArrayInputStream(ebmlVersionTagBytes);
 		
 		Tag tag = ParserUtils.parseTag(inputStream);
 		
 		// by specification
-		Assert.assertEquals("EBMLVersion", tag.getName());
-		Assert.assertEquals(0x4286, tag.getId());
-		Assert.assertEquals(1, tag.getSize());
+		assertEquals("EBMLVersion", tag.getName());
+		assertEquals(0x4286, tag.getId());
+		assertEquals(1, tag.getSize());
 		tag.parse(inputStream);
-		Assert.assertEquals(1, ((UnsignedIntegerTag)tag).getValue());
+		assertEquals(1, ((UnsignedIntegerTag)tag).getValue());
 	}
 	
+	@Test
 	public void testParseTagEBMLReadVersion() throws IOException, ConverterException {
 		InputStream inputStream = new ByteArrayInputStream(ebmlReadVersionTagBytes);
 		
 		Tag tag = ParserUtils.parseTag(inputStream);
 		
 		// by specification
-		Assert.assertEquals(tag.getName(), "EBMLReadVersion");
-		Assert.assertEquals(tag.getId(), 0x42f7);
-		Assert.assertEquals(tag.getSize(), 1);
+		assertEquals(tag.getName(), "EBMLReadVersion");
+		assertEquals(tag.getId(), 0x42f7);
+		assertEquals(tag.getSize(), 1);
 		tag.parse(inputStream);
-		Assert.assertEquals(((UnsignedIntegerTag)tag).getValue(), 255);
+		assertEquals(((UnsignedIntegerTag)tag).getValue(), 255);
 	}
 	
+	@Test
 	public void testParseTagDocType() throws IOException, ConverterException {
 		InputStream inputStream = new ByteArrayInputStream(ebmlDocTypeTagBytesMatroska);
 		Tag tag = ParserUtils.parseTag(inputStream);
 		
-		Assert.assertEquals(tag.getName(), "DocType");
-		Assert.assertEquals(tag.getId(), 0x4282);
-		Assert.assertEquals(tag.getSize(), 8);
+		assertEquals(tag.getName(), "DocType");
+		assertEquals(tag.getId(), 0x4282);
+		assertEquals(tag.getSize(), 8);
 		tag.parse(inputStream);
-		Assert.assertEquals(((StringTag)tag).getValue(), "matroska");
+		assertEquals(((StringTag)tag).getValue(), "matroska");
 		
 		inputStream = new ByteArrayInputStream(ebmlDocTypeTagBytesWebm);
 		tag = ParserUtils.parseTag(inputStream);
-		Assert.assertEquals(tag.getName(), "DocType");
-		Assert.assertEquals(tag.getId(), 0x4282);
-		Assert.assertEquals(tag.getSize(), 4);
+		assertEquals(tag.getName(), "DocType");
+		assertEquals(tag.getId(), 0x4282);
+		assertEquals(tag.getSize(), 4);
 		tag.parse(inputStream);
-		Assert.assertEquals(((StringTag)tag).getValue(), "webm");
+		assertEquals(((StringTag)tag).getValue(), "webm");
 		
 		inputStream = new ByteArrayInputStream(ebmlDocTypeTagBytesArch);
 		tag = ParserUtils.parseTag(inputStream);
-		Assert.assertEquals(tag.getName(), "DocType");
-		Assert.assertEquals(tag.getId(), 0x4282);
-		Assert.assertEquals(tag.getSize(), 4);
+		assertEquals(tag.getName(), "DocType");
+		assertEquals(tag.getId(), 0x4282);
+		assertEquals(tag.getSize(), 4);
 		tag.parse(inputStream);
-		Assert.assertFalse("webm".equals(((StringTag)tag).getValue()));
-		Assert.assertFalse("matroska".equals(((StringTag)tag).getValue()));
+		assertFalse("webm".equals(((StringTag)tag).getValue()));
+		assertFalse("matroska".equals(((StringTag)tag).getValue()));
 	}
 }

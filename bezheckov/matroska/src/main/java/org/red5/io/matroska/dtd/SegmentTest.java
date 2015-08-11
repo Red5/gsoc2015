@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.plugin.webm2flv.matroska.dtd;
+package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import org.red5.server.plugin.webm2flv.ConverterException;
-import org.red5.server.plugin.webm2flv.matroska.ParserUtils;
-import org.red5.server.plugin.webm2flv.matroska.VINT;
+import org.red5.io.matroska.ConverterException;
+import org.red5.io.matroska.ParserUtils;
+import org.red5.io.matroska.VINT;
 
 public class SegmentTest extends Tag {
 
