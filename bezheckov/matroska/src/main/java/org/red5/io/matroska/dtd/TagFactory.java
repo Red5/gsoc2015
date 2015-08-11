@@ -18,11 +18,13 @@
  */
 package org.red5.io.matroska.dtd;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.VINT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * factory for creating matroska tags,
@@ -31,21 +33,20 @@ import org.red5.io.matroska.VINT;
  * long id = "name provided specification","java class representing tag data"
  */
 public class TagFactory {
-	
-	static Properties propertyies;
+	static Logger log = LoggerFactory.getLogger(TagFactory.class);
+	static Properties properties;
 	
 	static {
-		propertyies = new Properties();
-		try (FileInputStream input = new FileInputStream("src/main/resources/matroska_type_definition_config.properties")) {
-			propertyies.load(input);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
+		properties = new Properties();
+		try (InputStream input = TagFactory.class.getResourceAsStream("matroska_type_definition_config.properties")) {
+			properties.load(input);
+		} catch (Exception e) {
+			log.error("Unexpected exception while reading properties", e);
 		}
 	}
 	
 	public static Tag createTag(VINT id, VINT size) throws ConverterException {
-		String value = propertyies.getProperty(Long.toHexString(id.getBinary()));
+		String value = properties.getProperty(Long.toHexString(id.getBinary()));
 		if (null == value) {
 			throw new ConverterException("not supported matroska tag: " + id.getBinary());
 		}
@@ -59,7 +60,7 @@ public class TagFactory {
 					.getConstructor(String.class, VINT.class, VINT.class)
 					.newInstance(name, id, size);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Unexpected exception while creating tag", e);
 		}
 		
 		return null;
