@@ -17,15 +17,16 @@
  * under the License.
  */
 
-package webmTags;
+package org.red5.io.webm.webmTags;
 
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import webmTags.CompoundTag;
+import org.red5.io.matroska.dtd.CompoundTag;
 
-public class SegmentElement extends CompoundTag {
+public class SegmentElement {
+	/*
 	protected boolean unknownSize = false;
 	
 	
@@ -51,7 +52,7 @@ public class SegmentElement extends CompoundTag {
 	    
 	    len += getSize();
 	    final ByteBuffer buf = ByteBuffer.allocate(len);
-	    buf.put(convertToByteArray(id.getValue(), (int) id.getLength()));
+	    buf.put(toByteArray(id.getValue(), (int) id.getLength()));
 	    buf.put(encodedSize);
 	    buf.put(dataToByteArray());
 	    buf.flip();
@@ -68,6 +69,6 @@ public class SegmentElement extends CompoundTag {
     {
     	return unknownSize;
     }
-
+	*/
 }
 

@@ -16,55 +16,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package webmWriter;
+package org.red5.io.webm;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.Object;
-import java.util.Scanner;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import webmTags.TagFactory;
-import webmTags.UnsignedIntegerTag;
-import webmWriter.WebmWriter;
-
 public class App {
 	private static Logger log = LoggerFactory.getLogger(WebmWriter.class);
+
 	public static void main(String[] args) {
-		
-		if (args.length < 1) {                                                             
+
+		if (args.length < 1) {
 			log.error("usage: java -jar converter.jar path/to/your/file.mkv");
 			return;
 		}
-		
+
 		if ("".equals(args[0])) {
-			log.error("invalid arguments");			
+			log.error("invalid arguments");
 			return;
 		}
-		
+
 		try {
 			writeRecord(args[0]);
-		}
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			log.error("File not found", e);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			log.error("IO exception", e);
-		} 
+		}
 	}
+
 	public static void writeRecord(String path) throws IOException, FileNotFoundException {
 		File outputFile = getRecordFile(path);
 		WebmWriter writer = new WebmWriter(outputFile, false);
 		writer.writeHeader();
 	}
+
 	public static File getRecordFile(String path) throws IOException {
 		File file = new File(path);
 		file.createNewFile();

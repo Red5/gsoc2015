@@ -17,25 +17,24 @@
  * under the License.
  */
 
-package webmTags;
-
-import webm2flv.matroska.VINT;
-import webm2flv.ConverterException;
-import webmTags.UnsignedIntegerTag;
-import webmTags.DateTag;
-import webmTags.CompoundTag;
-import webmTags.TagFactory;
-import webmTags.SegmentElement;
-import webmTags.StringTag;
-
+package org.red5.io.webm.webmTags;
 
 import java.io.IOException;
-import java.util.Date;
 import java.nio.ByteBuffer;
+import java.util.Date;
+
+import org.red5.io.matroska.ConverterException;
+import org.red5.io.matroska.dtd.BinaryTag;
+import org.red5.io.matroska.dtd.CompoundTag;
+import org.red5.io.matroska.dtd.DateTag;
+import org.red5.io.matroska.dtd.FloatTag;
+import org.red5.io.matroska.dtd.StringTag;
+import org.red5.io.matroska.dtd.TagFactory;
+import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 
 
 public class SegmentInfo {
-
+/*
 	  private static final long BLOCK_SIZE = 128;
 
 	  private Double duration;
@@ -64,7 +63,7 @@ public class SegmentInfo {
 		  bufferSize += muxingAppElemData.length;
 		  
 		  final DateTag dateElem = (DateTag) TagFactory.createTag("DateUTC");
-		  dateElem.setDate(segmentDate);
+		  dateElem.setValue(segmentDate);
 		  byte[] dateElemData = dateElem.writeHeaderData().array();
 		  bufferSize += dateElemData.length;
 
@@ -133,5 +132,5 @@ public class SegmentInfo {
 	    this.timecodeScale = timecodeScale;
 	  }	
 	
-	
+	*/
 }

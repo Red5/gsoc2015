@@ -17,8 +17,7 @@
  * under the License.
  */
 
-package webmWriter;
-
+package org.red5.io.webm;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,25 +26,25 @@ import java.io.RandomAccessFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import webmTags.Tag;
-import webmTags.TagFactory;
-import webmTags.UnsignedIntegerTag;
-import webmTags.StringTag;
+import org.red5.io.matroska.dtd.Tag;
+import org.red5.io.matroska.dtd.TagFactory;
+import org.red5.io.matroska.dtd.UnsignedIntegerTag;
+import org.red5.io.matroska.dtd.StringTag;
 
 public class WebmWriter {
 
 	private static Logger log = LoggerFactory.getLogger(WebmWriter.class);
-	
+
 	private boolean append;
-	
+
 	private RandomAccessFile dataFile;
-	
+
 	private RandomAccessFile file;
-	
+
 	private volatile long bytesWritten;
-	
+
 	private String filePath;
-	
+
 	public WebmWriter(File file, boolean append) {
 		filePath = file.getAbsolutePath();
 		try {
@@ -76,7 +75,7 @@ public class WebmWriter {
 		}
 
 	}
-	
+
 	public WebmWriter(Object outputFile, boolean append2) {
 		// TODO Auto-generated constructor stub
 	}
@@ -85,40 +84,39 @@ public class WebmWriter {
 		try {
 			UnsignedIntegerTag ebmlVersion = (UnsignedIntegerTag) TagFactory.createTag("EBMLVersion");
 			ebmlVersion.setValue(1);
-			file.write(ebmlVersion.writeHeaderData().array());
-			
+			file.write(ebmlVersion.toData().array());
+
 			UnsignedIntegerTag ebmlReadVersion = (UnsignedIntegerTag) TagFactory.createTag("EBMLReadVersion");
 			ebmlReadVersion.setValue(1);
-			file.write(ebmlReadVersion.writeHeaderData().array());
-			
+			file.write(ebmlReadVersion.toData().array());
+
 			UnsignedIntegerTag ebmlMaxIDLength = (UnsignedIntegerTag) TagFactory.createTag("EBMLMaxIDLength");
 			ebmlMaxIDLength.setValue(4);
-			file.write(ebmlMaxIDLength.writeHeaderData().array());
-			
+			file.write(ebmlMaxIDLength.toData().array());
+
 			UnsignedIntegerTag ebmlMaxSizeLength = (UnsignedIntegerTag) TagFactory.createTag("EBMLMaxSizeLength");
 			ebmlMaxSizeLength.setValue(8);
-			file.write(ebmlMaxSizeLength.writeHeaderData().array());
-				 
+			file.write(ebmlMaxSizeLength.toData().array());
+
 			StringTag docTypeTag = (StringTag) TagFactory.createTag("DocType");
-			byte[] bytes = {(byte) 0x77, (byte)0x65, (byte)0x62, (byte)0x6D};
+			byte[] bytes = { (byte) 0x77, (byte) 0x65, (byte) 0x62, (byte) 0x6D };
 			docTypeTag.setValue(new String(bytes, "UTF-8"));
-			file.write(docTypeTag.writeHeaderData().array());	
-			
+			file.write(docTypeTag.toData().array());
+
 			UnsignedIntegerTag docTypeVersion = (UnsignedIntegerTag) TagFactory.createTag("DocTypeVersion");
 			docTypeVersion.setValue(3);
-			file.write(docTypeVersion.writeHeaderData().array());
-			
+			file.write(docTypeVersion.toData().array());
+
 			UnsignedIntegerTag docTypeReadVersion = (UnsignedIntegerTag) TagFactory.createTag("DocTypeReadVersion");
 			docTypeReadVersion.setValue(2);
-			file.write(docTypeReadVersion.writeHeaderData().array());
+			file.write(docTypeReadVersion.toData().array());
 		} catch (Exception e) {
 			log.error("Failed to create FLV writer", e);
 		}
 	}
-	
+
 	public void writeTag(Tag tag) throws IOException {
-		file.write(tag.writeHeaderData().array());
+		file.write(tag.toData().array());
 	}
 
-	
 }
