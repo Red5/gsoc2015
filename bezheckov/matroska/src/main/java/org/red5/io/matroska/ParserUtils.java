@@ -31,6 +31,7 @@ import org.red5.io.matroska.dtd.TagFactory;
 
 
 public class ParserUtils {
+	private static final int BIT_IN_BYTE = 8;
 	
 	/**
 	 * it is used for : int, uint and date
@@ -97,8 +98,6 @@ public class ParserUtils {
 	public static int readIntByVINT(InputStream inputStream) throws IOException {
 		return (int)readVINT(inputStream).getValue();
 	}
-	
-	private static final int BIT_IN_BYTE = 8;
 	
 	private static VINT readVINT(InputStream inputStream) throws IOException {
 		ArrayList<Byte> lengthBytes = new ArrayList<Byte>();

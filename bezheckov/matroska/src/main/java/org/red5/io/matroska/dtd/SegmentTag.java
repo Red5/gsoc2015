@@ -27,15 +27,15 @@ import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
 
-public class SegmentTest extends Tag {
+public class SegmentTag extends Tag {
 
 	private ArrayList<Tag> subElements = new ArrayList<Tag>();
 	
-	public SegmentTest(String name, VINT id) {
+	public SegmentTag(String name, VINT id) {
 		super(name, id);
 	}
 	
-	public SegmentTest(String name, VINT id, VINT size) {
+	public SegmentTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 	

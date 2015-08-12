@@ -32,26 +32,26 @@ import org.red5.io.matroska.dtd.StringTag;
 import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 
-public class MatroskaParserTest {
+public class ParserTest {
 	
 	// size = 1, value = 0x37
-	byte[] ebmlTagBytes = {0x1A, 0x45, (byte) 0xdf, (byte) 0xa3, (byte) 0x81, 0x37};
+	static final byte[] ebmlTagBytes = {0x1A, 0x45, (byte) 0xdf, (byte) 0xa3, (byte) 0x81, 0x37};
 	
 	// size = 1, value = 1
-	byte[] ebmlVersionTagBytes = {0x42, (byte) 0x86, (byte) 0x81, 0x01};
+	static final byte[] ebmlVersionTagBytes = {0x42, (byte) 0x86, (byte) 0x81, 0x01};
 	
 	// size = 1, value = 255
-	byte[] ebmlReadVersionTagBytes = {0x42, (byte) 0xf7, (byte) 0x81, (byte) 0xff};
+	static final byte[] ebmlReadVersionTagBytes = {0x42, (byte) 0xf7, (byte) 0x81, (byte) 0xff};
 	
 	// size = 8, value = "matroska" -> positive scenario
-	byte[] ebmlDocTypeTagBytesMatroska = {0x42, (byte) 0x82, (byte) 0x88,
+	static final byte[] ebmlDocTypeTagBytesMatroska = {0x42, (byte) 0x82, (byte) 0x88,
 			0x6d, 0x61, 0x74, 0x72, 0x6f, 0x73, 0x6b, 0x61};
 	
 	// size = 4, value = "webm" -> positive scenario
-	byte[] ebmlDocTypeTagBytesWebm = {0x42, (byte) 0x82, (byte) 0x84, 0x77, 0x65, 0x62, 0x6d};
+	static final byte[] ebmlDocTypeTagBytesWebm = {0x42, (byte) 0x82, (byte) 0x84, 0x77, 0x65, 0x62, 0x6d};
 	
 	// size = 4, value = "arch" -> negative scenario
-	byte[] ebmlDocTypeTagBytesArch = {0x42, (byte) 0x82, (byte) 0x84, 0x61, 0x72, 0x63, 0x68};
+	static final byte[] ebmlDocTypeTagBytesArch = {0x42, (byte) 0x82, (byte) 0x84, 0x61, 0x72, 0x63, 0x68};
 	
 	@Test
 	public void testParseTagEBML() throws IOException, ConverterException {

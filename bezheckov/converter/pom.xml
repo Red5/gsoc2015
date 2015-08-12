@@ -20,7 +20,7 @@
 	<groupId>org.red5.server.plugin.webm2flv</groupId>
 	<artifactId>webm2flv</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>webm2flv</name>
 	<description>The Red5 Webm2flvPlugin</description>
 	<url>https://github.com/Red5/gsoc2015</url>
@@ -57,13 +57,6 @@
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.5</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>org.red5.server.plugin.webm2flv.App</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>

@@ -16,35 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.plugin.webm2flv;
+package org.red5.io.matroska;
 
-import static org.junit.Assume.assumeTrue;
+import static org.junit.Assert.assertArrayEquals;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.red5.io.matroska.dtd.Tag;
+import org.red5.io.matroska.dtd.TagFactory;
 
-import static org.junit.Assert.assertTrue;
+public class EncoderTest {
 
-/**
- * Unit test for simple App.
- */
-public class AppTest {
-	private static final String WEBM_FILE_PROPERTY = "webm.file.path";
-	
-	@Before
-	public void before() {
-		assumeTrue(System.getProperties().containsKey(WEBM_FILE_PROPERTY));
-	}
-	
 	@Test
-	public void testApp() throws FileNotFoundException {
-		File webmF = new File(System.getProperty(WEBM_FILE_PROPERTY));
-		WebM2FLVPlugin.convert(new FileInputStream(webmF), new ByteArrayOutputStream());
-		assertTrue("Invalid webM file is specified", webmF.exists() && webmF.isFile());
+	public void testParseTagEBML() throws IOException, ConverterException {
+		Tag t = TagFactory.createTag("EBML");
+		
+		byte[] s = ParserTest.ebmlTagBytes;
+		byte[] r = t.encode();
+		assertArrayEquals("", ParserTest.ebmlTagBytes, t.encode());
 	}
 }

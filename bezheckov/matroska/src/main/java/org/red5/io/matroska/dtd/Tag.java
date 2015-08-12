@@ -91,16 +91,7 @@ public abstract class Tag {
 		return ret;
 	}
 
-	private byte[] toByteArray(long value, int size) {
-		byte[] bytes = new byte[size];
-		long tempValue = value;
-		for (int i = 0; i < size; ++i) {
-			bytes[i] = (byte) (tempValue >> (size - i - 1 << 3));
-		}
-		return bytes;
-	}
-	
-	public ByteBuffer toData() throws IOException {
+	public byte[] encode() throws IOException {
 		int len = id.getLength();
 
 		final byte[] encodedSize = makeEbmlCodedSize(getSize(), 0);
@@ -109,10 +100,10 @@ public abstract class Tag {
 		len += getSize();
 		final ByteBuffer buf = ByteBuffer.allocate(len);
 		log.debug("Id:" + id.getValue() + "Idl:" + id.getLength() + ", Length:" + len + "GetSize():" + getSize());
-		buf.put(toByteArray(id.getValue(), (int) id.getLength()));
+		buf.put(id.encode());
 		buf.put(encodedSize);
 		putValue(buf);
 		buf.flip();
-		return buf;
+		return buf.array();
 	}
 }

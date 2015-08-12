@@ -46,4 +46,13 @@ public class VINT {
 	public long getValue() {
 		return value;
 	}
+
+	public byte[] encode() {
+		byte[] bytes = new byte[length];
+		long tempValue = value;
+		for (int i = 0; i < length; ++i) {
+			bytes[i] = (byte) (tempValue >> (length - i - 1 << 3));
+		}
+		return bytes;
+	}
 }

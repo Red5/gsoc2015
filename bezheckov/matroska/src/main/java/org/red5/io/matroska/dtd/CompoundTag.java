@@ -56,6 +56,8 @@ public class CompoundTag extends Tag {
 
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
-		bb.put(new byte[0]); //TODO FIXME stub
+		for (Tag tag : subElements) {
+			bb.put(tag.encode());
+		}
 	}
 }
