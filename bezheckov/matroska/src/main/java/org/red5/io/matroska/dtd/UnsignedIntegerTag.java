@@ -20,6 +20,7 @@ package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
@@ -29,7 +30,11 @@ public class UnsignedIntegerTag extends Tag {
 	
 	private long value;
 	
-	public UnsignedIntegerTag(String name, VINT id, VINT size) throws IOException {
+	public UnsignedIntegerTag(String name, VINT id) {
+		super(name, id);
+	}
+
+	public UnsignedIntegerTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 
@@ -38,12 +43,21 @@ public class UnsignedIntegerTag extends Tag {
 		value = ParserUtils.parseInteger(inputStream, (int) getSize());
 	}
 	
+	@Override
+	protected void putValue(ByteBuffer bb) throws IOException {
+		bb.putLong(value);
+	}
+	
 	public long getValue() {
 		return value;
 	}
 	
+	public void setValue(long value) {
+		this.value = value;
+	}
+	
+	@Override
 	public String toString() {
 		return (getName() + " = " + value);
 	}
-
 }

@@ -20,6 +20,7 @@ package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
@@ -29,6 +30,10 @@ public class FloatTag extends Tag {
 
 	private double value;
 	
+	public FloatTag(String name, VINT id) {
+		super(name, id);
+	}
+
 	public FloatTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
@@ -38,12 +43,21 @@ public class FloatTag extends Tag {
 		value = ParserUtils.parseFloat(inputStream, (int) getSize());
 	}
 	
+	@Override
+	protected void putValue(ByteBuffer bb) throws IOException {
+		bb.putDouble(value);
+	}
+	
 	public double getValue() {
 		return value;
 	}
 	
+	public void setValue(double value) {
+		this.value = value;
+	}
+	
+	@Override
 	public String toString() {
 		return (getName() + " = " + value);
 	}
-
 }

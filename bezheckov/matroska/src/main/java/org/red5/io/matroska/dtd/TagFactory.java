@@ -34,19 +34,26 @@ import org.slf4j.LoggerFactory;
  */
 public class TagFactory {
 	static Logger log = LoggerFactory.getLogger(TagFactory.class);
-	static Properties properties;
+	static final Properties tagsById;
+	static final Properties tagsByName;
 	
 	static {
-		properties = new Properties();
-		try (InputStream input = TagFactory.class.getResourceAsStream("matroska_type_definition_config.properties")) {
-			properties.load(input);
+		tagsById = new Properties();
+		try (InputStream input = TagFactory.class.getResourceAsStream("matroska_type_by_id_definition.properties")) {
+			tagsById.load(input);
+		} catch (Exception e) {
+			log.error("Unexpected exception while reading properties", e);
+		}
+		tagsByName = new Properties();
+		try (InputStream input = TagFactory.class.getResourceAsStream("matroska_type_by_name_definition.properties")) {
+			tagsByName.load(input);
 		} catch (Exception e) {
 			log.error("Unexpected exception while reading properties", e);
 		}
 	}
 	
 	public static Tag createTag(VINT id, VINT size) throws ConverterException {
-		String value = properties.getProperty(Long.toHexString(id.getBinary()));
+		String value = tagsById.getProperty(Long.toHexString(id.getBinary()));
 		if (null == value) {
 			throw new ConverterException("not supported matroska tag: " + id.getBinary());
 		}
@@ -66,4 +73,30 @@ public class TagFactory {
 		return null;
 	}
 	
+	public static Tag createTag(String tagName) throws ConverterException {
+		log.debug("Tag: " + tagName);
+		String value = tagsByName.getProperty(tagName);
+		if (null == value) {
+			throw new ConverterException("not supported matroska tag: " + tagName);
+		}
+		String[] parameters = value.split(",");
+		String id = parameters[0];
+		String className = parameters[1];
+
+		long longId = Long.parseLong(id, 16); 
+		VINT typeVint = new VINT(longId, (byte)(id.length() / 2), longId);
+		try {
+			log.debug("Class name: " + TagFactory.class.getPackage().getName() + "." + className);
+			Class<?> type = Class.forName(TagFactory.class.getPackage().getName() + "." + className);
+			log.debug(TagFactory.class.getPackage().getName() + "." + className);
+			Tag newTag = (Tag) type
+					.getConstructor(String.class, VINT.class)
+					.newInstance(tagName, typeVint);
+			return newTag;
+		} catch (Exception e) {
+			log.error("Can not find property", e);
+		}
+		
+		return null;
+	}
 }

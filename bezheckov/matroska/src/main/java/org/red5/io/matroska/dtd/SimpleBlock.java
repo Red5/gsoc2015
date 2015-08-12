@@ -20,6 +20,7 @@ package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.ParserUtils;
@@ -35,17 +36,25 @@ public class SimpleBlock extends Tag {
 	
 	private boolean keyFrame;
 	
+	public SimpleBlock(String name, VINT id) {
+		super(name, id);
+	}
+	
 	public SimpleBlock(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 	
 	@Override
-	public void parse(InputStream inputStream) throws IOException,
-			ConverterException {
+	public void parse(InputStream inputStream) throws IOException, ConverterException {
 		trackNumber = ParserUtils.readIntByVINT(inputStream);
 		timeCode = ParserUtils.parseInteger(inputStream, 2); // int16 by specification
 		keyFrame = (0x80 == (inputStream.read() & 0x80));
 		binary = ParserUtils.parseBinary(inputStream, (int) getSize() - 4);
+	}
+
+	@Override
+	protected void putValue(ByteBuffer bb) throws IOException {
+		bb.put(new byte[0]); //TODO FIXME stub
 	}
 
 	public byte[] getBinary() {
@@ -60,6 +69,7 @@ public class SimpleBlock extends Tag {
 		return trackNumber;
 	}
 	
+	@Override
 	public String toString() {
 		return (getName() + " = binary " + binary.length);
 	}

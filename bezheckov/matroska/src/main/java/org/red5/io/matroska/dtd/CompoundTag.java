@@ -20,6 +20,7 @@ package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import org.red5.io.matroska.ConverterException;
@@ -31,10 +32,15 @@ public class CompoundTag extends Tag {
 
 	private ArrayList<Tag> subElements = new ArrayList<Tag>();
 	
+	public CompoundTag(String name, VINT id) {
+		super(name, id);
+	}
+	
 	public CompoundTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 	
+	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder(getName() + "\n");
 		for (Tag tag : subElements) {
@@ -48,4 +54,8 @@ public class CompoundTag extends Tag {
 		subElements = ParserUtils.parseMasterElement(inputStream, (int) getSize());
 	}
 
+	@Override
+	protected void putValue(ByteBuffer bb) throws IOException {
+		bb.put(new byte[0]); //TODO FIXME stub
+	}
 }

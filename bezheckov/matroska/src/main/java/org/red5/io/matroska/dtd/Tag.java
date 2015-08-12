@@ -20,26 +20,34 @@ package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.VINT;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class Tag {
-	
+	static Logger log = LoggerFactory.getLogger(Tag.class);
 	private String name;
-	
+
 	private VINT id;
-	
+
 	private VINT size;
-	
+
+	public Tag(String name, VINT id) {
+		this(name, id, new VINT(0L, (byte) 0, 0L));
+	}
+
 	public Tag(String name, VINT id, VINT size) {
 		this.name = name;
 		this.id = id;
 		this.size = size;
 	}
-	
+
 	public abstract void parse(InputStream inputStream) throws IOException, ConverterException;
+	
+	protected abstract void putValue(ByteBuffer bb) throws IOException;
 
 	public String getName() {
 		return name;
@@ -51,5 +59,60 @@ public abstract class Tag {
 
 	public long getSize() {
 		return size.getValue();
+	}
+
+	private static int binaryCodedSize(final long value, int minSizeLen) {
+		int octetsNumber = 0;
+		if (value < 127) {
+			octetsNumber = 1;
+		} else if (value < 16383) {
+			octetsNumber = 2;
+		} else if (value < 2097151) {
+			octetsNumber = 3;
+		} else if (value < 268435455) {
+			octetsNumber = 4;
+		}
+		if ((minSizeLen > 0) && (octetsNumber <= minSizeLen)) {
+			octetsNumber = minSizeLen;
+		}
+
+		return octetsNumber;
+	}
+
+	private static byte[] makeEbmlCodedSize(final long size, int minSizeLen) {
+		final int len = binaryCodedSize(size, minSizeLen);
+		final byte[] ret = new byte[len];
+		long mask = 0x00000000000000FFL;
+		for (int i = 0; i < len; i++) {
+			ret[len - 1 - i] = (byte) ((size & mask) >>> (i * 8));
+			mask <<= 8;
+		}
+		ret[0] |= 0x80 >> (len - 1);
+		return ret;
+	}
+
+	private byte[] toByteArray(long value, int size) {
+		byte[] bytes = new byte[size];
+		long tempValue = value;
+		for (int i = 0; i < size; ++i) {
+			bytes[i] = (byte) (tempValue >> (size - i - 1 << 3));
+		}
+		return bytes;
+	}
+	
+	public ByteBuffer toData() throws IOException {
+		int len = id.getLength();
+
+		final byte[] encodedSize = makeEbmlCodedSize(getSize(), 0);
+
+		len += encodedSize.length;
+		len += getSize();
+		final ByteBuffer buf = ByteBuffer.allocate(len);
+		log.debug("Id:" + id.getValue() + "Idl:" + id.getLength() + ", Length:" + len + "GetSize():" + getSize());
+		buf.put(toByteArray(id.getValue(), (int) id.getLength()));
+		buf.put(encodedSize);
+		putValue(buf);
+		buf.flip();
+		return buf;
 	}
 }

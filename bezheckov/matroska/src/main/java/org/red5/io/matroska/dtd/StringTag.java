@@ -20,6 +20,7 @@ package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
@@ -29,6 +30,10 @@ public class StringTag extends Tag {
 	
 	private String value;
 	
+	public StringTag(String name, VINT id) {
+		super(name, id);
+	}
+	
 	public StringTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
@@ -37,13 +42,22 @@ public class StringTag extends Tag {
 		return value;
 	}
 
+	public void setValue(String value) {
+		this.value = value;
+	}
+
 	@Override
 	public void parse(InputStream inputStream) throws IOException {
 		value = ParserUtils.parseString(inputStream, (int) getSize());
 	}
+
+	@Override
+	protected void putValue(ByteBuffer bb) throws IOException {
+		bb.put(value.getBytes("UTF-8"));
+	}
 	
+	@Override
 	public String toString() {
 		return (getName() + " = " + value);
 	}
-
 }

@@ -20,6 +20,7 @@ package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import org.red5.io.matroska.ConverterException;
@@ -30,10 +31,15 @@ public class SegmentTest extends Tag {
 
 	private ArrayList<Tag> subElements = new ArrayList<Tag>();
 	
+	public SegmentTest(String name, VINT id) {
+		super(name, id);
+	}
+	
 	public SegmentTest(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 	
+	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder(getName() + "\n");
 		for (Tag tag : subElements) {
@@ -44,7 +50,6 @@ public class SegmentTest extends Tag {
 
 	@Override
 	public void parse(InputStream inputStream) throws IOException, ConverterException {
-		
 		// parse meta seek information
 		subElements.add(ParserUtils.parseTag(inputStream));
 		
@@ -66,4 +71,8 @@ public class SegmentTest extends Tag {
 		}
 	}
 
+	@Override
+	protected void putValue(ByteBuffer bb) throws IOException {
+		bb.put(new byte[1]); //TODO FIXME stub
+	}
 }

@@ -20,6 +20,7 @@ package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
@@ -31,6 +32,10 @@ public class BinaryTag extends Tag {
 	
 	private byte[] value;
 
+	public BinaryTag(String name, VINT id) {
+		super(name, id);
+	}
+	
 	public BinaryTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
@@ -50,12 +55,21 @@ public class BinaryTag extends Tag {
 		value = ParserUtils.parseBinary(inputStream, (int) getSize());
 	}
 
+	@Override
+	protected void putValue(ByteBuffer bb) throws IOException {
+		bb.put(value);
+	}
+	
 	public byte[] getValue() {
 		return value;
 	}
 	
+	public void setValue(byte[] value) {
+		this.value = value;
+	}
+	
+	@Override
 	public String toString() {
 		return (getName() + " = binary " + (int) getSize());
 	}
-
 }
