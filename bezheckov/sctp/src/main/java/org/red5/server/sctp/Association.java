@@ -23,6 +23,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.Random;
 
@@ -45,43 +47,81 @@ public class Association implements IAssociationControl {
 	
 	private DatagramSocket source;
 	
-	private DatagramSocket destination;
+	private InetSocketAddress destination;
 	
 	private Random random;
+	
+	public Association(final Random random, InetSocketAddress sourceAddress, int initialTSN, int verificationTag) throws SocketException {
+		this.random = random;
+		setState(State.CLOSED);
+		setVerificationTagItself(random.nextInt());
+		source = new DatagramSocket(sourceAddress);
+		creationTimestamp = new Timestamp(System.currentTimeMillis());
+	}
 
 	public Association(final Random random, InetSocketAddress sourceAddress) throws SocketException {
 		this.random = random;
 		setState(State.CLOSED);
 		setVerificationTagItself(random.nextInt());
-		destination = new DatagramSocket(sourceAddress);
+		source = new DatagramSocket(sourceAddress);
 		creationTimestamp = new Timestamp(System.currentTimeMillis());
 	}
 	
-	public boolean setUp(InetSocketAddress address) throws IOException {
+	public boolean setUp(InetSocketAddress address) 
+			throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
+		destination = address;
+		
+		// initialize association and send INIT
 		initialTSNSource = random.nextInt();
 		Init initChunk = new Init(verificationTagSource, initialTSNSource);
-		SctpPacket packet = new SctpPacket((short) source.getPort(), (short)destination.getPort(), 0, initChunk);
+		SctpPacket packet = new SctpPacket((short) source.getLocalPort(), (short)destination.getPort(), 0, initChunk);
 		byte[] data = packet.getBytes();
-		source.send(new DatagramPacket(data, data.length, address));
+		source.send(new DatagramPacket(data, data.length, destination));
+		state = State.COOKIE_WAIT;
 		
-		// wait init_ack
-		// receive init_ack
-		// send cookie_echo
-		// receive cookie_ack
+		// wait & receive INIT_ACK
+		byte[] buffer = new byte[1024];
+		DatagramPacket udpPacket = new DatagramPacket(buffer, buffer.length);
+		source.receive(udpPacket);
+		try {
+			packet = new SctpPacket(buffer, 0, udpPacket.getLength());
+		} catch (SctpException e) {
+			e.printStackTrace();
+		}
 		
-		return true;
+		// handle INIT ACK packet - send COOKIE ECHO
+		packet.apply(this);
+		
+		// handle COOKIE ACK
+		source.receive(udpPacket);
+		try {
+			packet = new SctpPacket(buffer, 0, udpPacket.getLength());
+		} catch (SctpException e) {
+			e.printStackTrace();
+		}
+		packet.apply(this);
+		
+		return state == State.ESTABLISHED;
 	}
 
 	public State getState() {
 		return state;
 	}
 	
-	public void setDestination(DatagramSocket destination) {
-		this.destination = destination;
+	public void setSource(DatagramSocket source) {
+		this.source = source;
 	}
 	
 	public int getVerificationTag() {
 		return verificationTagDestination;
+	}
+	
+	public int getVerificationTagItself() {
+		return verificationTagSource;
+	}
+
+	public void setVerificationTagItself(int verificationTagItself) {
+		this.verificationTagSource = verificationTagItself;
 	}
 
 	@Override
@@ -92,14 +132,16 @@ public class Association implements IAssociationControl {
 	@Override
 	public void sendPacket(SctpPacket packet) throws IOException {
 		byte[] data = packet.getBytes();
-		destination.send(new DatagramPacket(data, data.length));
+		source.send(new DatagramPacket(data, data.length));
+	}
+	
+	@Override
+	public int getDestinationPort() {
+		return destination.getPort();
 	}
 
-	public int getVerificationTagItself() {
-		return verificationTagSource;
-	}
-
-	public void setVerificationTagItself(int verificationTagItself) {
-		this.verificationTagSource = verificationTagItself;
+	@Override
+	public int getSourcePort() {
+		return source.getLocalPort();
 	}
 }

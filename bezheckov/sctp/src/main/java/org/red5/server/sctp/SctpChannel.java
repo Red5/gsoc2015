@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 public class SctpChannel {
@@ -33,11 +35,12 @@ public class SctpChannel {
 	}
 	
 	public SctpChannel bind(InetSocketAddress address) throws SocketException {
-		association.setDestination(new DatagramSocket(address));
+		association.setSource(new DatagramSocket(address));
 		return this;
 	}
 	
-	public boolean connect(InetSocketAddress address) throws IOException {
+	public boolean connect(InetSocketAddress address)
+			throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
 		return association.setUp(address);
 	}
 	

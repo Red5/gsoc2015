@@ -44,31 +44,42 @@ public class Init extends Chunk {
 	
 	private int initialTSN;
 	
-	public Init(short length, byte[] data) {
-		super(ChunkType.INIT, (byte) 0x00, length, data);
-	}
-	
 	public Init(int initialTSN, int initiateTag) {
 		super(ChunkType.INIT, (byte)0x00);
-		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE);
-		byteBuffer.putInt(initiateTag);
-		byteBuffer.putInt(IAssociationControl.DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT);
-		byteBuffer.putShort((short) IAssociationControl.DEFAULT_NUMBER_OF_OUTBOUND_STREAM);
-		byteBuffer.putShort((short) IAssociationControl.DEFAULT_NUMBER_OF_INBOUND_STREAM);
-		byteBuffer.putInt(initialTSN);
-		super.setData(byteBuffer.toString().getBytes());
-		super.setLength(MANDATORY_FIELD_SIZE);
+		super.setLength(getSize());
+		this.initialTSN = initialTSN;
+		this.initiateTag = initiateTag;
+		this.advertisedReceiverWindowCredit = IAssociationControl.DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT;
+		this.numberOfInboundStreams = IAssociationControl.DEFAULT_NUMBER_OF_INBOUND_STREAM;
+		this.numberOfOutboundStreams = IAssociationControl.DEFAULT_NUMBER_OF_OUTBOUND_STREAM;
 	}
 	
 	public Init(final byte[] data, int offset, int length) throws SctpException {
 		super(data, offset, length);
 		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset + CHUNK_HEADER_SIZE, data.length - (offset + CHUNK_HEADER_SIZE));
-		setLength((short)(data.length - (offset + CHUNK_HEADER_SIZE)));
+		setLength((short)(MANDATORY_FIELD_SIZE + CHUNK_HEADER_SIZE));
 		initiateTag = byteBuffer.getInt();
 		advertisedReceiverWindowCredit = byteBuffer.getInt();
 		numberOfOutboundStreams = byteBuffer.getShort();
 		numberOfInboundStreams = byteBuffer.getShort();
 		initialTSN = byteBuffer.getInt();
+	}
+	
+	@Override
+	public byte[] getBytes() {
+		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE + CHUNK_HEADER_SIZE);
+		byte[] data = super.getBytes();
+		byteBuffer.put(data);
+		byteBuffer.putInt(initiateTag);
+		byteBuffer.putInt(advertisedReceiverWindowCredit);
+		byteBuffer.putShort((short) numberOfOutboundStreams);
+		byteBuffer.putShort((short) numberOfInboundStreams);
+		byteBuffer.putInt(initialTSN);
+		
+		byteBuffer.clear();
+		byte[] result = new byte[byteBuffer.capacity()];
+		byteBuffer.get(result, 0, result.length);
+		return result;
 	}
 
 	public int getInitiateTag() {
@@ -89,6 +100,11 @@ public class Init extends Chunk {
 
 	public int getInitialTSN() {
 		return initialTSN;
+	}
+	
+	@Override
+	public int getSize() {
+		return MANDATORY_FIELD_SIZE + super.getSize();
 	}
 
 	@Override

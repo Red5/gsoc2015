@@ -43,6 +43,10 @@ public interface IAssociationControl {
 	
 	void setState(State state);
 	
+	int getDestinationPort();
+	
+	int getSourcePort();
+	
 	void sendPacket(SctpPacket packet) throws IOException;
 	
 	int getVerificationTag();

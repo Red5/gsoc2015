@@ -32,12 +32,12 @@ public class App {
 	
     public static void main(String[] args) throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
     	
-    	if (args.length != 2) {
+    	if (args.length != 1) {
     		System.out.println("usage java -jar path/to/jar server/client");
     		return;
     	}
     	
-    	if ("server".equals(args[1])) {
+    	if ("server".equals(args[0])) {
         	// example server
         	SocketAddress serverSocketAddress = new InetSocketAddress(SERVER_PORT);
         	System.out.println("create and bind for sctp address");
@@ -45,11 +45,11 @@ public class App {
         	System.out.println("address bind process finished successfully");
         	
         	SctpChannel sctpChannel = null;
-        	while ((sctpChannel = sctpServerChannel.accept()) != null) {
+			while ((sctpChannel = sctpServerChannel.accept()) != null) {
         		System.out.println("client connection received");
             }
     	}
-    	else if ("client".equals(args[1])) {
+    	else if ("client".equals(args[0])) {
     		// example client
     		InetSocketAddress socketAddress = new InetSocketAddress(SERVER_PORT);
             SctpChannel sctpChannel = SctpChannel.open();
@@ -57,7 +57,7 @@ public class App {
             sctpChannel.connect(socketAddress);
         }
     	else {
-    		System.out.println("usage java -jar " + args[0] + " server/client");
+    		System.out.println("usage java -jar server/client");
     	}
     }
 }

@@ -39,9 +39,11 @@ public class SctpPacket {
 	public SctpPacket(final byte[] data, int offset, int length) throws SctpException {
 		header = new SctpHeader(data, offset, length);
 		Chunk chunk = null;
-		for (int i = header.getSize() + offset; i < length; i += chunk.getSize()) {
+		length -= header.getSize();
+		for (int i = header.getSize() + offset; length != 0; i += chunk.getSize()) {
 			chunk = ChunkFactory.createChunk(data, i, length);
 			chunks.add(chunk);
+			length -= chunk.getSize();
 		}
 	}
 	
@@ -57,7 +59,8 @@ public class SctpPacket {
 		} 
 	}
 	
-	public void apply(IAssociationControl association) throws SctpException, IOException {
+	public void apply(IAssociationControl association)
+			throws SctpException, IOException, InvalidKeyException, NoSuchAlgorithmException {
 		for (Chunk chunk : chunks) {
 			chunk.apply(association);
 		} 
@@ -72,10 +75,10 @@ public class SctpPacket {
 		
 		byte[] result = new byte[resultSize];
 		System.arraycopy(header.getBytes(), 0, result, 0, header.getSize());
-		int previousSize = header.getSize();
+		int previousChunkSize = header.getSize();
 		for (Chunk chunk : chunks) {
-			System.arraycopy(chunk.getBytes(), 0, result, previousSize, chunk.getSize());
-			previousSize += chunk.getSize();
+			System.arraycopy(chunk.getBytes(), 0, result, previousChunkSize, chunk.getSize());
+			previousChunkSize += chunk.getSize();
 		}
 		
 		return result;

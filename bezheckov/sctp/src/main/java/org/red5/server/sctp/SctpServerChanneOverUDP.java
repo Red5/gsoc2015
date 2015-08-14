@@ -113,9 +113,9 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 	}
 	
 	@Override
-	public boolean addPendingChannel(InetSocketAddress address) throws SocketException {
+	public boolean addPendingChannel(InetSocketAddress address, int initialTSN, int verificationTag) throws SocketException {
 		if (pendingAssociations.size() < maxNumberOfPendingChannels) {
-			Association channel = new Association(random, address);
+			Association channel = new Association(random, address, initialTSN, verificationTag);
 			pendingAssociations.put(address, channel);
 			return true;
 		}
@@ -130,7 +130,7 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 	
 	@Override
 	public int getPort() {
-		return serverSocket.getPort();
+		return serverSocket.getLocalPort();
 	}
 	
 	@Override
