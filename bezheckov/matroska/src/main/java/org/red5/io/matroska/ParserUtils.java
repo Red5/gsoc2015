@@ -27,7 +27,10 @@ import java.util.ArrayList;
 
 import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.TagFactory;
-
+import static org.red5.io.matroska.VINT.MASK_BYTE_1;
+import static org.red5.io.matroska.VINT.MASK_BYTE_2;
+import static org.red5.io.matroska.VINT.MASK_BYTE_3;
+import static org.red5.io.matroska.VINT.MASK_BYTE_4;
 
 public class ParserUtils {
 	public static final int BIT_IN_BYTE = 8;
@@ -99,47 +102,46 @@ public class ParserUtils {
 	}
 	
 	public static VINT readVINT(InputStream inputStream) throws IOException {
-		ArrayList<Byte> lengthBytes = new ArrayList<Byte>();
-		byte length = determineLength(inputStream, lengthBytes);
+		byte[] vint;
+		int fb = inputStream.read(), read;
+		assert fb > 0;
 		
-		long binaryValue = lengthBytes.get(0) & (long)0xff;
-		long value = ((long)0xff >> (length + 1)) & binaryValue;
-		for (int i = 1; i < lengthBytes.size(); ++i) {
-			binaryValue = (binaryValue << BIT_IN_BYTE) | ((long)lengthBytes.get(i) & (long)0xff);
-			value = (value << BIT_IN_BYTE) | ((long)lengthBytes.get(i) & (long)0xff);
+		int len = (fb >> 4);
+		long mask = MASK_BYTE_4;
+		switch (len) {
+			case 0b0001:
+				vint = new byte[4];
+				read = inputStream.read(vint, 1, 3);
+				assert read == 3;
+				break;
+			case 0b0010:
+				mask = MASK_BYTE_3;
+				vint = new byte[3];
+				read = inputStream.read(vint, 1, 2);
+				assert read == 2;
+				break;
+			case 0b0100:
+				mask = MASK_BYTE_2;
+				vint = new byte[2];
+				read = inputStream.read(vint, 1, 1);
+				assert read == 1;
+				break;
+			case 0b1000:
+			default:
+				read = 0;
+				mask = MASK_BYTE_1;
+				vint = new byte[1];
+				break;
 		}
-		
-		for (int i = 0; i < length; ++i) {
-			byte nextByte = (byte)inputStream.read();
-			binaryValue = (binaryValue << BIT_IN_BYTE) | ((long)nextByte & (long)0xff);
-			value = (value << BIT_IN_BYTE) | ((long)nextByte & (long)0xff);
+		vint[0] = (byte)fb;
+		long binaryV = 0;
+		for (int i = 0; i < vint.length; ++i) {
+			binaryV += (0x00FF & vint[i]);
+			if (i != vint.length - 1) {
+				binaryV <<= BIT_IN_BYTE;
+			}
 		}
-		
-		return new VINT(binaryValue, (byte) (length + 1), value);
-	}
-	
-	private static byte determineLength(InputStream inputStream, ArrayList<Byte> lengthBytes) throws IOException {
-		byte length = 0;
-		
-		// search mark set bit
-		
-		// skip zeroes bytes
-		byte tmp = 0;
-		while (0 == (tmp = (byte)inputStream.read())) {
-			length += BIT_IN_BYTE;
-			lengthBytes.add(tmp);
-		}
-		
-		// skip zeroes bits
-		int position = BIT_IN_BYTE - 1;
-		lengthBytes.add(tmp);
-		while (position > 0 && 0 == getBit(tmp, position--)) { ++length; }
-		
-		return length;
-	}
-	
-	private static byte getBit(byte value, int position) {
-		return (byte) ((value >> position) & 1);
+		return new VINT(binaryV, (byte) (read + 1), mask & binaryV);
 	}
 	
 	/**

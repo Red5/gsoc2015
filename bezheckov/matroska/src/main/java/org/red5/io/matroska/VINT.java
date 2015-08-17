@@ -27,6 +27,10 @@ import java.util.BitSet;
  * <a href="http://matroska.org/technical/specs/rfc/index.html">EBML RFC</a>
  */
 public class VINT {
+	public static final long MASK_BYTE_4 = 0b00001111111111111111111111111111;
+	public static final long MASK_BYTE_3 = MASK_BYTE_4 >> BIT_IN_BYTE;
+	public static final long MASK_BYTE_2 = MASK_BYTE_3 >> BIT_IN_BYTE;
+	public static final long MASK_BYTE_1 = MASK_BYTE_2 >> BIT_IN_BYTE;
 	private long binaryValue;
 	
 	private byte length;
@@ -35,18 +39,9 @@ public class VINT {
 
 	public VINT(long binaryValue) {
 		BitSet bs = BitSet.valueOf(new long[]{binaryValue});
-		int l = bs.length();
-		if (l > 3 * BIT_IN_BYTE) {
-			length = 4;
-		} else if (l > 2 * BIT_IN_BYTE) {
-			length = 3;
-		} else if (l > BIT_IN_BYTE) {
-			length = 2;
-		} else {
-			length = 1;
-		}
-		bs.set(length * BIT_IN_BYTE - length, false);
-		value = bs.toLongArray()[0];
+		length = (byte)(1 + bs.length() / BIT_IN_BYTE);
+		long mask = MASK_BYTE_4 >> (4 - length) * BIT_IN_BYTE;
+		value = binaryValue & mask;
 		this.binaryValue = binaryValue;
 	}
 	

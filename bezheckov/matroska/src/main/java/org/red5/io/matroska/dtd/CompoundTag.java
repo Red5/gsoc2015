@@ -32,7 +32,6 @@ import org.red5.io.matroska.VINT;
 
 public class CompoundTag extends Tag {
 	private ArrayList<Tag> subElements = new ArrayList<Tag>();
-	private long value;
 	
 	public CompoundTag(String name, VINT id) {
 		super(name, id);
@@ -56,28 +55,21 @@ public class CompoundTag extends Tag {
 		subElements = ParserUtils.parseMasterElement(inputStream, (int) getSize());
 	}
 
-	public CompoundTag setValue(long value) {
-		this.value = value;
-		
+	public CompoundTag add(Tag ch) {
+		subElements.add(ch);
+		long sz = getSize() + ch.totalSize();
 		byte length = 1;
-		long v = (value + 1) >> BIT_IN_BYTE;
+		long v = (sz + 1) >> BIT_IN_BYTE;
 		while (v > 0) {
 			length++;
 			v = v >> BIT_IN_BYTE;
 		}
-		size = new VINT(0L, length, length);
-
-		return this;
-	}
-
-	public CompoundTag add(Tag ch) {
-		subElements.add(ch);
+		size = new VINT(0L, length, sz);
 		return this;
 	}
 	
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
-		bb.put(ParserUtils.getBytes(value, getSize()));
 		for (Tag tag : subElements) {
 			bb.put(tag.encode());
 		}

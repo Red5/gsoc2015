@@ -18,6 +18,8 @@
  */
 package org.red5.io.matroska.dtd;
 
+import static org.red5.io.matroska.ParserUtils.BIT_IN_BYTE;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -54,6 +56,13 @@ public class UnsignedIntegerTag extends Tag {
 	
 	public UnsignedIntegerTag setValue(long value) {
 		this.value = value;
+		byte length = 1;
+		long v = (value + 1) >> BIT_IN_BYTE;
+		while (v > 0) {
+			length++;
+			v = v >> BIT_IN_BYTE;
+		}
+		size = new VINT(0L, length, length);
 		return this;
 	}
 	

@@ -26,7 +26,6 @@ import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.VINT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.red5.io.matroska.ParserUtils.BIT_IN_BYTE;
 
 public abstract class Tag {
 	static Logger log = LoggerFactory.getLogger(Tag.class);
@@ -61,14 +60,16 @@ public abstract class Tag {
 	public long getSize() {
 		return size.getValue();
 	}
-
+	
+	public int totalSize() {
+		return (int)(id.getLength() + size.getLength() + size.getValue());
+	}
+	
 	public byte[] encode() throws IOException {
-		final byte[] eId = id.encode();
-		final byte[] eSize = size.encode();
-		final ByteBuffer buf = ByteBuffer.allocate((int)(eId.length + eSize.length + getSize()));
+		final ByteBuffer buf = ByteBuffer.allocate(totalSize());
 		log.debug("Id: " + id.getValue() + "; Idl: " + id.getLength() + "; Length: " + buf.limit() + "; size: " + getSize());
-		buf.put(eId);
-		buf.put(eSize);
+		buf.put(id.encode());
+		buf.put(size.encode());
 		putValue(buf);
 		buf.flip();
 		return buf.array();

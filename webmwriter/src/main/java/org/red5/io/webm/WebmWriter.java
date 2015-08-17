@@ -82,7 +82,7 @@ public class WebmWriter {
 			return;
 		}
 		try {
-			CompoundTag ebml = TagFactory.<CompoundTag>create("EBML").setValue(0x37)
+			CompoundTag ebml = TagFactory.<CompoundTag>create("EBML")
 					.add(TagFactory.<UnsignedIntegerTag>create("EBMLVersion").setValue(1))
 					.add(TagFactory.<UnsignedIntegerTag>create("EBMLReadVersion").setValue(1))
 					.add(TagFactory.<UnsignedIntegerTag>create("EBMLMaxIDLength").setValue(4))
