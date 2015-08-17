@@ -52,8 +52,9 @@ public class UnsignedIntegerTag extends Tag {
 		return value;
 	}
 	
-	public void setValue(long value) {
+	public UnsignedIntegerTag setValue(long value) {
 		this.value = value;
+		return this;
 	}
 	
 	@Override

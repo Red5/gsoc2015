@@ -18,6 +18,8 @@
  */
 package org.red5.io.matroska.dtd;
 
+import static org.red5.io.matroska.ParserUtils.BIT_IN_BYTE;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -54,10 +56,25 @@ public class CompoundTag extends Tag {
 		subElements = ParserUtils.parseMasterElement(inputStream, (int) getSize());
 	}
 
-	public void setValue(long value) {
+	public CompoundTag setValue(long value) {
 		this.value = value;
+		
+		byte length = 1;
+		long v = (value + 1) >> BIT_IN_BYTE;
+		while (v > 0) {
+			length++;
+			v = v >> BIT_IN_BYTE;
+		}
+		size = new VINT(0L, length, length);
+
+		return this;
 	}
 
+	public CompoundTag add(Tag ch) {
+		subElements.add(ch);
+		return this;
+	}
+	
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
 		bb.put(ParserUtils.getBytes(value, getSize()));

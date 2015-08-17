@@ -40,8 +40,9 @@ public class DateTag extends Tag {
 		bb.putLong((value.getTime() - DELAY) * NANO_MULTIPLIER);
 	}
 	
-	public void setValue(final Date value) {
+	public DateTag setValue(final Date value) {
 		this.value = value;
+		return this;
 	}
 
 	public Date getValue() {

@@ -34,7 +34,7 @@ public abstract class Tag {
 
 	private VINT id;
 
-	private VINT size;
+	VINT size;
 
 	public Tag(String name, VINT id) {
 		this(name, id, new VINT(0L, (byte) 0, 0L));
@@ -62,16 +62,6 @@ public abstract class Tag {
 		return size.getValue();
 	}
 
-	public void setSize(long value) {
-		byte length = 1;
-		long v = value >> BIT_IN_BYTE;
-		while (v > 0) {
-			length++;
-			v = v >> BIT_IN_BYTE;
-		}
-		size = new VINT(0L, length, value);
-	}
-	
 	public byte[] encode() throws IOException {
 		final byte[] eId = id.encode();
 		final byte[] eSize = size.encode();

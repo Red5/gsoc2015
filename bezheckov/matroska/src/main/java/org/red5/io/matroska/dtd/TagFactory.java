@@ -99,4 +99,9 @@ public class TagFactory {
 		
 		return null;
 	}
-}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T create(String tagName) throws ConverterException {
+		return (T)createTag(tagName);
+	}
+} 

@@ -52,8 +52,9 @@ public class FloatTag extends Tag {
 		return value;
 	}
 	
-	public void setValue(double value) {
+	public FloatTag setValue(double value) {
 		this.value = value;
+		return this;
 	}
 	
 	@Override

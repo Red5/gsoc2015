@@ -61,9 +61,7 @@ public class EncoderTest {
 
 	@Test
 	public void testEncodeTagEBML() throws IOException, ConverterException {
-		Tag t = TagFactory.createTag("EBML");
-		t.setSize(1);
-		((CompoundTag)t).setValue(0x37);
+		CompoundTag t = TagFactory.<CompoundTag>create("EBML").setValue(0x37);
 		
 		assertArrayEquals("EBML tag encoded with errors", ParserTest.ebmlTagBytes, t.encode());
 	}

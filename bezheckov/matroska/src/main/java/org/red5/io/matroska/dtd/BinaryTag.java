@@ -64,8 +64,9 @@ public class BinaryTag extends Tag {
 		return value;
 	}
 	
-	public void setValue(byte[] value) {
+	public BinaryTag setValue(byte[] value) {
 		this.value = value;
+		return this;
 	}
 	
 	@Override
