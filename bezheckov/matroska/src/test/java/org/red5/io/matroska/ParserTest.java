@@ -33,6 +33,8 @@ import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 
 public class ParserTest {
+	static final byte[] vint1Bytes = {(byte) 0x81};
+	static final byte[] vint2Bytes = {0x41, (byte)0xF4};
 	
 	// size = 1, value = 0x37
 	static final byte[] ebmlTagBytes = {0x1A, 0x45, (byte) 0xdf, (byte) 0xa3, (byte) 0x81, 0x37};
@@ -52,6 +54,22 @@ public class ParserTest {
 	
 	// size = 4, value = "arch" -> negative scenario
 	static final byte[] ebmlDocTypeTagBytesArch = {0x42, (byte) 0x82, (byte) 0x84, 0x61, 0x72, 0x63, 0x68};
+	
+	// size = 1, value = 0x37
+	static final byte[] trackEntryTagBytes = {(byte) 0xae, (byte) 0xEB};
+	
+	@Test
+	public void testParseVINT() throws IOException {
+		InputStream is = new ByteArrayInputStream(vint1Bytes);
+		VINT v1 = ParserUtils.readVINT(is);
+		assertEquals("Invalid length", v1.getLength(), 1);
+		assertEquals("Invalid value", v1.getValue(), 1);
+		
+		is = new ByteArrayInputStream(vint2Bytes);
+		VINT v2 = ParserUtils.readVINT(is);
+		assertEquals("Invalid length", v2.getLength(), 2);
+		assertEquals("Invalid value", v2.getValue(), 500);
+	}
 	
 	@Test
 	public void testParseTagEBML() throws IOException, ConverterException {

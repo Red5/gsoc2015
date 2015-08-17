@@ -45,7 +45,7 @@ public class UnsignedIntegerTag extends Tag {
 	
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
-		bb.putLong(value);
+		bb.put(ParserUtils.getBytes(value, getSize()));
 	}
 	
 	public long getValue() {

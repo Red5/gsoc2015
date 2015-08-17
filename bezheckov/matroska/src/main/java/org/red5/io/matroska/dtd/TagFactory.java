@@ -84,7 +84,7 @@ public class TagFactory {
 		String className = parameters[1];
 
 		long longId = Long.parseLong(id, 16); 
-		VINT typeVint = new VINT(longId, (byte)(id.length() / 2), longId);
+		VINT typeVint = new VINT(longId);
 		try {
 			log.debug("Class name: " + TagFactory.class.getPackage().getName() + "." + className);
 			Class<?> type = Class.forName(TagFactory.class.getPackage().getName() + "." + className);

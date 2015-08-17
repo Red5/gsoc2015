@@ -25,13 +25,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.TagFactory;
 
 
 public class ParserUtils {
-	private static final int BIT_IN_BYTE = 8;
+	public static final int BIT_IN_BYTE = 8;
 	
 	/**
 	 * it is used for : int, uint and date
@@ -99,7 +98,7 @@ public class ParserUtils {
 		return (int)readVINT(inputStream).getValue();
 	}
 	
-	private static VINT readVINT(InputStream inputStream) throws IOException {
+	public static VINT readVINT(InputStream inputStream) throws IOException {
 		ArrayList<Byte> lengthBytes = new ArrayList<Byte>();
 		byte length = determineLength(inputStream, lengthBytes);
 		
@@ -162,4 +161,13 @@ public class ParserUtils {
 		return TagFactory.createTag(id, size);
 	}
 	
+	public static byte[] getBytes(long val, long size) {
+		byte[] res = new byte[(int)size];
+		long bv = val;
+		for (int i = (int)size - 1; i >= 0; --i) {
+			res[i] = (byte)(bv & 0xFF);
+			bv >>= BIT_IN_BYTE;
+		}
+		return res;
+	}
 }

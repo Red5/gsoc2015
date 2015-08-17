@@ -18,6 +18,10 @@
  */
 package org.red5.io.matroska;
 
+import static org.red5.io.matroska.ParserUtils.BIT_IN_BYTE;
+
+import java.util.BitSet;
+
 /**
  * variable size integer class
  * <a href="http://matroska.org/technical/specs/rfc/index.html">EBML RFC</a>
@@ -28,9 +32,32 @@ public class VINT {
 	private byte length;
 	
 	private long value;
+
+	public VINT(long binaryValue) {
+		BitSet bs = BitSet.valueOf(new long[]{binaryValue});
+		int l = bs.length();
+		if (l > 3 * BIT_IN_BYTE) {
+			length = 4;
+		} else if (l > 2 * BIT_IN_BYTE) {
+			length = 3;
+		} else if (l > BIT_IN_BYTE) {
+			length = 2;
+		} else {
+			length = 1;
+		}
+		bs.set(length * BIT_IN_BYTE - length, false);
+		value = bs.toLongArray()[0];
+		this.binaryValue = binaryValue;
+	}
 	
 	public VINT(long binaryValue, byte length, long value) {
-		this.binaryValue = binaryValue;
+		if (binaryValue == 0L) {
+			BitSet bs = BitSet.valueOf(new long[]{value});
+			bs.set(length * BIT_IN_BYTE - length);
+			this.binaryValue = bs.toLongArray()[0];
+		} else {
+			this.binaryValue = binaryValue;
+		}
 		this.length = length;
 		this.value = value;
 	}
@@ -47,12 +74,11 @@ public class VINT {
 		return value;
 	}
 
+	public void setValue(long value) {
+		this.value= value ;
+	}
+
 	public byte[] encode() {
-		byte[] bytes = new byte[length];
-		long tempValue = value;
-		for (int i = 0; i < length; ++i) {
-			bytes[i] = (byte) (tempValue >> (length - i - 1 << 3));
-		}
-		return bytes;
+		return ParserUtils.getBytes(binaryValue, length);
 	}
 }

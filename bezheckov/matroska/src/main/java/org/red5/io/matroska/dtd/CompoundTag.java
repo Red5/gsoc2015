@@ -29,8 +29,8 @@ import org.red5.io.matroska.VINT;
 
 
 public class CompoundTag extends Tag {
-
 	private ArrayList<Tag> subElements = new ArrayList<Tag>();
+	private long value;
 	
 	public CompoundTag(String name, VINT id) {
 		super(name, id);
@@ -54,8 +54,13 @@ public class CompoundTag extends Tag {
 		subElements = ParserUtils.parseMasterElement(inputStream, (int) getSize());
 	}
 
+	public void setValue(long value) {
+		this.value = value;
+	}
+
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
+		bb.put(ParserUtils.getBytes(value, getSize()));
 		for (Tag tag : subElements) {
 			bb.put(tag.encode());
 		}

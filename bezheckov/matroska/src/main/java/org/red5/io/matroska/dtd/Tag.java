@@ -26,6 +26,7 @@ import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.VINT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.red5.io.matroska.ParserUtils.BIT_IN_BYTE;
 
 public abstract class Tag {
 	static Logger log = LoggerFactory.getLogger(Tag.class);
@@ -61,47 +62,23 @@ public abstract class Tag {
 		return size.getValue();
 	}
 
-	private static int binaryCodedSize(final long value, int minSizeLen) {
-		int octetsNumber = 0;
-		if (value < 127) {
-			octetsNumber = 1;
-		} else if (value < 16383) {
-			octetsNumber = 2;
-		} else if (value < 2097151) {
-			octetsNumber = 3;
-		} else if (value < 268435455) {
-			octetsNumber = 4;
+	public void setSize(long value) {
+		byte length = 1;
+		long v = value >> BIT_IN_BYTE;
+		while (v > 0) {
+			length++;
+			v = v >> BIT_IN_BYTE;
 		}
-		if ((minSizeLen > 0) && (octetsNumber <= minSizeLen)) {
-			octetsNumber = minSizeLen;
-		}
-
-		return octetsNumber;
+		size = new VINT(0L, length, value);
 	}
-
-	private static byte[] makeEbmlCodedSize(final long size, int minSizeLen) {
-		final int len = binaryCodedSize(size, minSizeLen);
-		final byte[] ret = new byte[len];
-		long mask = 0x00000000000000FFL;
-		for (int i = 0; i < len; i++) {
-			ret[len - 1 - i] = (byte) ((size & mask) >>> (i * 8));
-			mask <<= 8;
-		}
-		ret[0] |= 0x80 >> (len - 1);
-		return ret;
-	}
-
+	
 	public byte[] encode() throws IOException {
-		int len = id.getLength();
-
-		final byte[] encodedSize = makeEbmlCodedSize(getSize(), 0);
-
-		len += encodedSize.length;
-		len += getSize();
-		final ByteBuffer buf = ByteBuffer.allocate(len);
-		log.debug("Id:" + id.getValue() + "Idl:" + id.getLength() + ", Length:" + len + "GetSize():" + getSize());
-		buf.put(id.encode());
-		buf.put(encodedSize);
+		final byte[] eId = id.encode();
+		final byte[] eSize = size.encode();
+		final ByteBuffer buf = ByteBuffer.allocate((int)(eId.length + eSize.length + getSize()));
+		log.debug("Id: " + id.getValue() + "; Idl: " + id.getLength() + "; Length: " + buf.limit() + "; size: " + getSize());
+		buf.put(eId);
+		buf.put(eSize);
 		putValue(buf);
 		buf.flip();
 		return buf.array();

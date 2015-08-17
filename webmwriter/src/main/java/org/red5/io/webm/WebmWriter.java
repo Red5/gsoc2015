@@ -20,12 +20,12 @@
 package org.red5.io.webm;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.TagFactory;
 import org.red5.io.matroska.dtd.UnsignedIntegerTag;
@@ -51,14 +51,14 @@ public class WebmWriter {
 			this.append = append;
 			if (append) {
 				// grab the file we will append to
-				this.dataFile = new RandomAccessFile(file, "rws");
 				if (!file.exists() || !file.canRead() || !file.canWrite()) {
-					log.warn("File does not exist or cannot be accessed");
+					throw new FileNotFoundException("File does not exist or cannot be accessed");
 				} else {
 					log.trace("File size: {} last modified: {}", file.length(), file.lastModified());
 					// update the bytes written so we write to the correct starting position
 					bytesWritten = file.length();
 				}
+				this.dataFile = new RandomAccessFile(file, "rws");
 			} else {
 				// temporary data file for storage of stream data
 				File dat = new File(filePath + ".ser");
@@ -84,39 +84,39 @@ public class WebmWriter {
 		try {
 			UnsignedIntegerTag ebmlVersion = (UnsignedIntegerTag) TagFactory.createTag("EBMLVersion");
 			ebmlVersion.setValue(1);
-			file.write(ebmlVersion.toData().array());
+			file.write(ebmlVersion.encode());
 
 			UnsignedIntegerTag ebmlReadVersion = (UnsignedIntegerTag) TagFactory.createTag("EBMLReadVersion");
 			ebmlReadVersion.setValue(1);
-			file.write(ebmlReadVersion.toData().array());
+			file.write(ebmlReadVersion.encode());
 
 			UnsignedIntegerTag ebmlMaxIDLength = (UnsignedIntegerTag) TagFactory.createTag("EBMLMaxIDLength");
 			ebmlMaxIDLength.setValue(4);
-			file.write(ebmlMaxIDLength.toData().array());
+			file.write(ebmlMaxIDLength.encode());
 
 			UnsignedIntegerTag ebmlMaxSizeLength = (UnsignedIntegerTag) TagFactory.createTag("EBMLMaxSizeLength");
 			ebmlMaxSizeLength.setValue(8);
-			file.write(ebmlMaxSizeLength.toData().array());
+			file.write(ebmlMaxSizeLength.encode());
 
 			StringTag docTypeTag = (StringTag) TagFactory.createTag("DocType");
 			byte[] bytes = { (byte) 0x77, (byte) 0x65, (byte) 0x62, (byte) 0x6D };
 			docTypeTag.setValue(new String(bytes, "UTF-8"));
-			file.write(docTypeTag.toData().array());
+			file.write(docTypeTag.encode());
 
 			UnsignedIntegerTag docTypeVersion = (UnsignedIntegerTag) TagFactory.createTag("DocTypeVersion");
 			docTypeVersion.setValue(3);
-			file.write(docTypeVersion.toData().array());
+			file.write(docTypeVersion.encode());
 
 			UnsignedIntegerTag docTypeReadVersion = (UnsignedIntegerTag) TagFactory.createTag("DocTypeReadVersion");
 			docTypeReadVersion.setValue(2);
-			file.write(docTypeReadVersion.toData().array());
+			file.write(docTypeReadVersion.encode());
 		} catch (Exception e) {
 			log.error("Failed to create FLV writer", e);
 		}
 	}
 
 	public void writeTag(Tag tag) throws IOException {
-		file.write(tag.toData().array());
+		file.write(tag.encode());
 	}
 
 }
