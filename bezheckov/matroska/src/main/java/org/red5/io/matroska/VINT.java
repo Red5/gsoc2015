@@ -69,10 +69,26 @@ public class VINT {
 		return ParserUtils.getBytes(binaryValue, length);
 	}
 	
+	@Override
+	public String toString() {
+		return String.format("VINT[size=%s,value=%s]", length, value);
+	}
+	
 	public static VINT fromBinary(long binary) {
 		BitSet bs = BitSet.valueOf(new long[]{binary});
 		byte length = (byte)(1 + bs.length() / BIT_IN_BYTE);
-		long mask = MASK_BYTE_4 >> (4 - length) * BIT_IN_BYTE;
+		long mask = MASK_BYTE_4;
+		switch (length) {
+			case 3:
+				mask = MASK_BYTE_3;
+				break;
+			case 2:
+				mask = MASK_BYTE_2;
+				break;
+			case 1:
+				mask = MASK_BYTE_1;
+				break;
+		}
 		long value = binary & mask;
 		return new VINT(binary, length, value);
 	}

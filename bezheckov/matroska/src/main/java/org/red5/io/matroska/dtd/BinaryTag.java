@@ -66,6 +66,7 @@ public class BinaryTag extends Tag {
 	
 	public BinaryTag setValue(byte[] value) {
 		this.value = value;
+		size = VINT.fromValue(value.length);
 		return this;
 	}
 	

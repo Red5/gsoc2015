@@ -14,7 +14,7 @@ import org.red5.io.matroska.VINT;
  * 
  *
  */
-public class DateTag extends Tag {
+public class DateTag extends UnsignedIntegerTag {
 	public static final long NANO_MULTIPLIER = 1000;
 	public static final long DELAY = 978285600000L; // 2001/01/01 00:00:00 UTC
 
@@ -30,22 +30,24 @@ public class DateTag extends Tag {
 
 	@Override
 	public void parse(InputStream inputStream) throws IOException {
-		long val = ParserUtils.parseInteger(inputStream, (int) getSize());
-		val = val / NANO_MULTIPLIER + DELAY;
+		long _val = ParserUtils.parseInteger(inputStream, (int) getSize());
+		long val = _val / NANO_MULTIPLIER + DELAY;
+		super.setValue(_val);
 		value = new Date(val);
 	}
 	
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
-		bb.putLong((value.getTime() - DELAY) * NANO_MULTIPLIER);
+		super.putValue(bb);
 	}
 	
 	public DateTag setValue(final Date value) {
 		this.value = value;
+		super.setValue((value.getTime() - DELAY) * NANO_MULTIPLIER);
 		return this;
 	}
 
-	public Date getValue() {
+	public Date getDate() {
 		return value;
 	}
 

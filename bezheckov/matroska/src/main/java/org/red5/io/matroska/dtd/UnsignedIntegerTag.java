@@ -62,7 +62,7 @@ public class UnsignedIntegerTag extends Tag {
 			length++;
 			v = v >> BIT_IN_BYTE;
 		}
-		size = new VINT(0L, length, length);
+		size = VINT.fromValue(length);
 		return this;
 	}
 	

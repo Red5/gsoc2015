@@ -28,13 +28,13 @@ import org.red5.io.matroska.VINT;
 
 public class SimpleBlock extends Tag {
 
-	private int trackNumber;
+	private VINT trackNumber;
 	
 	private long timeCode;
 	
-	private byte[] binary;
-	
 	private boolean keyFrame;
+	
+	private byte[] binary;
 	
 	public SimpleBlock(String name, VINT id) {
 		super(name, id);
@@ -46,7 +46,7 @@ public class SimpleBlock extends Tag {
 	
 	@Override
 	public void parse(InputStream inputStream) throws IOException, ConverterException {
-		trackNumber = ParserUtils.readIntByVINT(inputStream);
+		trackNumber = ParserUtils.readVINT(inputStream);
 		timeCode = ParserUtils.parseInteger(inputStream, 2); // int16 by specification
 		keyFrame = (0x80 == (inputStream.read() & 0x80));
 		binary = ParserUtils.parseBinary(inputStream, (int) getSize() - 4);
@@ -54,7 +54,10 @@ public class SimpleBlock extends Tag {
 
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
-		bb.put(new byte[0]); //TODO FIXME stub
+		bb.put(trackNumber.encode());
+		bb.put(ParserUtils.getBytes(timeCode, 2));
+		bb.put((byte)(keyFrame ? 0x80 : 0x00));
+		bb.put(binary);
 	}
 
 	public byte[] getBinary() {
@@ -66,7 +69,7 @@ public class SimpleBlock extends Tag {
 	}
 
 	public int getTrackNumber() {
-		return trackNumber;
+		return (int)trackNumber.getValue();
 	}
 	
 	@Override

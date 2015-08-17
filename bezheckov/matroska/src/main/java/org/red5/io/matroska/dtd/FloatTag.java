@@ -54,6 +54,7 @@ public class FloatTag extends Tag {
 	
 	public FloatTag setValue(double value) {
 		this.value = value;
+		size = VINT.fromValue(8);
 		return this;
 	}
 	

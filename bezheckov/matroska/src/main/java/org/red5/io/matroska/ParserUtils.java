@@ -68,7 +68,7 @@ public class ParserUtils {
 		int numberOfReadsBytes = inputStream.read(buffer, 0, size);
 		assert numberOfReadsBytes == size;
 		
-		ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, 0, size).order(ByteOrder.BIG_ENDIAN);
+		ByteBuffer byteBuffer = ByteBuffer.wrap(buffer).order(ByteOrder.BIG_ENDIAN);
 		if (8 == size) {
 			return byteBuffer.getDouble();
 		}
@@ -95,10 +95,6 @@ public class ParserUtils {
 		int numberOfBytesRead = inputStream.read(value, 0, value.length);
 		assert numberOfBytesRead ==  value.length;
 		return value;
-	}
-	
-	public static int readIntByVINT(InputStream inputStream) throws IOException {
-		return (int)readVINT(inputStream).getValue();
 	}
 	
 	public static VINT readVINT(InputStream inputStream) throws IOException {
