@@ -28,23 +28,15 @@ import java.util.BitSet;
  */
 public class VINT {
 	public static final long MASK_BYTE_4 = 0b00001111111111111111111111111111;
-	public static final long MASK_BYTE_3 = MASK_BYTE_4 >> BIT_IN_BYTE;
-	public static final long MASK_BYTE_2 = MASK_BYTE_3 >> BIT_IN_BYTE;
-	public static final long MASK_BYTE_1 = MASK_BYTE_2 >> BIT_IN_BYTE;
+	public static final long MASK_BYTE_3 = 0b000111111111111111111111;
+	public static final long MASK_BYTE_2 = 0b0011111111111111;
+	public static final long MASK_BYTE_1 = 0b01111111;
 	private long binaryValue;
 	
 	private byte length;
 	
 	private long value;
 
-	public VINT(long binaryValue) {
-		BitSet bs = BitSet.valueOf(new long[]{binaryValue});
-		length = (byte)(1 + bs.length() / BIT_IN_BYTE);
-		long mask = MASK_BYTE_4 >> (4 - length) * BIT_IN_BYTE;
-		value = binaryValue & mask;
-		this.binaryValue = binaryValue;
-	}
-	
 	public VINT(long binaryValue, byte length, long value) {
 		if (binaryValue == 0L) {
 			BitSet bs = BitSet.valueOf(new long[]{value});
@@ -75,5 +67,24 @@ public class VINT {
 
 	public byte[] encode() {
 		return ParserUtils.getBytes(binaryValue, length);
+	}
+	
+	public static VINT fromBinary(long binary) {
+		BitSet bs = BitSet.valueOf(new long[]{binary});
+		byte length = (byte)(1 + bs.length() / BIT_IN_BYTE);
+		long mask = MASK_BYTE_4 >> (4 - length) * BIT_IN_BYTE;
+		long value = binary & mask;
+		return new VINT(binary, length, value);
+	}
+	
+	public static VINT fromValue(long value) {
+		BitSet bs = BitSet.valueOf(new long[]{value});
+		byte length = (byte)(1 + bs.length() / BIT_IN_BYTE);
+		if (bs.length() == length * BIT_IN_BYTE) {
+			length ++;
+		}
+		bs.set(length * BIT_IN_BYTE - length);
+		long binary = bs.toLongArray()[0];
+		return new VINT(binary, length, value);
 	}
 }

@@ -27,11 +27,27 @@ import java.io.InputStream;
 
 import org.junit.Test;
 import org.red5.io.matroska.dtd.CompoundTag;
+import org.red5.io.matroska.dtd.StringTag;
 import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.TagFactory;
 import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 
 public class EncoderTest {
+	
+	@Test
+	public void createVINT() {
+		VINT v = new VINT(0x1a45dfa3, (byte)4, 0xa45dfa3);
+		VINT v1 = VINT.fromBinary(0x1a45dfa3);
+		VINT v2 = VINT.fromValue(0xa45dfa3);
+		assertEquals("VINT:: Values are different", v.getValue(), v1.getValue());
+		assertEquals("VINT:: Values are different", v.getValue(), v2.getValue());
+		
+		long[] vals = {0L, 127L, 1234567};
+		for (int i = 0; i < vals.length; ++i) {
+			VINT vi = VINT.fromValue(vals[i]);
+			assertEquals("VINT:: Values are different", vals[i], vi.getValue());
+		}
+	}
 	
 	@Test
 	public void testCreateTags() throws IOException, ConverterException {
@@ -68,5 +84,33 @@ public class EncoderTest {
 		InputStream is = new ByteArrayInputStream(t.encode());
 		Tag tag = ParserUtils.parseTag(is);
 		//tag.parse(is); //TODO FIXME will fail
+	}
+
+	@Test
+	public void testEncodeTagUint() throws IOException, ConverterException {
+		int[] uints = {0, 1, 500, 17000, 3000000, 250000000};
+		for (int i = 0; i < uints.length; ++i) {
+			UnsignedIntegerTag t = TagFactory.<UnsignedIntegerTag>create("EBMLVersion").setValue(uints[i]);
+			
+			InputStream is = new ByteArrayInputStream(t.encode());
+			Tag tag = ParserUtils.parseTag(is);
+			tag.parse(is);
+			assertEquals("EBML:: IDs are not equals", t.getId(), tag.getId());
+			assertEquals("EBML:: Values are not equals", t.getValue(), ((UnsignedIntegerTag)tag).getValue());
+		}
+	}
+
+	@Test
+	public void testEncodeTagString() throws IOException, ConverterException {
+		String[] strings = {null, "", "abcd", "Some examples of the encoding of integers of width 1 to 4", "A\u00ea\u00f1\u00fcC"};
+		for (int i = 0; i < strings.length; ++i) {
+			StringTag t = TagFactory.<StringTag>create("DocType").setValue(strings[i]);
+			
+			InputStream is = new ByteArrayInputStream(t.encode());
+			Tag tag = ParserUtils.parseTag(is);
+			tag.parse(is);
+			assertEquals("EBML:: IDs are not equals", t.getId(), tag.getId());
+			assertEquals("EBML:: Values are not equals", t.getValue(), ((StringTag)tag).getValue());
+		}
 	}
 }

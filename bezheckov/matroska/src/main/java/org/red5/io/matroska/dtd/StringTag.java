@@ -20,6 +20,7 @@ package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 import org.red5.io.matroska.ParserUtils;
@@ -28,7 +29,7 @@ import org.red5.io.matroska.VINT;
 
 public class StringTag extends Tag {
 	
-	private String value;
+	private String value = "";
 	
 	public StringTag(String name, VINT id) {
 		super(name, id);
@@ -42,8 +43,12 @@ public class StringTag extends Tag {
 		return value;
 	}
 
-	public StringTag setValue(String value) {
-		this.value = value;
+	public StringTag setValue(String value) throws UnsupportedEncodingException {
+		if (value != null) {
+			this.value = value;
+		}
+		byte[] bb = this.value.getBytes("UTF-8");
+		size = VINT.fromValue(bb.length);
 		return this;
 	}
 
