@@ -162,4 +162,10 @@ public class ParserUtils {
 		}
 		return res;
 	}
+	
+	public static void skip(long size, InputStream input) throws IOException {
+		while (size > 0) {
+			size -= input.skip(size);
+		}
+	}
 }

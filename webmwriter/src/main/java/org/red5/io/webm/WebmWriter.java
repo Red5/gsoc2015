@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.dtd.CompoundTag;
 import org.red5.io.matroska.dtd.StringTag;
 import org.red5.io.matroska.dtd.Tag;
@@ -33,15 +34,13 @@ import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WebmWriter implements Closeable {
-
+public class WebmWriter implements Closeable, TagConsumer {
 	private static Logger log = LoggerFactory.getLogger(WebmWriter.class);
 
 	private boolean append;
 
 	private RandomAccessFile dataFile;
 
-	@SuppressWarnings("unused")
 	private File file;
 
 	@SuppressWarnings("unused")
@@ -79,7 +78,7 @@ public class WebmWriter implements Closeable {
 		}
 	}
 
-	public void writeHeader() throws IOException {
+	public void writeHeader() throws IOException, ConverterException {
 		if (append) {
 			return;
 		}
@@ -96,8 +95,9 @@ public class WebmWriter implements Closeable {
 			byte[] hb = ebml.encode();
 			bytesWritten += hb.length;
 			dataFile.write(hb);
-		} catch (Exception e) {
+		} catch (IOException|ConverterException e) {
 			log.error("Failed to write header", e);
+			throw e;
 		}
 	}
 
@@ -110,6 +110,13 @@ public class WebmWriter implements Closeable {
 	@Override
 	public void close() throws IOException {
 		if (dataFile != null) {
+			//TODO create separate method for this
+			if (!append) {
+				dataFile.seek(0);
+				try (RandomAccessFile rf = new RandomAccessFile(file, "rw")) {
+					rf.getChannel().transferFrom(dataFile.getChannel(), 0, dataFile.length());
+				}
+			}
 			try {
 				dataFile.close();
 				dataFile = null;
@@ -117,5 +124,10 @@ public class WebmWriter implements Closeable {
 				//no-op
 			}
 		}
+	}
+
+	@Override
+	public void consume(Tag tag) throws IOException {
+		writeTag(tag);
 	}
 }

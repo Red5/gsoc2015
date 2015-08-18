@@ -86,7 +86,8 @@ public class EncoderTest {
 		
 		InputStream is = new ByteArrayInputStream(t.encode());
 		Tag tag = ParserUtils.parseTag(is);
-		//tag.parse(is); //TODO FIXME will fail
+		assertEquals("TrackEntry:: wrong tag was read", "EBML", tag.getName());
+		//TODO FIXME, there is no possibility to check inner tag here
 	}
 
 	@Test

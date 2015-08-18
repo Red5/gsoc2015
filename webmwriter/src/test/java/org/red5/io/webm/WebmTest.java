@@ -18,18 +18,19 @@
  */
 package org.red5.io.webm;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
-import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.red5.io.matroska.ConverterException;
+import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.Tag.Type;
 import org.red5.io.matroska.parser.TagCrawler;
@@ -53,10 +54,7 @@ public class WebmTest {
 			public void handle(Tag tag, InputStream input) throws IOException, ConverterException {
 				log.debug("Tag found: " + tag.getName());
 				if (tag.getType() != Type.master) {
-					long size = tag.getSize();
-					while (size > 0) {
-						size -= input.skip(size);
-					}
+					ParserUtils.skip(tag.getSize(), input);
 				}
 			}
 		};
@@ -76,9 +74,17 @@ public class WebmTest {
 	}
 	
 	@Test
-	public void testApp() throws FileNotFoundException {
+	public void testReaderWriter() throws IOException, ConverterException {
 		File webmF = new File(System.getProperty(WEBM_FILE_PROPERTY));
-		//WebM2FLVPlugin.convert(new FileInputStream(webmF), new ByteArrayOutputStream());
 		assertTrue("Invalid webM file is specified", webmF.exists() && webmF.isFile());
+		File out = File.createTempFile("webmwriter", ".webm");
+		log.debug("Temporary file was created: " + out.getAbsolutePath());
+		try (
+				WebmWriter w = new WebmWriter(out, false);
+				WebmReader r = new WebmReader(webmF, w);
+		) {
+			r.process();
+		}
+		assertEquals("", webmF.length(), out.length());
 	}
 }

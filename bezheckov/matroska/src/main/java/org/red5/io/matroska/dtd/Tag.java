@@ -76,7 +76,7 @@ public abstract class Tag {
 	
 	public byte[] encode() throws IOException {
 		final ByteBuffer buf = ByteBuffer.allocate(totalSize());
-		log.debug("Id: " + id.getValue() + "; Idl: " + id.getLength() + "; Length: " + buf.limit() + "; size: " + getSize());
+		log.debug("Tag: " + this);
 		buf.put(id.encode());
 		buf.put(size.encode());
 		putValue(buf);

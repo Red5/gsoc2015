@@ -267,14 +267,8 @@ public class Converter {
 				tagHanlder.handle(tag, input, output);
 			}
 			else {
-				warrantySkip(input, tag.getSize());
+				ParserUtils.skip(tag.getSize(), input);
 			}
-		}
-	}
-	
-	private void warrantySkip(InputStream input, long size) throws IOException {
-		while (size > 0) {
-			size -= input.skip(size);
 		}
 	}
 }

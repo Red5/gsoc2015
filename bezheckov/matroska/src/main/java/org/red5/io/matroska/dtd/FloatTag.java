@@ -45,7 +45,11 @@ public class FloatTag extends Tag {
 	
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
-		bb.putDouble(value);
+		if (getSize() == 4) {
+			bb.putFloat((float)value);
+		} else {
+			bb.putDouble(value);
+		}
 	}
 	
 	public double getValue() {

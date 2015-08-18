@@ -24,13 +24,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.InputStream;
 
-import org.red5.io.matroska.dtd.CompoundTag;
-import org.red5.io.matroska.dtd.StringTag;
+import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.dtd.Tag;
-import org.red5.io.matroska.dtd.TagFactory;
-import org.red5.io.matroska.dtd.UnsignedIntegerTag;
+import org.red5.io.matroska.dtd.Tag.Type;
+import org.red5.io.matroska.parser.TagCrawler;
+import org.red5.io.matroska.parser.TagHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,14 +38,35 @@ public class WebmReader implements Closeable {
 	private static Logger log = LoggerFactory.getLogger(WebmReader.class);
 
 	private FileInputStream fis = null;
+	private final TagConsumer processor;
+	private TagCrawler crawler;
 
-	@SuppressWarnings("unused")
-	private volatile long position;
-
-	public WebmReader(File file) throws FileNotFoundException {
+	public WebmReader(File file, TagConsumer processor) throws FileNotFoundException {
 		fis = new FileInputStream(file);
+		this.processor = processor;
+
+		final TagHandler anyHandler = new TagHandler() {
+			@Override
+			public void handle(Tag tag, InputStream input) throws IOException, ConverterException {
+				log.debug("Tag found: " + tag.getName());
+				if (tag.getType() != Type.master) {
+					tag.parse(input);
+				}
+				WebmReader.this.processor.consume(tag);
+			}
+		};
+		crawler = new TagCrawler() {
+			@Override
+			public TagHandler getHandler(Tag tag) {
+				return anyHandler;
+			}
+		};
 	}
 
+	public void process() throws IOException, ConverterException {
+		crawler.process(fis);
+	}
+	
 	@Override
 	public void close() throws IOException {
 		if (fis != null) {
