@@ -71,15 +71,25 @@ public abstract class Tag {
 	}
 	
 	public int totalSize() {
-		return (int)(id.getLength() + size.getLength() + size.getValue());
+		return totalSize(false);
+	}
+	
+	public int totalSize(boolean saxMode) {
+		return (int)(id.getLength() + size.getLength() + (saxMode ? 0 : size.getValue()));
 	}
 	
 	public byte[] encode() throws IOException {
+		return encode(false);
+	}
+	
+	public byte[] encode(boolean saxMode) throws IOException {
 		final ByteBuffer buf = ByteBuffer.allocate(totalSize());
 		log.debug("Tag: " + this);
 		buf.put(id.encode());
 		buf.put(size.encode());
-		putValue(buf);
+		if (getType() != Type.master || saxMode) {
+			putValue(buf);
+		}
 		buf.flip();
 		return buf.array();
 	}
