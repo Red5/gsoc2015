@@ -47,7 +47,7 @@ public class SctpPacket {
 		}
 	}
 	
-	public SctpPacket(short sourcePort, short destinationPort, int verificationTag, Chunk chunk) {
+	public SctpPacket(int sourcePort, int destinationPort, int verificationTag, Chunk chunk) {
 		header = new SctpHeader(sourcePort, destinationPort, verificationTag, 0);
 		chunks.add(chunk);
 	}

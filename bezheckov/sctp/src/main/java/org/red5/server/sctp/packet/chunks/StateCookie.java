@@ -30,11 +30,22 @@ public class StateCookie {
 	//	mac : byte[mac_length]
 	//	creationTimestamp : Long
 	//	lifespan : short
+	
+	//	[client information]
 	//	verificationTag : int
+	//	advertisedReceiverWindowCredit : int
+	//	numberOfOutboundStreams : short
+	//	numberOfInboundStreams : short
 	//	initialTSN : int
 	
-	// creationTimestamp(8 bytes) + lifespan(2 bytes) + verificationTag(4 bytes) + initialTSN(4 bytes)
-	private static final int HEADER_STATE_COOKIE_SIZE = 18;
+	// creationTimestamp(8 bytes)
+	// + lifespan(2 bytes)
+	// + verificationTag(4 bytes)
+	// + advertisedReceiverWindowCredit(4 bytes)
+	// + numberOfOutboundStreams(2 bytes)
+	// + numberOfInboundStreams(2 bytes)
+	// + initialTSN(4 bytes)
+	private static final int HEADER_STATE_COOKIE_SIZE = 26;
 	
 	private static final short LIFESPAN = 60; // in seconds
 	
@@ -44,12 +55,26 @@ public class StateCookie {
 	
 	private int verificationTag;
 	
+	private int advertisedReceiverWindowCredit;
+	
+	private int numberOfOutboundStreams;
+	
+	private int numberOfInboundStreams;
+	
 	private int initialTSN;
 	
 	private byte[] mac;
 	
-	public StateCookie(int verificationTag, int initialTSN) {
+	public StateCookie(
+			int verificationTag,
+			int initialTSN,
+			int advertisedReceiverWindowCredit,
+			int numberOfOutboundStreams,
+			int numberOfInboundStreams) {
 		this.verificationTag = verificationTag;
+		this.advertisedReceiverWindowCredit = advertisedReceiverWindowCredit;
+		this.numberOfOutboundStreams = numberOfOutboundStreams;
+		this.numberOfInboundStreams = numberOfInboundStreams;
 		this.initialTSN = initialTSN;
 		currentLifespan = LIFESPAN;
 	}
@@ -65,6 +90,9 @@ public class StateCookie {
 		creationTimestamp = byteBuffer.getLong();
 		currentLifespan = byteBuffer.getShort();
 		verificationTag = byteBuffer.getInt();
+		advertisedReceiverWindowCredit = byteBuffer.getInt();
+		numberOfOutboundStreams = byteBuffer.getShort();
+		numberOfInboundStreams = byteBuffer.getShort();
 		initialTSN = byteBuffer.getInt();
 	}
 	
@@ -72,13 +100,17 @@ public class StateCookie {
 		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(HEADER_STATE_COOKIE_SIZE);
 		byteBuffer.putLong(creationTimestamp);
 		byteBuffer.putShort(currentLifespan);
-		byteBuffer.putInt(getVerificationTag());
-		byteBuffer.putInt(getInitialTSN());
+		byteBuffer.putInt(verificationTag);
+		byteBuffer.putInt(advertisedReceiverWindowCredit);
+		byteBuffer.putShort((short)numberOfOutboundStreams);
+		byteBuffer.putShort((short)numberOfInboundStreams);
+		byteBuffer.putInt(initialTSN);
+		
 		byteBuffer.clear();
 		byte[] data = new byte[byteBuffer.capacity()];
 		byteBuffer.get(data, 0, data.length);
 		
-		if (mac != null) {
+		if (messageAuthenticationCode != null) {
 			mac = messageAuthenticationCode.doFinal(data);
 		}
 		

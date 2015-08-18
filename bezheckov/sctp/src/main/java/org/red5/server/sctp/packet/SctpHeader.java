@@ -38,12 +38,7 @@ public final class SctpHeader {
 	// sourcePort(2 byte) + destinationPort(2 byte) + verificationTag(4 byte) + checksum(4 byte)
 	private static final int HEADER_SIZE = 12;
 	
-	public SctpHeader(
-			final short sourcePort,
-			final short destinationPort,
-			final int verificationTag,
-			final int checksum
-			) {
+	public SctpHeader(int sourcePort, int destinationPort, int verificationTag, int checksum) {
 		this.sourcePort = sourcePort;
 		this.destinationPort = destinationPort;
 		this.verificationTag = verificationTag;

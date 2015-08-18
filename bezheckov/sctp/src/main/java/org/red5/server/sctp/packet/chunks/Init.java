@@ -38,9 +38,9 @@ public class Init extends Chunk {
 	
 	private int advertisedReceiverWindowCredit;
 	
-	private short numberOfOutboundStreams;
+	private int numberOfOutboundStreams;
 	
-	private short numberOfInboundStreams;
+	private int numberOfInboundStreams;
 	
 	private int initialTSN;
 	
@@ -90,11 +90,11 @@ public class Init extends Chunk {
 		return advertisedReceiverWindowCredit;
 	}
 
-	public short getNumberOfOutboundStreams() {
+	public int getNumberOfOutboundStreams() {
 		return numberOfOutboundStreams;
 	}
 
-	public short getNumberOfInboundStreams() {
+	public int getNumberOfInboundStreams() {
 		return numberOfInboundStreams;
 	}
 
@@ -116,14 +116,19 @@ public class Init extends Chunk {
 		}
 		
 		// 1. generate state cookie & initAck chunk
+		StateCookie stateCookie = new StateCookie(
+				getInitiateTag(),
+				getInitialTSN(),
+				getAdvertisedReceiverWindowCredit(),
+				getNumberOfOutboundStreams(),
+				getNumberOfInboundStreams()
+		);
 		int verificationTag = server.getRandom().nextInt();
 		int initialTSN = server.getRandom().nextInt();
-		StateCookie stateCookie = new StateCookie(verificationTag, initialTSN);
 		Chunk initAck = new InitAck(verificationTag, initialTSN, stateCookie, server.getMac());
 		
 		// 2. pack and send packet with initAck inside
-		short sourcePort = (short)server.getPort();
-		SctpPacket packet = new SctpPacket(sourcePort, (short)address.getPort(), verificationTag, initAck);
+		SctpPacket packet = new SctpPacket(server.getPort(), address.getPort(), getInitiateTag(), initAck);
 		server.send(packet, address);
 	}
 

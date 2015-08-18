@@ -78,7 +78,7 @@ public abstract class Chunk {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE);
 		byteBuffer.put((byte)type.getValue());
 		byteBuffer.put(flags);
-		byteBuffer.putShort((short)length);
+		byteBuffer.putShort((short)(getSize() & 0xffff));
 		
 		byteBuffer.clear();
 		byte[] result = new byte[byteBuffer.capacity()];

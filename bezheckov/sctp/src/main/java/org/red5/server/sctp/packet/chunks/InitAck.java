@@ -71,7 +71,7 @@ public final class InitAck extends Chunk {
 		this.numberOfInboundStreams = IAssociationControl.DEFAULT_NUMBER_OF_INBOUND_STREAM;
 		this.numberOfOutboundStreams = IAssociationControl.DEFAULT_NUMBER_OF_OUTBOUND_STREAM;
 		this.advertisedReceiverWindowCredit = IAssociationControl.DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT;
-		super.setLength(MANDATORY_FIELD_SIZE + stateCookieBytes.length);
+		super.setLength(MANDATORY_FIELD_SIZE + stateCookieBytes.length + super.getSize());
 	}
 	
 	@Override

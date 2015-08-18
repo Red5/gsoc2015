@@ -73,16 +73,18 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 	public SctpChannel accept() throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
 		logger.setLevel(Level.INFO);
 		
+		DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
+		SctpPacket packet = null;
 		while (true) {
-			DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
 			serverSocket.receive(receivePacket);
-			SctpPacket packet = null;
 			try {
 				packet = new SctpPacket(buffer, 0, receivePacket.getLength());
 			} catch (SctpException e) {
 				logger.log(Level.WARNING, e.getMessage());
 				continue;
 			}
+			
+			logger.log(Level.INFO, "receive new packet");
 			
 			InetSocketAddress address = new InetSocketAddress(receivePacket.getAddress(), receivePacket.getPort());
 			packet.apply(address, this);
