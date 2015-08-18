@@ -43,6 +43,11 @@ public class SimpleBlock extends Tag {
 	public SimpleBlock(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
+
+	@Override
+	public Type getType() {
+		return Type.simple;
+	}
 	
 	@Override
 	public void parse(InputStream inputStream) throws IOException, ConverterException {
@@ -74,7 +79,7 @@ public class SimpleBlock extends Tag {
 	
 	@Override
 	public String toString() {
-		return (getName() + " = binary " + binary.length);
+		return (super.toString() + " = binary " + binary.length);
 	}
 
 	public boolean isKeyFrame() {

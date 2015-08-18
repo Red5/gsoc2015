@@ -64,6 +64,6 @@ public class StringTag extends Tag {
 	
 	@Override
 	public String toString() {
-		return (getName() + " = " + value);
+		return (super.toString() + " = " + value);
 	}
 }

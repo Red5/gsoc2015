@@ -16,48 +16,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.red5.io.webm;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
+import org.red5.io.matroska.dtd.CompoundTag;
+import org.red5.io.matroska.dtd.StringTag;
+import org.red5.io.matroska.dtd.Tag;
+import org.red5.io.matroska.dtd.TagFactory;
+import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class App {
-	private static Logger log = LoggerFactory.getLogger(WebmWriter.class);
+public class WebmReader implements Closeable {
+	private static Logger log = LoggerFactory.getLogger(WebmReader.class);
 
-	public static void main(String[] args) {
+	private FileInputStream fis = null;
 
-		if (args.length < 1) {
-			log.error("usage: java -jar webm-1.0.0-SNAPSHOT.jar path/to/your/file.webm");
-			return;
-		}
+	@SuppressWarnings("unused")
+	private volatile long position;
 
-		if ("".equals(args[0])) {
-			log.error("invalid arguments");
-			return;
-		}
-
-		try {
-			writeRecord(args[0]);
-		} catch (FileNotFoundException e) {
-			log.error("File not found", e);
-		} catch (IOException e) {
-			log.error("IO exception", e);
-		}
+	public WebmReader(File file) throws FileNotFoundException {
+		fis = new FileInputStream(file);
 	}
 
-	public static void writeRecord(String path) throws IOException, FileNotFoundException {
-		File outputFile = getRecordFile(path);
-		WebmWriter writer = new WebmWriter(outputFile, false);
-		writer.writeHeader();
-	}
-
-	public static File getRecordFile(String path) throws IOException {
-		File file = new File(path);
-		file.createNewFile();
-		return file;
+	@Override
+	public void close() throws IOException {
+		if (fis != null) {
+			try {
+				fis.close();
+				fis = null;
+			} catch (Throwable th) {
+				//no-op
+			}
+		}
 	}
 }

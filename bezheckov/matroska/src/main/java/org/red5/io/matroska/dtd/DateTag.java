@@ -53,6 +53,6 @@ public class DateTag extends UnsignedIntegerTag {
 
 	@Override
 	public String toString() {
-		return (getName() + " = " + value);
+		return (super.toString() + " = " + value);
 	}
 }

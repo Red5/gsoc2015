@@ -16,22 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.io.matroska;
+package org.red5.io.matroska.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.red5.io.matroska.ConverterException;
+import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.dtd.Tag;
 
 
 public class SimpleMatroskaParser implements MatroskaParser {
 
 	@Override
-	public ArrayList<Tag> parse(InputStream inputStream) throws IOException, ConverterException {
+	public List<Tag> parse(InputStream inputStream) throws IOException, ConverterException {
 		
-		ArrayList<Tag> listOfTags = new ArrayList<Tag>();
+		List<Tag> listOfTags = new ArrayList<>();
 		
 		// parse EBML tag
 		listOfTags.add(ParserUtils.parseTag(inputStream));

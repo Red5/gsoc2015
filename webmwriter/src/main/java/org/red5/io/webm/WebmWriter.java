@@ -19,6 +19,7 @@
 
 package org.red5.io.webm;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,7 +33,7 @@ import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WebmWriter {
+public class WebmWriter implements Closeable {
 
 	private static Logger log = LoggerFactory.getLogger(WebmWriter.class);
 
@@ -40,13 +41,17 @@ public class WebmWriter {
 
 	private RandomAccessFile dataFile;
 
-	private RandomAccessFile file;
+	@SuppressWarnings("unused")
+	private File file;
 
+	@SuppressWarnings("unused")
 	private volatile long bytesWritten;
 
 	private String filePath;
 
 	public WebmWriter(File file, boolean append) {
+		// the final version of the file will go here
+		this.file = file;
 		filePath = file.getAbsolutePath();
 		try {
 			this.append = append;
@@ -68,13 +73,10 @@ public class WebmWriter {
 					dat.createNewFile();
 				}
 				this.dataFile = new RandomAccessFile(dat, "rws");
-				// the final version of the file will go here
-				this.file = new RandomAccessFile(file, "rws");
 			}
 		} catch (Exception e) {
 			log.error("Failed to create FLV writer", e);
 		}
-
 	}
 
 	public void writeHeader() throws IOException {
@@ -103,5 +105,17 @@ public class WebmWriter {
 		byte[] hb = tag.encode();
 		bytesWritten += hb.length;
 		dataFile.write(hb);
+	}
+
+	@Override
+	public void close() throws IOException {
+		if (dataFile != null) {
+			try {
+				dataFile.close();
+				dataFile = null;
+			} catch (Throwable th) {
+				//no-op
+			}
+		}
 	}
 }

@@ -43,13 +43,18 @@ public class CompoundTag extends Tag {
 	
 	@Override
 	public String toString() {
-		StringBuilder result = new StringBuilder(getName() + "\n");
+		StringBuilder result = new StringBuilder(super.toString() + "\n");
 		for (Tag tag : subElements) {
-			result.append("    " + tag + "\n");
+			result.append("\t" + tag + "\n");
 		}
 		return result.toString();
 	}
 
+	@Override
+	public Type getType() {
+		return Type.master;
+	}
+	
 	@Override
 	public void parse(InputStream inputStream) throws IOException, ConverterException {
 		subElements = ParserUtils.parseMasterElement(inputStream, (int) getSize());

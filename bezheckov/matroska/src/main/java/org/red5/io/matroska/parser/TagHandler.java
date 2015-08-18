@@ -16,15 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.io.matroska;
+package org.red5.io.matroska.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.dtd.Tag;
 
-public interface MatroskaParser {
-	ArrayList<Tag> parse(InputStream inputStream) throws IOException, ConverterException;
+public interface TagHandler {
+	void handle(Tag tag, InputStream input) throws IOException, ConverterException;
 }

@@ -104,30 +104,24 @@ public class ParserUtils {
 		
 		int len = (fb >> 4);
 		long mask = MASK_BYTE_4;
-		switch (len) {
-			case 0b0001:
-				vint = new byte[4];
-				read = inputStream.read(vint, 1, 3);
-				assert read == 3;
-				break;
-			case 0b0010:
-				mask = MASK_BYTE_3;
-				vint = new byte[3];
-				read = inputStream.read(vint, 1, 2);
-				assert read == 2;
-				break;
-			case 0b0100:
-				mask = MASK_BYTE_2;
-				vint = new byte[2];
-				read = inputStream.read(vint, 1, 1);
-				assert read == 1;
-				break;
-			case 0b1000:
-			default:
-				read = 0;
-				mask = MASK_BYTE_1;
-				vint = new byte[1];
-				break;
+		if (len >= 0b1000) {
+			read = 0;
+			mask = MASK_BYTE_1;
+			vint = new byte[1];
+		} else if (len >= 0b0100) {
+			mask = MASK_BYTE_2;
+			vint = new byte[2];
+			read = inputStream.read(vint, 1, 1);
+			assert read == 1;
+		} else if (len >= 0b0010) {
+			mask = MASK_BYTE_3;
+			vint = new byte[3];
+			read = inputStream.read(vint, 1, 2);
+			assert read == 2;
+		} else {
+			vint = new byte[4];
+			read = inputStream.read(vint, 1, 3);
+			assert read == 3;
 		}
 		vint[0] = (byte)fb;
 		long binaryV = 0;

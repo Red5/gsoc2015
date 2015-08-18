@@ -16,50 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.io.matroska.dtd;
+package org.red5.io.matroska.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
+import java.util.List;
 
-import org.red5.io.matroska.ParserUtils;
-import org.red5.io.matroska.VINT;
+import org.red5.io.matroska.ConverterException;
+import org.red5.io.matroska.dtd.Tag;
 
-
-public class FloatTag extends Tag {
-
-	private double value;
-	
-	public FloatTag(String name, VINT id) {
-		super(name, id);
-	}
-
-	public FloatTag(String name, VINT id, VINT size) {
-		super(name, id, size);
-	}
-
-	@Override
-	public void parse(InputStream inputStream) throws IOException {
-		value = ParserUtils.parseFloat(inputStream, (int) getSize());
-	}
-	
-	@Override
-	protected void putValue(ByteBuffer bb) throws IOException {
-		bb.putDouble(value);
-	}
-	
-	public double getValue() {
-		return value;
-	}
-	
-	public FloatTag setValue(double value) {
-		this.value = value;
-		size = VINT.fromValue(8);
-		return this;
-	}
-	
-	@Override
-	public String toString() {
-		return (super.toString() + " = " + value);
-	}
+public interface MatroskaParser {
+	List<Tag> parse(InputStream inputStream) throws IOException, ConverterException;
 }

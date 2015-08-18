@@ -71,7 +71,7 @@ public class VINT {
 	
 	@Override
 	public String toString() {
-		return String.format("VINT[size=%s,value=%s]", length, value);
+		return String.format("%s(%s)", value, length);
 	}
 	
 	public static VINT fromBinary(long binary) {

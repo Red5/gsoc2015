@@ -72,6 +72,6 @@ public class BinaryTag extends Tag {
 	
 	@Override
 	public String toString() {
-		return (getName() + " = binary " + (int) getSize());
+		return (super.toString() + " = binary " + (int) getSize());
 	}
 }

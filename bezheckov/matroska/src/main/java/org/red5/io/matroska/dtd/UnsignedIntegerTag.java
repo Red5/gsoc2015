@@ -68,6 +68,6 @@ public class UnsignedIntegerTag extends Tag {
 	
 	@Override
 	public String toString() {
-		return (getName() + " = " + value);
+		return (super.toString() + " = " + value);
 	}
 }

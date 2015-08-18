@@ -29,6 +29,11 @@ import org.slf4j.LoggerFactory;
 
 public abstract class Tag {
 	static Logger log = LoggerFactory.getLogger(Tag.class);
+	public enum Type {
+		master
+		, simple
+		, primitive
+	}
 	private String name;
 
 	private VINT id;
@@ -49,6 +54,10 @@ public abstract class Tag {
 	
 	protected abstract void putValue(ByteBuffer bb) throws IOException;
 
+	public Type getType() {
+		return Type.primitive;
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -73,5 +82,10 @@ public abstract class Tag {
 		putValue(buf);
 		buf.flip();
 		return buf.array();
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("%s %s [id: %s, size: %s]", name, getType(), id, size);
 	}
 }
