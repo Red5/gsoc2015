@@ -62,7 +62,7 @@ public class WebmTest {
 		};
 		TagCrawler crawler = new TagCrawler() {
 			@Override
-			public TagHandler getHandler(String name) {
+			public TagHandler getHandler(Tag tag) {
 				return compoundHandler;
 			}
 		};

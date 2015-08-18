@@ -50,9 +50,9 @@ public class TagCrawler {
 		return this;
 	}
 	
-	public TagHandler getHandler(String name) {
-		if (handlers.containsKey(name)) {
-			return handlers.get(name);
+	public TagHandler getHandler(Tag tag) {
+		if (handlers.containsKey(tag.getName())) {
+			return handlers.get(tag.getName());
 		}
 		return null;
 	}
@@ -73,7 +73,7 @@ public class TagCrawler {
 	public void process(InputStream input) throws IOException, ConverterException {
 		while (0 != input.available()) {
 			Tag tag = ParserUtils.parseTag(input);
-			TagHandler handler = getHandler(tag.getName());
+			TagHandler handler = getHandler(tag);
 			if (null == handler) {
 				skipHandler.handle(tag, input);
 			} else {
