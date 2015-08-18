@@ -102,7 +102,11 @@ public class WebmWriter implements Closeable, TagConsumer {
 	}
 
 	public void writeTag(Tag tag) throws IOException {
-		byte[] hb = tag.encode();
+		writeTag(tag, false);
+	}
+	
+	public void writeTag(Tag tag, boolean saxMode) throws IOException {
+		byte[] hb = tag.encode(saxMode);
 		bytesWritten += hb.length;
 		dataFile.write(hb);
 	}
@@ -128,6 +132,7 @@ public class WebmWriter implements Closeable, TagConsumer {
 
 	@Override
 	public void consume(Tag tag) throws IOException {
-		writeTag(tag);
+		//TODO add mode switch
+		writeTag(tag, true);
 	}
 }

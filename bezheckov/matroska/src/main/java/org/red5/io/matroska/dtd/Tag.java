@@ -75,7 +75,7 @@ public abstract class Tag {
 	}
 	
 	public int totalSize(boolean saxMode) {
-		return (int)(id.getLength() + size.getLength() + (saxMode ? 0 : size.getValue()));
+		return (int)(id.getLength() + size.getLength() + (getType() == Type.master && saxMode ? 0 : size.getValue()));
 	}
 	
 	public byte[] encode() throws IOException {
@@ -83,7 +83,7 @@ public abstract class Tag {
 	}
 	
 	public byte[] encode(boolean saxMode) throws IOException {
-		final ByteBuffer buf = ByteBuffer.allocate(totalSize());
+		final ByteBuffer buf = ByteBuffer.allocate(totalSize(saxMode));
 		log.debug("Tag: " + this);
 		buf.put(id.encode());
 		buf.put(size.encode());

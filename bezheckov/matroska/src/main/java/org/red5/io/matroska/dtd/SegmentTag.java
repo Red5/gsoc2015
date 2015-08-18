@@ -46,7 +46,7 @@ public class SegmentTag extends Tag {
 	
 	@Override
 	public String toString() {
-		StringBuilder result = new StringBuilder(getName() + "\n");
+		StringBuilder result = new StringBuilder(super.toString() + "\n");
 		for (Tag tag : subElements) {
 			result.append("    " + tag + "\n");
 		}
@@ -78,6 +78,8 @@ public class SegmentTag extends Tag {
 
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
-		bb.put(new byte[1]); //TODO FIXME stub
+		for (Tag tag : subElements) {
+			bb.put(tag.encode());
+		}
 	}
 }
