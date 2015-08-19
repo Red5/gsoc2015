@@ -33,6 +33,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Tag {
 	static Logger log = LoggerFactory.getLogger(Tag.class);
+	/**
+	 * enum to determine the tag type
+	 *
+	 */
 	public enum Type {
 		master
 		, simple
@@ -44,7 +48,7 @@ public abstract class Tag {
 	VINT size;
 
 	/**
-	 * Constructor, internally calls {@link Tag#Tag(String, VINT, VINT)}
+	 * Constructor, internally calls {@link Tag#Tag(String, VINT, VINT)} to create tag with 0 size
 	 * 
 	 * @param name - the name of tag to be created
 	 * @param id - the id of tag to be created
@@ -66,8 +70,21 @@ public abstract class Tag {
 		this.size = size;
 	}
 
+	/**
+	 * method to read tag from inputStream given
+	 * 
+	 * @param inputStream - stream to read tag from
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any conversion errors
+	 */
 	public abstract void parse(InputStream inputStream) throws IOException, ConverterException;
 	
+	/**
+	 * method to store tag value to {@link ByteBuffer} given
+	 * 
+	 * @param bb - {@link ByteBuffer} to store value
+	 * @throws IOException - in case of any IO errors
+	 */
 	protected abstract void putValue(ByteBuffer bb) throws IOException;
 
 	/**
@@ -119,7 +136,7 @@ public abstract class Tag {
 	/**
 	 * method to get total size of this tag
 	 * 
-	 * @param saxMode - if <code>true</code> and type of tag is {@link Type#master} "contents" size will not be added
+	 * @param saxMode - if <code>true</code> and type of tag is {@value Type#master} "contents" size will not be added
 	 * @return - total size as int
 	 */
 	public int totalSize(boolean saxMode) {
@@ -157,7 +174,7 @@ public abstract class Tag {
 	}
 	
 	/**
-	 * method to get "pretty" represented {@link VINT}
+	 * method to get "pretty" represented {@link Tag}
 	 */
 	@Override
 	public String toString() {

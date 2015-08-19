@@ -33,33 +33,56 @@ import org.red5.io.matroska.VINT;
 public class CompoundTag extends Tag {
 	private ArrayList<Tag> subElements = new ArrayList<Tag>();
 	
+	/**
+	 * Constructor
+	 * 
+	 * @see Tag#Tag(String, VINT)
+	 */
 	public CompoundTag(String name, VINT id) {
 		super(name, id);
 	}
 	
+	/**
+	 * Constructor
+	 * 
+	 * @see Tag#Tag(String, VINT, VINT)
+	 */
 	public CompoundTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 	
-	@Override
-	public String toString() {
-		StringBuilder result = new StringBuilder(super.toString() + "\n");
-		for (Tag tag : subElements) {
-			result.append("\t" + tag + "\n");
-		}
-		return result.toString();
-	}
-
-	@Override
-	public Type getType() {
-		return Type.master;
-	}
-	
+	/**
+	 * @see Tag#parse(InputStream)
+	 */
 	@Override
 	public void parse(InputStream inputStream) throws IOException, ConverterException {
 		subElements = ParserUtils.parseMasterElement(inputStream, (int) getSize());
 	}
+	
+	/**
+	 * @see Tag#putValue(ByteBuffer)
+	 */
+	@Override
+	protected void putValue(ByteBuffer bb) throws IOException {
+		for (Tag tag : subElements) {
+			bb.put(tag.encode());
+		}
+	}
 
+	/**
+	 * getter for type, overriden to return {@value Type#master}
+	 */
+	@Override
+	public Type getType() {
+		return Type.master;
+	}
+
+	/**
+	 * method to add child tag to this {@link CompoundTag}, updates the size on add
+	 * 
+	 * @param ch - child {@link Tag} to be added
+	 * @return
+	 */
 	public CompoundTag add(Tag ch) {
 		subElements.add(ch);
 		long sz = getSize() + ch.totalSize();
@@ -73,10 +96,15 @@ public class CompoundTag extends Tag {
 		return this;
 	}
 	
+	/**
+	 * method to get "pretty" represented {@link Tag}
+	 */
 	@Override
-	protected void putValue(ByteBuffer bb) throws IOException {
+	public String toString() {
+		StringBuilder result = new StringBuilder(super.toString() + "\n");
 		for (Tag tag : subElements) {
-			bb.put(tag.encode());
+			result.append("\t" + tag + "\n");
 		}
+		return result.toString();
 	}
 }

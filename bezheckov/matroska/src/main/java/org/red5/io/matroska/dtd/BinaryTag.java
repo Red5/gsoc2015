@@ -25,21 +25,85 @@ import java.nio.ByteBuffer;
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
 
-
+/**
+ * http://matroska.org/technical/specs/index.html
+ * webm tag to hold "binary" value as byte[] array
+ *
+ */
 public class BinaryTag extends Tag {
-	
 	private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
 	
 	private byte[] value;
 
+	/**
+	 * Constructor
+	 * 
+	 * @see Tag#Tag(String, VINT)
+	 */
 	public BinaryTag(String name, VINT id) {
 		super(name, id);
 	}
 	
+	/**
+	 * Constructor
+	 * 
+	 * @see Tag#Tag(String, VINT, VINT)
+	 */
 	public BinaryTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 	
+	/**
+	 * @see Tag#parse(InputStream)
+	 */
+	@Override
+	public void parse(InputStream inputStream) throws IOException {
+		value = ParserUtils.parseBinary(inputStream, (int) getSize());
+	}
+
+	/**
+	 * @see Tag#putValue(ByteBuffer)
+	 */
+	@Override
+	protected void putValue(ByteBuffer bb) throws IOException {
+		bb.put(value);
+	}
+	
+	/**
+	 * getter for value
+	 * 
+	 * @return - byte array stored by this binary tag
+	 */
+	public byte[] getValue() {
+		return value;
+	}
+	
+	/**
+	 * setter for value, updates the size of this tag
+	 * 
+	 * @param value - value to be set
+	 * @return - this for chaining
+	 */
+	public BinaryTag setValue(byte[] value) {
+		this.value = value;
+		size = VINT.fromValue(value.length);
+		return this;
+	}
+	
+	/**
+	 * method to get "pretty" represented {@link Tag}
+	 */
+	@Override
+	public String toString() {
+		return (super.toString() + " = binary " + (int) getSize());
+	}
+
+	/**
+	 * Utility helper method to get string representation of given byte array
+	 * 
+	 * @param bytes - bytes to be printed
+	 * @return - String representation of byte array
+	 */
 	public static String bytesToHex(byte[] bytes) {
 		char[] hexChars = new char[bytes.length * 2];
 		for ( int j = 0; j < bytes.length; j++ ) {
@@ -48,30 +112,5 @@ public class BinaryTag extends Tag {
 			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
 		}
 		return new String(hexChars);
-	}
-
-	@Override
-	public void parse(InputStream inputStream) throws IOException {
-		value = ParserUtils.parseBinary(inputStream, (int) getSize());
-	}
-
-	@Override
-	protected void putValue(ByteBuffer bb) throws IOException {
-		bb.put(value);
-	}
-	
-	public byte[] getValue() {
-		return value;
-	}
-	
-	public BinaryTag setValue(byte[] value) {
-		this.value = value;
-		size = VINT.fromValue(value.length);
-		return this;
-	}
-	
-	@Override
-	public String toString() {
-		return (super.toString() + " = binary " + (int) getSize());
 	}
 }
