@@ -34,6 +34,10 @@ import org.red5.io.matroska.parser.TagHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class able to parse webm Tags from file
+ *
+ */
 public class WebmReader implements Closeable {
 	private static Logger log = LoggerFactory.getLogger(WebmReader.class);
 
@@ -41,6 +45,13 @@ public class WebmReader implements Closeable {
 	private final TagConsumer processor;
 	private TagCrawler crawler;
 
+	/**
+	 * Constructor
+	 * 
+	 * @param file - file to be read
+	 * @param processor - handler for the tags found
+	 * @throws FileNotFoundException - will be thrown if file not found
+	 */
 	public WebmReader(File file, TagConsumer processor) throws FileNotFoundException {
 		fis = new FileInputStream(file);
 		this.processor = processor;
@@ -63,10 +74,19 @@ public class WebmReader implements Closeable {
 		};
 	}
 
+	/**
+	 * will process given file and send all tags found to the consumer
+	 * 
+	 * @throws IOException - in case of any exception during reading and/or consumeng
+	 * @throws ConverterException - in case of any error during conversions
+	 */
 	public void process() throws IOException, ConverterException {
 		crawler.process(fis);
 	}
 	
+	/**
+	 * Will close all opened resources
+	 */
 	@Override
 	public void close() throws IOException {
 		if (fis != null) {

@@ -42,11 +42,21 @@ public class WebmTest {
 	private static Logger log = LoggerFactory.getLogger(WebmTest.class);
 	private static final String WEBM_FILE_PROPERTY = "webm.file.path";
 	
+	/**
+	 * This check will cancel further tests in case there is no system property "webm.file.path" specified
+	 * with path to the test web file.
+	 */
 	@Before
 	public void before() {
 		assumeTrue(System.getProperties().containsKey(WEBM_FILE_PROPERTY));
 	}
 	
+	/**
+	 * This test checks if test webm file can be read till the end with no exceptions
+	 * 
+	 * @throws IOException - in case of any IO exception
+	 * @throws ConverterException - in case of any conversion exception
+	 */
 	@Test
 	public void crawl() throws IOException, ConverterException {
 		final TagHandler compoundHandler = new TagHandler() {
@@ -73,6 +83,12 @@ public class WebmTest {
 		}
 	}
 	
+	/**
+	 * This test checks if test webm file can be read and then be written with no exceptions
+	 * 
+	 * @throws IOException - in case of any IO exception
+	 * @throws ConverterException - in case of any conversion exception
+	 */
 	@Test
 	public void testReaderWriter() throws IOException, ConverterException {
 		File webmF = new File(System.getProperty(WEBM_FILE_PROPERTY));

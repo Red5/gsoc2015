@@ -34,20 +34,26 @@ import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class able to write webm tags to file
+ *
+ */
 public class WebmWriter implements Closeable, TagConsumer {
 	private static Logger log = LoggerFactory.getLogger(WebmWriter.class);
 
 	private boolean append;
-
 	private RandomAccessFile dataFile;
-
 	private File file;
-
 	@SuppressWarnings("unused")
 	private volatile long bytesWritten;
-
 	private String filePath;
 
+	/**
+	 * Constructor
+	 * 
+	 * @param file - file the data need to written to
+	 * @param append - if <code>false</code> the file will be rewritten, if <code>true</code> data will be appended
+	 */
 	public WebmWriter(File file, boolean append) {
 		// the final version of the file will go here
 		this.file = file;
@@ -78,6 +84,12 @@ public class WebmWriter implements Closeable, TagConsumer {
 		}
 	}
 
+	/**
+	 * method to write webm header to the new file
+	 * 
+	 * @throws IOException - in case of IO errors
+	 * @throws ConverterException - in case of conversion errors
+	 */
 	public void writeHeader() throws IOException, ConverterException {
 		if (append) {
 			return;
@@ -101,16 +113,33 @@ public class WebmWriter implements Closeable, TagConsumer {
 		}
 	}
 
+	/**
+	 * will write tag in "dom" mode, equivalent to {@link WebmWriter#writeTag(Tag, false)}
+	 * 
+	 * @param tag - webm tag to be written
+	 * @throws IOException - in case of any IO errors
+	 */
 	public void writeTag(Tag tag) throws IOException {
 		writeTag(tag, false);
 	}
-	
+
+	/**
+	 * will write tag in given mode: in "sax" mode "master" tags will not encode their children
+	 * bytesWritten counter will be increased by the number of bytes actually written
+	 * 
+	 * @param tag - tag to be written
+	 * @param saxMode - "sax" mode if <code>true</code>, "dom" mode otherwise
+	 * @throws IOException - in case of any IO errors
+	 */
 	public void writeTag(Tag tag, boolean saxMode) throws IOException {
 		byte[] hb = tag.encode(saxMode);
 		bytesWritten += hb.length;
 		dataFile.write(hb);
 	}
 
+	/**
+	 * Will close all opened resources and "finalize" the write process
+	 */
 	@Override
 	public void close() throws IOException {
 		if (dataFile != null) {
@@ -130,6 +159,9 @@ public class WebmWriter implements Closeable, TagConsumer {
 		}
 	}
 
+	/**
+	 * @see org.red5.io.webm.TagConsumer#consume(org.red5.io.matroska.dtd.Tag)
+	 */
 	@Override
 	public void consume(Tag tag) throws IOException {
 		//TODO add mode switch
