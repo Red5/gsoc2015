@@ -33,15 +33,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Tag {
 	static Logger log = LoggerFactory.getLogger(Tag.class);
-	/**
-	 * enum to determine the tag type
-	 *
-	 */
-	public enum Type {
-		master
-		, simple
-		, primitive
-	}
 	
 	private String name;
 	private VINT id;
@@ -86,15 +77,6 @@ public abstract class Tag {
 	 * @throws IOException - in case of any IO errors
 	 */
 	protected abstract void putValue(ByteBuffer bb) throws IOException;
-
-	/**
-	 * getter for type
-	 * 
-	 * @return type of this {@link Tag}
-	 */
-	public Type getType() {
-		return Type.primitive;
-	}
 	
 	/**
 	 * getter for name
@@ -125,50 +107,25 @@ public abstract class Tag {
 	
 	/**
 	 * method to get total size of this tag: "header" + "contents"
-	 * internally calls {@link Tag#totalSize(false)}
 	 * 
 	 * @return - total size as int
 	 */
 	public int totalSize() {
-		return totalSize(false);
+		return (int)(id.getLength() + size.getLength() + size.getValue());
 	}
 	
 	/**
-	 * method to get total size of this tag
-	 * 
-	 * @param saxMode - if <code>true</code> and type of tag is {@value Type#master} "contents" size will not be added
-	 * @return - total size as int
-	 */
-	public int totalSize(boolean saxMode) {
-		return (int)(id.getLength() + size.getLength() + (getType() == Type.master && saxMode ? 0 : size.getValue()));
-	}
-	
-	/**
-	 * method to encode {@link Tag} as sequence of bytes, internally call {@link Tag#encode(false)}
+	 * method to encode {@link Tag} as sequence of bytes
 	 * 
 	 * @return - encoded {@link Tag}
 	 * @throws IOException - in case of any IO errors
 	 */
 	public byte[] encode() throws IOException {
-		return encode(false);
-	}
-	
-	/**
-	 * method to encode {@link Tag} as sequence of bytes
-	 * in "sax" mode "master" tags will not encode their children
-	 * 
-	 * @param saxMode - "sax" mode if <code>true</code>, "dom" mode otherwise
-	 * @return - encoded {@link Tag}
-	 * @throws IOException - in case of any IO errors
-	 */
-	public byte[] encode(boolean saxMode) throws IOException {
-		final ByteBuffer buf = ByteBuffer.allocate(totalSize(saxMode));
+		final ByteBuffer buf = ByteBuffer.allocate(totalSize());
 		log.debug("Tag: " + this);
 		buf.put(id.encode());
 		buf.put(size.encode());
-		if (getType() != Type.master || saxMode) {
-			putValue(buf);
-		}
+		putValue(buf);
 		buf.flip();
 		return buf.array();
 	}
@@ -178,6 +135,6 @@ public abstract class Tag {
 	 */
 	@Override
 	public String toString() {
-		return String.format("%s %s [id: %s, size: %s]", name, getType(), id, size);
+		return String.format("%s [id: %s, size: %s]", name, id, size);
 	}
 }

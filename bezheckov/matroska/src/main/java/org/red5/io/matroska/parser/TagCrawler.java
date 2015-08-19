@@ -42,19 +42,22 @@ public class TagCrawler {
 		handlers.put(name, handler);
 		return this;
 	}
+	
+	public TagCrawler addSkipHandler(String name) {
+		handlers.put(name, skipHandler);
+		return this;
+	}
 
 	public TagCrawler removeHandler(String name, TagHandler handler) {
 		if (handlers.containsKey(name)) {
 			handlers.remove(name);
+			log.debug("remove handler: " + name);
 		}
 		return this;
 	}
 	
 	public TagHandler getHandler(Tag tag) {
-		if (handlers.containsKey(tag.getName())) {
-			return handlers.get(tag.getName());
-		}
-		return null;
+		return handlers.get(tag.getName());
 	}
 	
 	public TagHandler createSkipHandler() {
@@ -74,11 +77,7 @@ public class TagCrawler {
 		while (0 != input.available()) {
 			Tag tag = ParserUtils.parseTag(input);
 			TagHandler handler = getHandler(tag);
-			if (null == handler) {
-				skipHandler.handle(tag, input);
-			} else {
-				handler.handle(tag, input);
-			}
+			handler.handle(tag, input);
 		}
 	}
 }

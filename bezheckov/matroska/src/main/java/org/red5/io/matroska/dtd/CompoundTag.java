@@ -70,14 +70,6 @@ public class CompoundTag extends Tag {
 	}
 
 	/**
-	 * getter for type, overriden to return {@value Type#master}
-	 */
-	@Override
-	public Type getType() {
-		return Type.master;
-	}
-
-	/**
 	 * method to add child tag to this {@link CompoundTag}, updates the size on add
 	 * 
 	 * @param ch - child {@link Tag} to be added

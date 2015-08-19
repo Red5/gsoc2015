@@ -43,11 +43,6 @@ public class SimpleBlock extends Tag {
 	public SimpleBlock(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
-
-	@Override
-	public Type getType() {
-		return Type.simple;
-	}
 	
 	@Override
 	public void parse(InputStream inputStream) throws IOException, ConverterException {

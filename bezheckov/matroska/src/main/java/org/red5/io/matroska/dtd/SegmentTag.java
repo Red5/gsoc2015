@@ -38,11 +38,6 @@ public class SegmentTag extends Tag {
 	public SegmentTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
-
-	@Override
-	public Type getType() {
-		return Type.master;
-	}
 	
 	@Override
 	public String toString() {
