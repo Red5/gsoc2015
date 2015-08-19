@@ -19,6 +19,8 @@
 package org.red5.io.matroska.dtd;
 
 import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Properties;
 
 import org.red5.io.matroska.ConverterException;
@@ -33,39 +35,48 @@ import org.slf4j.LoggerFactory;
  * long id = "name provided specification","java class representing tag data"
  */
 public class TagFactory {
-	static Logger log = LoggerFactory.getLogger(TagFactory.class);
-	static final Properties tagsById;
-	static final Properties tagsByName;
+	private static Logger log = LoggerFactory.getLogger(TagFactory.class);
+	private static final Map<Long, NameTag> tagsById = new Hashtable<>();
+	private static final Map<String, IdTag> tagsByName = new Hashtable<>();
 	
 	static {
-		tagsById = new Properties();
-		try (InputStream input = TagFactory.class.getResourceAsStream("matroska_type_by_id_definition.properties")) {
-			tagsById.load(input);
-		} catch (Exception e) {
-			log.error("Unexpected exception while reading properties", e);
+		{ //scope
+			Properties props = new Properties();
+			try (InputStream input = TagFactory.class.getResourceAsStream("matroska_type_by_id_definition.properties")) {
+				props.load(input);
+				log.trace("Properties are loaded");
+				for (Map.Entry<Object, Object> e : props.entrySet()) {
+					if (log.isTraceEnabled()) {
+						log.trace("Processing property: {} -> {}", e.getKey(), e.getValue());
+					}
+					tagsById.put(Long.valueOf("" + e.getKey(), 16), new NameTag(e.getValue()));
+				}
+			} catch (Exception e) {
+				log.error("Unexpected exception while reading properties", e);
+			}
 		}
-		tagsByName = new Properties();
-		try (InputStream input = TagFactory.class.getResourceAsStream("matroska_type_by_name_definition.properties")) {
-			tagsByName.load(input);
-		} catch (Exception e) {
-			log.error("Unexpected exception while reading properties", e);
+		{ //scope
+			Properties props = new Properties();
+			try (InputStream input = TagFactory.class.getResourceAsStream("matroska_type_by_name_definition.properties")) {
+				props.load(input);
+				for (Map.Entry<Object, Object> e : props.entrySet()) {
+					tagsByName.put("" + e.getKey(), new IdTag(e.getValue()));
+				}
+			} catch (Exception e) {
+				log.error("Unexpected exception while reading properties", e);
+			}
 		}
 	}
 	
 	public static Tag createTag(VINT id, VINT size) throws ConverterException {
-		String value = tagsById.getProperty(Long.toHexString(id.getBinary()));
-		if (null == value) {
+		NameTag nt = tagsById.get(id.getBinary());
+		if (null == nt) {
 			throw new ConverterException("not supported matroska tag: " + id.getBinary());
 		}
-		String[] parameters = value.split(",");
-		String className = parameters[1];
-		String name = parameters[0];
-		
 		try {
-			Class<?> type = Class.forName(TagFactory.class.getPackage().getName() + "." + className);
-			return (Tag) type
+			return (Tag) nt.clazz
 					.getConstructor(String.class, VINT.class, VINT.class)
-					.newInstance(name, id, size);
+					.newInstance(nt.name, id, size);
 		} catch (Exception e) {
 			log.error("Unexpected exception while creating tag", e);
 		}
@@ -75,21 +86,13 @@ public class TagFactory {
 	
 	public static Tag createTag(String tagName) throws ConverterException {
 		log.debug("Tag: " + tagName);
-		String value = tagsByName.getProperty(tagName);
-		if (null == value) {
+		IdTag it = tagsByName.get(tagName);
+		if (null == it) {
 			throw new ConverterException("not supported matroska tag: " + tagName);
 		}
-		String[] parameters = value.split(",");
-		String id = parameters[0];
-		String className = parameters[1];
-
-		long longId = Long.parseLong(id, 16); 
-		VINT typeVint = VINT.fromBinary(longId);
+		VINT typeVint = VINT.fromBinary(it.id);
 		try {
-			log.debug("Class name: " + TagFactory.class.getPackage().getName() + "." + className);
-			Class<?> type = Class.forName(TagFactory.class.getPackage().getName() + "." + className);
-			log.debug(TagFactory.class.getPackage().getName() + "." + className);
-			Tag newTag = (Tag) type
+			Tag newTag = (Tag) it.clazz
 					.getConstructor(String.class, VINT.class)
 					.newInstance(tagName, typeVint);
 			return newTag;
@@ -103,5 +106,29 @@ public class TagFactory {
 	@SuppressWarnings("unchecked")
 	public static <T> T create(String tagName) throws ConverterException {
 		return (T)createTag(tagName);
+	}
+	
+	private static class NameTag {
+		private String name;
+		private Class<? extends Tag> clazz;
+		
+		@SuppressWarnings("unchecked")
+		private NameTag(Object prop) throws ClassNotFoundException {
+			String[] parameters = ((String)prop).split(",");
+			this.name = parameters[0];
+			this.clazz = (Class<? extends Tag>)Class.forName(TagFactory.class.getPackage().getName() + "." + parameters[1]);
+		}
+	}
+
+	private static class IdTag {
+		private Long id;
+		private Class<? extends Tag> clazz;
+		
+		@SuppressWarnings("unchecked")
+		private IdTag(Object prop) throws ClassNotFoundException {
+			String[] parameters = ((String)prop).split(",");
+			this.id = Long.valueOf("" + parameters[0], 16);
+			this.clazz = (Class<? extends Tag>)Class.forName(TagFactory.class.getPackage().getName() + "." + parameters[1]);
+		}
 	}
 } 
