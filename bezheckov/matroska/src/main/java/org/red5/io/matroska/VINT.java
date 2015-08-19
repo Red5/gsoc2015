@@ -31,49 +31,80 @@ public class VINT {
 	public static final long MASK_BYTE_3 = 0b000111111111111111111111;
 	public static final long MASK_BYTE_2 = 0b0011111111111111;
 	public static final long MASK_BYTE_1 = 0b01111111;
-	private long binaryValue;
 	
+	private long binary;
 	private byte length;
-	
 	private long value;
 
-	public VINT(long binaryValue, byte length, long value) {
-		if (binaryValue == 0L) {
+	/**
+	 * Constructor
+	 * 
+	 * @param binary - binary value of this {@link VINT}, calculated from value if not specified
+	 * @param length - length of this {@link VINT}
+	 * @param value - value of this {@link VINT}
+	 */
+	public VINT(long binary, byte length, long value) {
+		if (binary == 0L) {
 			BitSet bs = BitSet.valueOf(new long[]{value});
 			bs.set(length * BIT_IN_BYTE - length);
-			this.binaryValue = bs.toLongArray()[0];
+			this.binary = bs.toLongArray()[0];
 		} else {
-			this.binaryValue = binaryValue;
+			this.binary = binary;
 		}
 		this.length = length;
 		this.value = value;
 	}
 	
+	/**
+	 * getter for length
+	 * 
+	 * @return - length
+	 */
 	public byte getLength() {
 		return length;
 	}
 	
+	/**
+	 * getter for binary
+	 * 
+	 * @return - binary
+	 */
 	public long getBinary() {
-		return binaryValue;
+		return binary;
 	}
 	
+	/**
+	 * getter for value
+	 * 
+	 * @return - value
+	 */
 	public long getValue() {
 		return value;
 	}
 
-	public void setValue(long value) {
-		this.value= value ;
-	}
-
+	/**
+	 * method to encode {@link VINT} as sequence of bytes
+	 * 
+	 * @return - encoded {@link VINT}
+	 */
 	public byte[] encode() {
-		return ParserUtils.getBytes(binaryValue, length);
+		return ParserUtils.getBytes(binary, length);
 	}
 	
+	/**
+	 * method to get "pretty" represented {@link VINT}
+	 */
 	@Override
 	public String toString() {
 		return String.format("%s(%s)", value, length);
 	}
 	
+	/**
+	 * method to construct {@link VINT} based on its binary representation
+	 * 
+	 * @param binary - binary value of {@link VINT}
+	 * @return {@link VINT} corresponding to this binary
+	 */
 	public static VINT fromBinary(long binary) {
 		BitSet bs = BitSet.valueOf(new long[]{binary});
 		long mask = MASK_BYTE_1;
@@ -92,6 +123,12 @@ public class VINT {
 		return new VINT(binary, length, value);
 	}
 	
+	/**
+	 * method to construct {@link VINT} based on its value
+	 * 
+	 * @param value - value of {@link VINT}
+	 * @return {@link VINT} corresponding to this value
+	 */
 	public static VINT fromValue(long value) {
 		BitSet bs = BitSet.valueOf(new long[]{value});
 		byte length = (byte)(1 + bs.length() / BIT_IN_BYTE);
