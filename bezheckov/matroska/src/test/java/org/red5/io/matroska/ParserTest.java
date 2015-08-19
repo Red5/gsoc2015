@@ -32,6 +32,10 @@ import org.red5.io.matroska.dtd.StringTag;
 import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 
+/**
+ * Class to test webm tags parse methods
+ *
+ */
 public class ParserTest {
 	static final byte[] vint1Bytes = {(byte) 0x81};
 	static final byte[] vint2Bytes = {0x41, (byte)0xF4};
@@ -46,8 +50,7 @@ public class ParserTest {
 	static final byte[] ebmlReadVersionTagBytes = {0x42, (byte) 0xf7, (byte) 0x81, (byte) 0xff};
 	
 	// size = 8, value = "matroska" -> positive scenario
-	static final byte[] ebmlDocTypeTagBytesMatroska = {0x42, (byte) 0x82, (byte) 0x88,
-			0x6d, 0x61, 0x74, 0x72, 0x6f, 0x73, 0x6b, 0x61};
+	static final byte[] ebmlDocTypeTagBytesMatroska = {0x42, (byte) 0x82, (byte) 0x88, 0x6d, 0x61, 0x74, 0x72, 0x6f, 0x73, 0x6b, 0x61};
 	
 	// size = 4, value = "webm" -> positive scenario
 	static final byte[] ebmlDocTypeTagBytesWebm = {0x42, (byte) 0x82, (byte) 0x84, 0x77, 0x65, 0x62, 0x6d};
@@ -58,19 +61,12 @@ public class ParserTest {
 	// size = 1, value = 0x37
 	static final byte[] trackEntryTagBytes = {(byte) 0xae, (byte) 0xEB};
 	
-	@Test
-	public void testParseVINT() throws IOException {
-		InputStream is = new ByteArrayInputStream(vint1Bytes);
-		VINT v1 = ParserUtils.readVINT(is);
-		assertEquals("Invalid length", v1.getLength(), 1);
-		assertEquals("Invalid value", v1.getValue(), 1);
-		
-		is = new ByteArrayInputStream(vint2Bytes);
-		VINT v2 = ParserUtils.readVINT(is);
-		assertEquals("Invalid length", v2.getLength(), 2);
-		assertEquals("Invalid value", v2.getValue(), 500);
-	}
-	
+	/**
+	 * tests if EBML tag parsed as expected
+	 * 
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any errors during conversion
+	 */
 	@Test
 	public void testParseTagEBML() throws IOException, ConverterException {
 		InputStream inputStream = new ByteArrayInputStream(ebmlTagBytes);
@@ -83,6 +79,12 @@ public class ParserTest {
 		assertEquals(1, tag.getSize());
 	}
 	
+	/**
+	 * tests if EBMLVersion tag parsed as expected
+	 * 
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any errors during conversion
+	 */
 	@Test
 	public void testParseTagEBMLVersion() throws IOException, ConverterException {
 		InputStream inputStream = new ByteArrayInputStream(ebmlVersionTagBytes);
@@ -97,6 +99,12 @@ public class ParserTest {
 		assertEquals(1, ((UnsignedIntegerTag)tag).getValue());
 	}
 	
+	/**
+	 * tests if EBMLReadVersion tag parsed as expected
+	 * 
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any errors during conversion
+	 */
 	@Test
 	public void testParseTagEBMLReadVersion() throws IOException, ConverterException {
 		InputStream inputStream = new ByteArrayInputStream(ebmlReadVersionTagBytes);
@@ -111,6 +119,12 @@ public class ParserTest {
 		assertEquals(((UnsignedIntegerTag)tag).getValue(), 255);
 	}
 	
+	/**
+	 * tests if DocType tag parsed as expected
+	 * 
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any errors during conversion
+	 */
 	@Test
 	public void testParseTagDocType() throws IOException, ConverterException {
 		InputStream inputStream = new ByteArrayInputStream(ebmlDocTypeTagBytesMatroska);

@@ -76,19 +76,18 @@ public class VINT {
 	
 	public static VINT fromBinary(long binary) {
 		BitSet bs = BitSet.valueOf(new long[]{binary});
-		byte length = (byte)(1 + bs.length() / BIT_IN_BYTE);
-		long mask = MASK_BYTE_4;
-		switch (length) {
-			case 3:
-				mask = MASK_BYTE_3;
-				break;
-			case 2:
-				mask = MASK_BYTE_2;
-				break;
-			case 1:
-				mask = MASK_BYTE_1;
-				break;
-		}
+		long mask = MASK_BYTE_1;
+		byte length = 1;
+		if (bs.length() > 3 * BIT_IN_BYTE) {
+			mask = MASK_BYTE_4;
+			length = 4;
+		} else if (bs.length() > 2 * BIT_IN_BYTE) {
+			mask = MASK_BYTE_3;
+			length = 3;
+		} else if (bs.length() > 1 * BIT_IN_BYTE) {
+			mask = MASK_BYTE_2;
+			length = 2;
+		} 
 		long value = binary & mask;
 		return new VINT(binary, length, value);
 	}

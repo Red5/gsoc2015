@@ -18,7 +18,6 @@
  */
 package org.red5.io.matroska;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
@@ -35,23 +34,17 @@ import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.TagFactory;
 import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 
+/**
+ * Class to test webm tags encode methods
+ *
+ */
 public class EncoderTest {
-	
-	@Test
-	public void createVINT() {
-		VINT v = new VINT(0x1a45dfa3, (byte)4, 0xa45dfa3);
-		VINT v1 = VINT.fromBinary(0x1a45dfa3);
-		VINT v2 = VINT.fromValue(0xa45dfa3);
-		assertEquals("VINT:: Values are different", v.getValue(), v1.getValue());
-		assertEquals("VINT:: Values are different", v.getValue(), v2.getValue());
-		
-		long[] vals = {0L, 127L, 1234567};
-		for (int i = 0; i < vals.length; ++i) {
-			VINT vi = VINT.fromValue(vals[i]);
-			assertEquals("VINT:: Values are different", vals[i], vi.getValue());
-		}
-	}
-	
+	/**
+	 * tests if created and parsed {@link Tag}s have same IDs
+	 * 
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any errors during conversion
+	 */
 	@Test
 	public void testCreateTags() throws IOException, ConverterException {
 		InputStream inputStream = new ByteArrayInputStream(ParserTest.ebmlTagBytes);
@@ -70,15 +63,12 @@ public class EncoderTest {
 		assertEquals("TrackEntry:: IDs are not equals", te1.getId(), te2.getId());
 	}
 	
-	@Test
-	public void testEncodeVINT() throws IOException, ConverterException {
-		VINT v1 = new VINT(0L, (byte)1, 1L);
-		assertArrayEquals("VINT decoded with errors", ParserTest.vint1Bytes, v1.encode());
-		
-		VINT v2 = new VINT(0L, (byte)2, 500L);
-		assertArrayEquals("VINT decoded with errors", ParserTest.vint2Bytes, v2.encode());
-	}
-
+	/**
+	 * tests if manually created and encoded "master" {@link Tag} can be parsed successfully
+	 * 
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any errors during conversion
+	 */
 	@Test
 	public void testEncodeTagEBML() throws IOException, ConverterException {
 		CompoundTag t = TagFactory.<CompoundTag>create("EBML")
@@ -90,6 +80,12 @@ public class EncoderTest {
 		//TODO FIXME, there is no possibility to check inner tag here
 	}
 
+	/**
+	 * tests if manually created and encoded "uint" {@link Tag} can be parsed successfully
+	 * 
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any errors during conversion
+	 */
 	@Test
 	public void testEncodeTagUint() throws IOException, ConverterException {
 		int[] vals = {0, 1, 500, 17000, 3000000, 250000000};
@@ -104,6 +100,12 @@ public class EncoderTest {
 		}
 	}
 
+	/**
+	 * tests if manually created and encoded "string" {@link Tag} can be parsed successfully
+	 * 
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any errors during conversion
+	 */
 	@Test
 	public void testEncodeTagString() throws IOException, ConverterException {
 		String[] vals = {null, "", "abcd", "Some examples of the encoding of integers of width 1 to 4", "A\u00ea\u00f1\u00fcC"};
@@ -118,6 +120,12 @@ public class EncoderTest {
 		}
 	}
 	
+	/**
+	 * tests if manually created and encoded "double" {@link Tag} can be parsed successfully
+	 * 
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any errors during conversion
+	 */
 	@Test
 	public void testEncodeTagDouble() throws IOException, ConverterException {
 		double[] vals = {0, .1, 500.12345, Double.MIN_NORMAL, Double.MAX_VALUE};
@@ -132,6 +140,12 @@ public class EncoderTest {
 		}
 	}
 	
+	/**
+	 * tests if manually created and encoded "date" {@link Tag} can be parsed successfully
+	 * 
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any errors during conversion
+	 */
 	@Test
 	public void testEncodeTagDate() throws IOException, ConverterException {
 		Date[] vals = {new Date()};
@@ -145,6 +159,4 @@ public class EncoderTest {
 			assertEquals("EBML:: Values are not equals", t.getValue(), ((DateTag)tag).getValue(), 1e-10);
 		}
 	}
-	
-	//2001/01/01 00:00:00 UTC
 }

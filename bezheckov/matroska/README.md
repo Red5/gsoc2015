@@ -1,6 +1,6 @@
-Project: cbrary to work with matroska file format (h264 video & PCM audio)
+Project: library to work with matroska file format (h264 video & PCM audio)
 
-Author: Dmitry Bezheckov dima00782@gmail.com
+Author: Dmitry Bezheckov dima00782@gmail.com, Artyom Savchenko armisav@gmail.com
 
 Build system: maven
 
