@@ -40,31 +40,21 @@ public class TagFactory {
 	private static final Map<String, IdTag> tagsByName = new Hashtable<>();
 	
 	static {
-		{ //scope
-			Properties props = new Properties();
-			try (InputStream input = TagFactory.class.getResourceAsStream("matroska_type_by_id_definition.properties")) {
-				props.load(input);
-				log.trace("Properties are loaded");
-				for (Map.Entry<Object, Object> e : props.entrySet()) {
-					if (log.isTraceEnabled()) {
-						log.trace("Processing property: {} -> {}", e.getKey(), e.getValue());
-					}
-					tagsById.put(Long.valueOf("" + e.getKey(), 16), new NameTag(e.getValue()));
+		Properties props = new Properties();
+		try (InputStream input = TagFactory.class.getResourceAsStream("matroska_type_by_id_definition.properties")) {
+			props.load(input);
+			log.trace("Properties are loaded");
+			for (Map.Entry<Object, Object> e : props.entrySet()) {
+				if (log.isTraceEnabled()) {
+					log.trace("Processing property: {} -> {}", e.getKey(), e.getValue());
 				}
-			} catch (Exception e) {
-				log.error("Unexpected exception while reading properties", e);
+				Long id = Long.valueOf("" + e.getKey(), 16);
+				NameTag nt = new NameTag(e.getValue());
+				tagsById.put(id, nt);
+				tagsByName.put(nt.name, new IdTag(id, nt.clazz));
 			}
-		}
-		{ //scope
-			Properties props = new Properties();
-			try (InputStream input = TagFactory.class.getResourceAsStream("matroska_type_by_name_definition.properties")) {
-				props.load(input);
-				for (Map.Entry<Object, Object> e : props.entrySet()) {
-					tagsByName.put("" + e.getKey(), new IdTag(e.getValue()));
-				}
-			} catch (Exception e) {
-				log.error("Unexpected exception while reading properties", e);
-			}
+		} catch (Exception e) {
+			log.error("Unexpected exception while reading properties", e);
 		}
 	}
 	
@@ -109,8 +99,8 @@ public class TagFactory {
 	}
 	
 	private static class NameTag {
-		private String name;
-		private Class<? extends Tag> clazz;
+		private final String name;
+		private final Class<? extends Tag> clazz;
 		
 		@SuppressWarnings("unchecked")
 		private NameTag(Object prop) throws ClassNotFoundException {
@@ -121,8 +111,13 @@ public class TagFactory {
 	}
 
 	private static class IdTag {
-		private Long id;
-		private Class<? extends Tag> clazz;
+		private final Long id;
+		private final Class<? extends Tag> clazz;
+		
+		private IdTag(Long id, Class<? extends Tag> clazz) {
+			this.id = id;
+			this.clazz = clazz;
+		}
 		
 		@SuppressWarnings("unchecked")
 		private IdTag(Object prop) throws ClassNotFoundException {

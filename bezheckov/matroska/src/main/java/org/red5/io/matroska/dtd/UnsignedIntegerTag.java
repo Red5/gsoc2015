@@ -27,33 +27,64 @@ import java.nio.ByteBuffer;
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
 
-
+/**
+ * http://matroska.org/technical/specs/index.html
+ * 
+ * UnsignedInteger tag is class able to store long
+ * 
+ */
 public class UnsignedIntegerTag extends Tag {
-	
 	private long value;
 	
+	/**
+	 * Constructor
+	 * 
+	 * @see Tag#Tag(String, VINT)
+	 */
 	public UnsignedIntegerTag(String name, VINT id) {
 		super(name, id);
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @see Tag#Tag(String, VINT, VINT)
+	 */
 	public UnsignedIntegerTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 
+	/**
+	 * @see Tag#parse(InputStream)
+	 */
 	@Override
 	public void parse(InputStream inputStream) throws IOException {
 		value = ParserUtils.parseInteger(inputStream, (int) getSize());
 	}
 	
+	/**
+	 * @see Tag#putValue(ByteBuffer)
+	 */
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
 		bb.put(ParserUtils.getBytes(value, getSize()));
 	}
 	
+	/**
+	 * getter for value
+	 * 
+	 * @return - value
+	 */
 	public long getValue() {
 		return value;
 	}
 	
+	/**
+	 * setter for value, updates the size of this tag
+	 * 
+	 * @param value - value to be set
+	 * @return - this for chaining
+	 */
 	public UnsignedIntegerTag setValue(long value) {
 		this.value = value;
 		byte length = 1;
@@ -66,6 +97,9 @@ public class UnsignedIntegerTag extends Tag {
 		return this;
 	}
 	
+	/**
+	 * method to get "pretty" represented {@link Tag}
+	 */
 	@Override
 	public String toString() {
 		return (super.toString() + " = " + value);

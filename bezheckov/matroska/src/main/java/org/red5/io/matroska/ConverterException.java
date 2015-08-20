@@ -18,14 +18,24 @@
  */
 package org.red5.io.matroska;
 
+/**
+ * Any exception happens during webm conversion
+ *
+ */
 public class ConverterException extends Exception {
+	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 
+	 * @see Exception#Exception()
 	 */
-	private static final long serialVersionUID = -9200184118058503138L;
-	
-	public ConverterException() { super(); }
-	public ConverterException(String message) { super(message); }
+	public ConverterException() {
+		super();
+	}
 
+	/**
+	 * @see Exception#Exception(String)
+	 */
+	public ConverterException(String message) {
+		super(message);
+	}
 }

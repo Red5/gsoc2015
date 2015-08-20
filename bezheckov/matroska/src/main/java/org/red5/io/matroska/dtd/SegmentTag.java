@@ -26,33 +26,44 @@ import java.util.ArrayList;
 import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
+import org.red5.io.matroska.dtd.Tag.Type;
 
+/**
+ * Special version if {@link CompoundTag}
+ *
+ */
 public class SegmentTag extends Tag {
-
 	private ArrayList<Tag> subElements = new ArrayList<Tag>();
 	
+	/**
+	 * Constructor
+	 * 
+	 * @see Tag#Tag(String, VINT)
+	 */
 	public SegmentTag(String name, VINT id) {
 		super(name, id);
 	}
 	
+	/**
+	 * Constructor
+	 * 
+	 * @see Tag#Tag(String, VINT, VINT)
+	 */
 	public SegmentTag(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 
+	/**
+	 * getter for type, overriden to return {@value Type#master}
+	 */
 	@Override
 	public Type getType() {
 		return Type.master;
 	}
-	
-	@Override
-	public String toString() {
-		StringBuilder result = new StringBuilder(super.toString() + "\n");
-		for (Tag tag : subElements) {
-			result.append("    " + tag + "\n");
-		}
-		return result.toString();
-	}
 
+	/**
+	 * @see Tag#parse(InputStream)
+	 */
 	@Override
 	public void parse(InputStream inputStream) throws IOException, ConverterException {
 		// parse meta seek information
@@ -76,10 +87,25 @@ public class SegmentTag extends Tag {
 		}
 	}
 
+	/**
+	 * @see Tag#putValue(ByteBuffer)
+	 */
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
 		for (Tag tag : subElements) {
 			bb.put(tag.encode());
 		}
+	}
+	
+	/**
+	 * method to get "pretty" represented {@link Tag}
+	 */
+	@Override
+	public String toString() {
+		StringBuilder result = new StringBuilder(super.toString() + "\n");
+		for (Tag tag : subElements) {
+			result.append("    " + tag + "\n");
+		}
+		return result.toString();
 	}
 }

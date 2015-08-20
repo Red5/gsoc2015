@@ -25,30 +25,47 @@ import java.nio.ByteBuffer;
 import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
+import org.red5.io.matroska.dtd.Tag.Type;
 
+/**
+ * Tag representing complex block of different tags
+ *
+ */
 public class SimpleBlock extends Tag {
-
 	private VINT trackNumber;
-	
 	private long timeCode;
-	
 	private boolean keyFrame;
-	
 	private byte[] binary;
 	
+	/**
+	 * Constructor
+	 * 
+	 * @see Tag#Tag(String, VINT)
+	 */
 	public SimpleBlock(String name, VINT id) {
 		super(name, id);
 	}
 	
+	/**
+	 * Constructor
+	 * 
+	 * @see Tag#Tag(String, VINT, VINT)
+	 */
 	public SimpleBlock(String name, VINT id, VINT size) {
 		super(name, id, size);
 	}
 
+	/**
+	 * getter for type, overriden to return {@value Type#simple}
+	 */
 	@Override
 	public Type getType() {
 		return Type.simple;
 	}
 	
+	/**
+	 * @see Tag#parse(InputStream)
+	 */
 	@Override
 	public void parse(InputStream inputStream) throws IOException, ConverterException {
 		trackNumber = ParserUtils.readVINT(inputStream);
@@ -57,6 +74,9 @@ public class SimpleBlock extends Tag {
 		binary = ParserUtils.parseBinary(inputStream, (int) getSize() - 4);
 	}
 
+	/**
+	 * @see Tag#putValue(ByteBuffer)
+	 */
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
 		bb.put(trackNumber.encode());
@@ -65,24 +85,47 @@ public class SimpleBlock extends Tag {
 		bb.put(binary);
 	}
 
+	/**
+	 * getter for binary
+	 * 
+	 * @return - binary
+	 */
 	public byte[] getBinary() {
 		return binary;
 	}
 
+	/**
+	 * getter for time code
+	 * 
+	 * @return - time code
+	 */
 	public long getTimeCode() {
 		return timeCode;
 	}
 
+	/**
+	 * getter for track number
+	 * 
+	 * @return - track number
+	 */
 	public int getTrackNumber() {
 		return (int)trackNumber.getValue();
 	}
+
+	/**
+	 * getter for key frame
+	 * 
+	 * @return - key frame
+	 */
+	public boolean isKeyFrame() {
+		return keyFrame;
+	}
 	
+	/**
+	 * method to get "pretty" represented {@link Tag}
+	 */
 	@Override
 	public String toString() {
 		return (super.toString() + " = binary " + binary.length);
-	}
-
-	public boolean isKeyFrame() {
-		return keyFrame;
 	}
 }

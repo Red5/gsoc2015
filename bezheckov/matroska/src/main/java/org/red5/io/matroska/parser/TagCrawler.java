@@ -29,34 +29,68 @@ import org.red5.io.matroska.dtd.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * class able to walk through the webm file and pass parsed tags to registered handlers
+ *
+ */
 public class TagCrawler {
 	private static Logger log = LoggerFactory.getLogger(TagCrawler.class);
 	private final Map<String, TagHandler> handlers = new HashMap<>();
 	private final TagHandler skipHandler;
 	
+	/**
+	 * Constructor
+	 * 
+	 */
 	public TagCrawler() {
 		skipHandler = createSkipHandler();
 	}
 	
+	/**
+	 * Method to add {@link TagHandler}
+	 * 
+	 * @param name - unique name of tag handler
+	 * @param handler - handler
+	 * @return - this for chaining
+	 */
 	public TagCrawler addHandler(String name, TagHandler handler) {
 		handlers.put(name, handler);
 		return this;
 	}
 
-	public TagCrawler removeHandler(String name, TagHandler handler) {
+	/**
+	 * Method to remove {@link TagHandler}
+	 * 
+	 * @param name - unique name of tag handler
+	 * @return - this for chaining
+	 */
+	public TagCrawler removeHandler(String name) {
 		if (handlers.containsKey(name)) {
 			handlers.remove(name);
 		}
 		return this;
 	}
-	
+
+	/**
+	 * Method to get {@link TagHandler} by tag, can be overridden to change 
+	 * the logic of handler searching
+	 * 
+	 * @param tag - tag to be handled
+	 * @return - this for chaining
+	 */
 	public TagHandler getHandler(Tag tag) {
 		if (handlers.containsKey(tag.getName())) {
 			return handlers.get(tag.getName());
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Method to create "default" handler (the one will be used if none other handlers were found)
+	 * can be overridden to change the logic
+	 * 
+	 * @return - this for chaining
+	 */
 	public TagHandler createSkipHandler() {
 		return new TagHandler() {
 			@Override
@@ -70,6 +104,13 @@ public class TagCrawler {
 		};
 	}
 	
+	/**
+	 * Method to process the input stream given, will stop as soon as input stream will be empty
+	 * 
+	 * @param input - input stream to process
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any conversion errorss
+	 */
 	public void process(InputStream input) throws IOException, ConverterException {
 		while (0 != input.available()) {
 			Tag tag = ParserUtils.parseTag(input);
