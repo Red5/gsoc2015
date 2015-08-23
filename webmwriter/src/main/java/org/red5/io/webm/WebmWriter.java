@@ -114,25 +114,14 @@ public class WebmWriter implements Closeable, TagConsumer {
 	}
 
 	/**
-	 * will write tag in "dom" mode, equivalent to {@link WebmWriter#writeTag(Tag, false)}
-	 * 
-	 * @param tag - webm tag to be written
-	 * @throws IOException - in case of any IO errors
-	 */
-	public void writeTag(Tag tag) throws IOException {
-		writeTag(tag, false);
-	}
-
-	/**
-	 * will write tag in given mode: in "sax" mode "master" tags will not encode their children
+	 * will write tag
 	 * bytesWritten counter will be increased by the number of bytes actually written
 	 * 
 	 * @param tag - tag to be written
-	 * @param saxMode - "sax" mode if <code>true</code>, "dom" mode otherwise
 	 * @throws IOException - in case of any IO errors
 	 */
-	public void writeTag(Tag tag, boolean saxMode) throws IOException {
-		byte[] hb = tag.encode(saxMode);
+	public void writeTag(Tag tag) throws IOException {
+		byte[] hb = tag.encode();
 		bytesWritten += hb.length;
 		dataFile.write(hb);
 	}
@@ -165,6 +154,6 @@ public class WebmWriter implements Closeable, TagConsumer {
 	@Override
 	public void consume(Tag tag) throws IOException {
 		//TODO add mode switch
-		writeTag(tag, true);
+		writeTag(tag);
 	}
 }
