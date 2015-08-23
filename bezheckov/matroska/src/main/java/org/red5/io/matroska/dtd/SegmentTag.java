@@ -49,8 +49,8 @@ public class SegmentTag extends Tag {
 	 * 
 	 * @see Tag#Tag(String, VINT, VINT)
 	 */
-	public SegmentTag(String name, VINT id, VINT size) {
-		super(name, id, size);
+	public SegmentTag(String name, VINT id, VINT size, byte[] data) {
+		super(name, id, size, data);
 	}
 
 	/**

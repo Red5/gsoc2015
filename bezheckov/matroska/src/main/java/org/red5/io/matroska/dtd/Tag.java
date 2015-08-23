@@ -18,6 +18,7 @@
  */
 package org.red5.io.matroska.dtd;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -45,16 +46,17 @@ public abstract class Tag {
 	
 	private String name;
 	private VINT id;
+	private byte[] data;
 	VINT size;
 
 	/**
-	 * Constructor, internally calls {@link Tag#Tag(String, VINT, VINT)} to create tag with 0 size
+	 * Constructor, internally calls {@link Tag#Tag(String, VINT, VINT, byte[])} to create tag with 0 size
 	 * 
 	 * @param name - the name of tag to be created
 	 * @param id - the id of tag to be created
 	 */
 	public Tag(String name, VINT id) {
-		this(name, id, new VINT(0L, (byte) 0, 0L));
+		this(name, id, new VINT(0L, (byte) 0, 0L), new byte[0]);
 	}
 
 	/**
@@ -64,10 +66,11 @@ public abstract class Tag {
 	 * @param id - the id of tag to be created
 	 * @param size - the size of tag to be created
 	 */
-	public Tag(String name, VINT id, VINT size) {
+	public Tag(String name, VINT id, VINT size, byte[] data) {
 		this.name = name;
 		this.id = id;
 		this.size = size;
+		this.data = data;
 	}
 
 	/**
@@ -78,6 +81,18 @@ public abstract class Tag {
 	 * @throws ConverterException - in case of any conversion errors
 	 */
 	public abstract void parse(InputStream inputStream) throws IOException, ConverterException;
+	
+	/**
+	 * method to parse tag data
+	 * internally calls {@link Tag#parse(InputStream)}
+	 * 
+	 * @throws IOException - in case of any IO errors
+	 * @throws ConverterException - in case of any conversion errors
+	 */
+	public void parse() throws IOException, ConverterException {
+		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
+		parse(byteArrayInputStream);
+	}
 	
 	/**
 	 * method to store tag value to {@link ByteBuffer} given
@@ -124,51 +139,35 @@ public abstract class Tag {
 	}
 	
 	/**
+	 * getter for data
+	 * 
+	 * @return data of this {@link Tag}
+	 */
+	public byte[] getData() {
+		return data;
+	}
+	
+	/**
 	 * method to get total size of this tag: "header" + "contents"
-	 * internally calls {@link Tag#totalSize(false)}
 	 * 
 	 * @return - total size as int
 	 */
 	public int totalSize() {
-		return totalSize(false);
+		return (int)(id.getLength() + size.getLength() + size.getValue());
 	}
 	
 	/**
-	 * method to get total size of this tag
-	 * 
-	 * @param saxMode - if <code>true</code> and type of tag is {@value Type#master} "contents" size will not be added
-	 * @return - total size as int
-	 */
-	public int totalSize(boolean saxMode) {
-		return (int)(id.getLength() + size.getLength() + (getType() == Type.master && saxMode ? 0 : size.getValue()));
-	}
-	
-	/**
-	 * method to encode {@link Tag} as sequence of bytes, internally call {@link Tag#encode(false)}
+	 * method to encode {@link Tag} as sequence of bytes
 	 * 
 	 * @return - encoded {@link Tag}
 	 * @throws IOException - in case of any IO errors
 	 */
 	public byte[] encode() throws IOException {
-		return encode(false);
-	}
-	
-	/**
-	 * method to encode {@link Tag} as sequence of bytes
-	 * in "sax" mode "master" tags will not encode their children
-	 * 
-	 * @param saxMode - "sax" mode if <code>true</code>, "dom" mode otherwise
-	 * @return - encoded {@link Tag}
-	 * @throws IOException - in case of any IO errors
-	 */
-	public byte[] encode(boolean saxMode) throws IOException {
-		final ByteBuffer buf = ByteBuffer.allocate(totalSize(saxMode));
+		final ByteBuffer buf = ByteBuffer.allocate(totalSize());
 		log.debug("Tag: " + this);
 		buf.put(id.encode());
 		buf.put(size.encode());
-		if (getType() != Type.master || saxMode) {
-			putValue(buf);
-		}
+		putValue(buf);
 		buf.flip();
 		return buf.array();
 	}

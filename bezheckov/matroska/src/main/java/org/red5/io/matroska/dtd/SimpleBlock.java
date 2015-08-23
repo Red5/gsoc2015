@@ -51,8 +51,8 @@ public class SimpleBlock extends Tag {
 	 * 
 	 * @see Tag#Tag(String, VINT, VINT)
 	 */
-	public SimpleBlock(String name, VINT id, VINT size) {
-		super(name, id, size);
+	public SimpleBlock(String name, VINT id, VINT size, byte[] data) {
+		super(name, id, size, data);
 	}
 
 	/**

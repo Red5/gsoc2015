@@ -47,8 +47,8 @@ public class CompoundTag extends Tag {
 	 * 
 	 * @see Tag#Tag(String, VINT, VINT)
 	 */
-	public CompoundTag(String name, VINT id, VINT size) {
-		super(name, id, size);
+	public CompoundTag(String name, VINT id, VINT size, byte[] data) {
+		super(name, id, size, data);
 	}
 	
 	/**
@@ -94,6 +94,13 @@ public class CompoundTag extends Tag {
 		}
 		size = new VINT(0L, length, sz);
 		return this;
+	}
+	
+	/**
+	 * method to get child elements
+	 */
+	public ArrayList<Tag> getSubElements() {
+		return subElements;
 	}
 	
 	/**

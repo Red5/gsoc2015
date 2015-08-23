@@ -91,8 +91,11 @@ public class ParserUtils {
 	}
 	
 	public static byte[] parseBinary(InputStream inputStream, final int size) throws IOException {
+		if (size == 0) {
+			return new byte[0];
+		}
 		byte value[] = new byte[size];
-		int numberOfBytesRead = inputStream.read(value, 0, value.length);
+		int numberOfBytesRead = inputStream.read(value);
 		assert numberOfBytesRead ==  value.length;
 		return value;
 	}
@@ -146,11 +149,10 @@ public class ParserUtils {
 	 * @throws ConverterException
 	 */
 	public static Tag parseTag(InputStream inputStream) throws IOException, ConverterException {
-		
 		VINT id = readVINT(inputStream);
 		VINT size = readVINT(inputStream);
-		
-		return TagFactory.createTag(id, size);
+		byte[] data = parseBinary(inputStream, (int)size.getValue());
+		return TagFactory.createTag(id, size, data);
 	}
 	
 	public static byte[] getBytes(long val, long size) {
