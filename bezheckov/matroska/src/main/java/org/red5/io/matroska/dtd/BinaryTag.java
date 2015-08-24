@@ -49,8 +49,8 @@ public class BinaryTag extends Tag {
 	 * 
 	 * @see Tag#Tag(String, VINT, VINT)
 	 */
-	public BinaryTag(String name, VINT id, VINT size, byte[] data) {
-		super(name, id, size, data);
+	public BinaryTag(String name, VINT id, VINT size) {
+		super(name, id, size);
 	}
 	
 	/**

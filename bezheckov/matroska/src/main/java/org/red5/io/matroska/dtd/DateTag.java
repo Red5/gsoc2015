@@ -33,8 +33,8 @@ public class DateTag extends UnsignedIntegerTag {
 	 * 
 	 * @see Tag#Tag(String, VINT, VINT)
 	 */
-	public DateTag(String name, VINT id, VINT size, byte[] data) {
-		super(name, id, size, data);
+	public DateTag(String name, VINT id, VINT size) {
+		super(name, id, size);
 	}
 
 	/**

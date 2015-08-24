@@ -49,8 +49,8 @@ public class StringTag extends Tag {
 	 * 
 	 * @see Tag#Tag(String, VINT, VINT)
 	 */
-	public StringTag(String name, VINT id, VINT size, byte[] data) {
-		super(name, id, size, data);
+	public StringTag(String name, VINT id, VINT size) {
+		super(name, id, size);
 	}
 	
 	/**

@@ -40,7 +40,7 @@ public class ParserTest {
 	static final byte[] vint1Bytes = {(byte) 0x81};
 	static final byte[] vint2Bytes = {0x41, (byte)0xF4};
 	
-	// size = 1, stub value = 0x37
+	// size = 1, value = 0x37
 	static final byte[] ebmlTagBytes = {0x1A, 0x45, (byte) 0xdf, (byte) 0xa3, (byte) 0x81, 0x37};
 	
 	// size = 1, value = 1
@@ -58,8 +58,8 @@ public class ParserTest {
 	// size = 4, value = "arch" -> negative scenario
 	static final byte[] ebmlDocTypeTagBytesArch = {0x42, (byte) 0x82, (byte) 0x84, 0x61, 0x72, 0x63, 0x68};
 	
-	// size = 1, stub value = 0x37
-	static final byte[] trackEntryTagBytes = {(byte) 0xae, (byte) 0x81, 0x37};
+	// size = 1, value = 0x37
+	static final byte[] trackEntryTagBytes = {(byte) 0xae, (byte) 0xEB};
 	
 	/**
 	 * tests if EBML tag parsed as expected
@@ -95,7 +95,7 @@ public class ParserTest {
 		assertEquals("EBMLVersion", tag.getName());
 		assertEquals(0x4286, tag.getId());
 		assertEquals(1, tag.getSize());
-		tag.parse();
+		tag.parse(inputStream);
 		assertEquals(1, ((UnsignedIntegerTag)tag).getValue());
 	}
 	
@@ -115,7 +115,7 @@ public class ParserTest {
 		assertEquals(tag.getName(), "EBMLReadVersion");
 		assertEquals(tag.getId(), 0x42f7);
 		assertEquals(tag.getSize(), 1);
-		tag.parse();
+		tag.parse(inputStream);
 		assertEquals(((UnsignedIntegerTag)tag).getValue(), 255);
 	}
 	
@@ -133,7 +133,7 @@ public class ParserTest {
 		assertEquals(tag.getName(), "DocType");
 		assertEquals(tag.getId(), 0x4282);
 		assertEquals(tag.getSize(), 8);
-		tag.parse();
+		tag.parse(inputStream);
 		assertEquals(((StringTag)tag).getValue(), "matroska");
 		
 		inputStream = new ByteArrayInputStream(ebmlDocTypeTagBytesWebm);
@@ -141,7 +141,7 @@ public class ParserTest {
 		assertEquals(tag.getName(), "DocType");
 		assertEquals(tag.getId(), 0x4282);
 		assertEquals(tag.getSize(), 4);
-		tag.parse();
+		tag.parse(inputStream);
 		assertEquals(((StringTag)tag).getValue(), "webm");
 		
 		inputStream = new ByteArrayInputStream(ebmlDocTypeTagBytesArch);
@@ -149,7 +149,7 @@ public class ParserTest {
 		assertEquals(tag.getName(), "DocType");
 		assertEquals(tag.getId(), 0x4282);
 		assertEquals(tag.getSize(), 4);
-		tag.parse();
+		tag.parse(inputStream);
 		assertFalse("webm".equals(((StringTag)tag).getValue()));
 		assertFalse("matroska".equals(((StringTag)tag).getValue()));
 	}

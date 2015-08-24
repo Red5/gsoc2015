@@ -48,8 +48,8 @@ public class FloatTag extends Tag {
 	 * 
 	 * @see Tag#Tag(String, VINT, VINT)
 	 */
-	public FloatTag(String name, VINT id, VINT size, byte[] data) {
-		super(name, id, size, data);
+	public FloatTag(String name, VINT id, VINT size) {
+		super(name, id, size);
 	}
 
 	/**
