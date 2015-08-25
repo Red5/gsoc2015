@@ -34,6 +34,8 @@ public class ConverterException extends Exception {
 
 	/**
 	 * @see Exception#Exception(String)
+	 * 
+	 * @param message - string message for this exception
 	 */
 	public ConverterException(String message) {
 		super(message);

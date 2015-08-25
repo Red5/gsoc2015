@@ -39,6 +39,9 @@ public class BinaryTag extends Tag {
 	 * Constructor
 	 * 
 	 * @see Tag#Tag(String, VINT)
+	 *
+	 * @param name - the name of tag to be created
+	 * @param id - the id of tag to be created
 	 */
 	public BinaryTag(String name, VINT id) {
 		super(name, id);
@@ -48,6 +51,10 @@ public class BinaryTag extends Tag {
 	 * Constructor
 	 * 
 	 * @see Tag#Tag(String, VINT, VINT)
+	 * 
+	 * @param name - the name of tag to be created
+	 * @param id - the id of tag to be created
+	 * @param size - the size of tag to be created
 	 */
 	public BinaryTag(String name, VINT id, VINT size) {
 		super(name, id, size);

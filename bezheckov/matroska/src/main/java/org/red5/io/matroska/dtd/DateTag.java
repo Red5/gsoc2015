@@ -23,6 +23,9 @@ public class DateTag extends UnsignedIntegerTag {
 	 * Constructor
 	 * 
 	 * @see Tag#Tag(String, VINT)
+	 *
+	 * @param name - the name of tag to be created
+	 * @param id - the id of tag to be created
 	 */
 	public DateTag(String name, VINT id) {
 		super(name, id);
@@ -32,6 +35,10 @@ public class DateTag extends UnsignedIntegerTag {
 	 * Constructor
 	 * 
 	 * @see Tag#Tag(String, VINT, VINT)
+	 * 
+	 * @param name - the name of tag to be created
+	 * @param id - the id of tag to be created
+	 * @param size - the size of tag to be created
 	 */
 	public DateTag(String name, VINT id, VINT size) {
 		super(name, id, size);

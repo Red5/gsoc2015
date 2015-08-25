@@ -39,6 +39,9 @@ public class StringTag extends Tag {
 	 * Constructor
 	 * 
 	 * @see Tag#Tag(String, VINT)
+	 *
+	 * @param name - the name of tag to be created
+	 * @param id - the id of tag to be created
 	 */
 	public StringTag(String name, VINT id) {
 		super(name, id);
@@ -48,6 +51,10 @@ public class StringTag extends Tag {
 	 * Constructor
 	 * 
 	 * @see Tag#Tag(String, VINT, VINT)
+	 * 
+	 * @param name - the name of tag to be created
+	 * @param id - the id of tag to be created
+	 * @param size - the size of tag to be created
 	 */
 	public StringTag(String name, VINT id, VINT size) {
 		super(name, id, size);
@@ -83,6 +90,7 @@ public class StringTag extends Tag {
 	 * 
 	 * @param value - value to be set
 	 * @return - this for chaining
+	 * @throws UnsupportedEncodingException - in case UTF-8 encoding is not supported
 	 */
 	public StringTag setValue(String value) throws UnsupportedEncodingException {
 		if (value != null) {

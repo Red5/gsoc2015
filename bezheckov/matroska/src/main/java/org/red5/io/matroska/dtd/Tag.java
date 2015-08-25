@@ -125,7 +125,7 @@ public abstract class Tag {
 	
 	/**
 	 * method to get total size of this tag: "header" + "contents"
-	 * internally calls {@link Tag#totalSize(false)}
+	 * internally calls {@link Tag#totalSize(boolean)} with saxMode <code>false</code>
 	 * 
 	 * @return - total size as int
 	 */
@@ -136,7 +136,7 @@ public abstract class Tag {
 	/**
 	 * method to get total size of this tag
 	 * 
-	 * @param saxMode - if <code>true</code> and type of tag is {@value Type#master} "contents" size will not be added
+	 * @param saxMode - if <code>true</code> and type of tag is {@link Type#master} "contents" size will not be added
 	 * @return - total size as int
 	 */
 	public int totalSize(boolean saxMode) {
@@ -144,7 +144,8 @@ public abstract class Tag {
 	}
 	
 	/**
-	 * method to encode {@link Tag} as sequence of bytes, internally call {@link Tag#encode(false)}
+	 * method to encode {@link Tag} as sequence of bytes, internally calls {@link Tag#encode(boolean)}
+	 *  with saxMode <code>false</code>
 	 * 
 	 * @return - encoded {@link Tag}
 	 * @throws IOException - in case of any IO errors

@@ -37,6 +37,9 @@ public class CompoundTag extends Tag {
 	 * Constructor
 	 * 
 	 * @see Tag#Tag(String, VINT)
+	 *
+	 * @param name - the name of tag to be created
+	 * @param id - the id of tag to be created
 	 */
 	public CompoundTag(String name, VINT id) {
 		super(name, id);
@@ -46,6 +49,10 @@ public class CompoundTag extends Tag {
 	 * Constructor
 	 * 
 	 * @see Tag#Tag(String, VINT, VINT)
+	 * 
+	 * @param name - the name of tag to be created
+	 * @param id - the id of tag to be created
+	 * @param size - the size of tag to be created
 	 */
 	public CompoundTag(String name, VINT id, VINT size) {
 		super(name, id, size);
@@ -70,7 +77,7 @@ public class CompoundTag extends Tag {
 	}
 
 	/**
-	 * getter for type, overriden to return {@value Type#master}
+	 * getter for type, overriden to return {@link Type#master}
 	 */
 	@Override
 	public Type getType() {
@@ -81,7 +88,7 @@ public class CompoundTag extends Tag {
 	 * method to add child tag to this {@link CompoundTag}, updates the size on add
 	 * 
 	 * @param ch - child {@link Tag} to be added
-	 * @return
+	 * @return - this for chaining
 	 */
 	public CompoundTag add(Tag ch) {
 		subElements.add(ch);
