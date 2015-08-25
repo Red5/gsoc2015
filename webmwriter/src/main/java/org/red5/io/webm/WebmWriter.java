@@ -114,7 +114,7 @@ public class WebmWriter implements Closeable, TagConsumer {
 	}
 
 	/**
-	 * will write tag in "dom" mode, equivalent to {@link WebmWriter#writeTag(Tag, false)}
+	 * will write tag in "dom" mode, equivalent to {@link WebmWriter#writeTag(Tag, boolean)} with saxMode set to <code>false</code>
 	 * 
 	 * @param tag - webm tag to be written
 	 * @throws IOException - in case of any IO errors
