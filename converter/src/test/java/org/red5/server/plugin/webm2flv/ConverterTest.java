@@ -20,31 +20,31 @@ package org.red5.server.plugin.webm2flv;
 
 import static org.junit.Assume.assumeTrue;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * Unit test for simple App.
- */
-public class AppTest {
-	private static final String WEBM_FILE_PROPERTY = "webm.file.path";
+public class ConverterTest {
+	private static final String WEBM_INFILE_PROPERTY = "webm.in.file";
+	private static final String FLV_OUTFILE_PROPERTY = "flv.out.file";
 	
 	@Before
 	public void before() {
-		assumeTrue(System.getProperties().containsKey(WEBM_FILE_PROPERTY));
+		//assumeTrue(System.getProperties().containsKey(WEBM_INFILE_PROPERTY));
+		//assumeTrue(System.getProperties().containsKey(FLV_OUTFILE_PROPERTY));
 	}
 	
 	@Test
-	public void testApp() throws FileNotFoundException {
-		File webmF = new File(System.getProperty(WEBM_FILE_PROPERTY));
-		WebM2FLVPlugin.convert(new FileInputStream(webmF), new ByteArrayOutputStream());
+	public void testConvert() throws FileNotFoundException {
+		File webmF = new File("/home/dbezheckov/Documents/gsoc/sample.mkv");
+		File flvF = new File("/home/dbezheckov/Documents/gsoc/example.flv");
 		assertTrue("Invalid webM file is specified", webmF.exists() && webmF.isFile());
+		WebM2FLVPlugin.convert(new FileInputStream(webmF), new FileOutputStream(flvF));
 	}
 }
