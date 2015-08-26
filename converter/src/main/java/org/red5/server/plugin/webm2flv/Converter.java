@@ -21,11 +21,9 @@ package org.red5.server.plugin.webm2flv;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
 
 import org.red5.server.plugin.webm2flv.flv.FLVOnMetaData;
 import org.red5.server.plugin.webm2flv.flv.FLVWriter;
-import org.red5.server.plugin.webm2flv.flv.TagHandler;
 import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.dtd.BinaryTag;
@@ -34,14 +32,17 @@ import org.red5.io.matroska.dtd.SimpleBlock;
 import org.red5.io.matroska.dtd.StringTag;
 import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.UnsignedIntegerTag;
+import org.red5.io.matroska.parser.TagCrawler;
+import org.red5.io.matroska.parser.TagHandler;
 
 /**
  * class for convert webm/mkv h264 video and pcm_16_le audio to flv
  * with same video and audio encoding
  */
 public class Converter {
+	private OutputStream output;
 	
-	private HashMap<String, TagHandler> handlers = new HashMap<>();
+	private final TagCrawler crawler;
 	
 	private FLVOnMetaData onMetaData;
 	
@@ -60,20 +61,12 @@ public class Converter {
 	private int currentVideoTimestamp = 0;
 	
 	public Converter() {
+		crawler = new TagCrawler();
 		
-		TagHandler enterHandler = new TagHandler() {
+		crawler.addHandler("DocType", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output) {
-				// nothing to do
-				// this handler is used for compound tags, so as not to skip the sub tags 
-			}
-		};
-		
-		handlers.put("DocType", new TagHandler() {
-			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
 				String docType = ((StringTag)tag).getValue();
 				if (!"matroska".equals(docType) && !"webm".equals(docType)) {
 					throw new ConverterException("not supported document type " + docType);
@@ -81,117 +74,115 @@ public class Converter {
 			}
 		});
 		
-		handlers.put("Segment", new TagHandler() {
+		crawler.addHandler("Segment", new TagHandler() {			
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output) throws IOException{
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
 				FLVWriter.writeHeader(output);
 			}
 		});
 		
-		handlers.put("Info", new TagHandler() {
+		crawler.addHandler("Info", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output) {
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
 				onMetaData = new FLVOnMetaData();
 			}
 		});
 		
-		handlers.put("Duration", new TagHandler() {
+		crawler.addHandler("Duration", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
 				onMetaData.setDuration(((FloatTag)tag).getValue() / 1000.0); // in seconds
 			}
 		});
 		
-		handlers.put("Tracks", enterHandler);
-		handlers.put("TrackEntry", enterHandler);
-		handlers.put("TrackNumber", new TagHandler() {
+		TagHandler enterHandler = new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				// nothing to do
+				// this handler is used for compound tags, so as not to skip the sub tags
+			}
+		};
+		
+		crawler.addHandler("Tracks", enterHandler);
+		crawler.addHandler("TrackEntry", enterHandler);
+		
+		crawler.addHandler("TrackNumber", new TagHandler() {
+			@Override
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
 				lastTrackNumber = (int) ((UnsignedIntegerTag)tag).getValue();
 			}
 		});
 		
-		handlers.put("Video", new TagHandler() {
+		crawler.addHandler("Video", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
 				videoTrackNumber = lastTrackNumber;
 			}
 		});
 		
-		handlers.put("PixelWidth", new TagHandler() {
+		crawler.addHandler("PixelWidth", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
 				onMetaData.setWidth(((UnsignedIntegerTag)tag).getValue());
 			}
 		});
 		
-		handlers.put("PixelHeight", new TagHandler() {
+		crawler.addHandler("PixelHeight", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
 				onMetaData.setHeight(((UnsignedIntegerTag)tag).getValue());
 			}
 		});
 		
-		handlers.put("CodecPrivate", new TagHandler() {
+		crawler.addHandler("CodecPrivate", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
 				codecPrivate = ((BinaryTag)tag).getValue();
 			}
 		});
 		
-		handlers.put("Audio", new TagHandler() {
+		crawler.addHandler("Audio", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
 				audioTrackNumber = lastTrackNumber;
 			}
 		});
 		
-		handlers.put("SamplingFrequency", new TagHandler() {
+		crawler.addHandler("SamplingFrequency", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
-				onMetaData.setAudioSampleRate(((FloatTag)tag).getValue());
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
+				onMetaData.setAudioSampleRate(((FloatTag)tag).getValue()); 
 			}
 		});
 		
-		handlers.put("BitDepth", new TagHandler() {
+		crawler.addHandler("BitDepth", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
 				onMetaData.setAudioSampleSize(((UnsignedIntegerTag)tag).getValue());
 				FLVWriter.writeOnMetaDataTag(onMetaData, output);
 				FLVWriter.writeVideoTag(0, 0, codecPrivate, true, (byte) 0, output);
 			}
 		});
 		
-		handlers.put("Channels", new TagHandler() {
+		crawler.addHandler("Channels", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
 				onMetaData.setStereo(2 == ((UnsignedIntegerTag)tag).getValue());
 			}
 		});
 		
-		handlers.put("CodecID", new TagHandler() {
+		crawler.addHandler("CodecID", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
 				String codecName = ((StringTag)tag).getValue();
 				if (!"V_MPEG4/ISO/AVC".equals(codecName) && !"A_PCM/INT/LIT".equals(codecName)) {
 					throw new ConverterException("not supported codec " + codecName);
@@ -199,22 +190,20 @@ public class Converter {
 			}
 		});
 		
-		handlers.put("Cluster", enterHandler);
+		crawler.addHandler("Cluster", enterHandler);
 		
-		handlers.put("Timecode", new TagHandler() {
+		crawler.addHandler("Timecode", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
 				clusterTimecode = ((UnsignedIntegerTag)tag).getValue();
 			}
 		});
 		
-		handlers.put("SimpleBlock", new TagHandler() {
+		crawler.addHandler("SimpleBlock", new TagHandler() {
 			@Override
-			public void handle(Tag tag, InputStream input, OutputStream output)
-					throws IOException, ConverterException {
-				tag.parse(input);
+			public void handle(Tag tag, InputStream is) throws IOException, ConverterException {
+				tag.parse(is);
 				int trackNumber = ((SimpleBlock)tag).getTrackNumber();
 				long timeCode = ((SimpleBlock)tag).getTimeCode();
 				byte[] data = ((SimpleBlock)tag).getBinary();
@@ -260,15 +249,7 @@ public class Converter {
 		}
 		
 		// 2. read through all tags and gather info to output, like a SAX parser
-		while (0 != input.available()) {
-			tag = ParserUtils.parseTag(input);
-			TagHandler tagHanlder = handlers.get(tag.getName());
-			if (null != tagHanlder) {
-				tagHanlder.handle(tag, input, output);
-			}
-			else {
-				ParserUtils.skip(tag.getSize(), input);
-			}
-		}
+		this.output = output;
+		crawler.process(input);
 	}
 }
