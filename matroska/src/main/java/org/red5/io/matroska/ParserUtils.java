@@ -33,6 +33,7 @@ import static org.red5.io.matroska.VINT.MASK_BYTE_1;
 import static org.red5.io.matroska.VINT.MASK_BYTE_2;
 import static org.red5.io.matroska.VINT.MASK_BYTE_3;
 import static org.red5.io.matroska.VINT.MASK_BYTE_4;
+import static org.red5.io.matroska.VINT.MASK_BYTE_8;
 
 public class ParserUtils {
 	public static final int BIT_IN_BYTE = 8;
@@ -146,7 +147,8 @@ public class ParserUtils {
 	 */
 	public static VINT readVINT(InputStream inputStream) throws IOException {
 		byte[] vint;
-		int fb = inputStream.read(), read;
+		int fb = inputStream.read();
+		int read = 0;
 		assert fb > 0;
 		
 		int len = (fb >> 4);
@@ -165,10 +167,15 @@ public class ParserUtils {
 			vint = new byte[3];
 			read = inputStream.read(vint, 1, 2);
 			assert read == 2;
-		} else {
+		} else if (len >= 0b0001) {
 			vint = new byte[4];
 			read = inputStream.read(vint, 1, 3);
 			assert read == 3;
+		} else {
+			mask = MASK_BYTE_8;
+			vint = new byte[8];
+			read = inputStream.read(vint, 1, 7);
+			assert read == 7;
 		}
 		vint[0] = (byte)fb;
 		long binaryV = 0;

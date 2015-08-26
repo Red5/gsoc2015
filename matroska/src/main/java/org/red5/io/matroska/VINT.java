@@ -27,6 +27,7 @@ import java.util.BitSet;
  * <a href="http://matroska.org/technical/specs/rfc/index.html">EBML RFC</a>
  */
 public class VINT {
+	public static final long MASK_BYTE_8 = 0b0000000011111111111111111111111111111111111111111111111111111111L;
 	public static final long MASK_BYTE_4 = 0b00001111111111111111111111111111;
 	public static final long MASK_BYTE_3 = 0b000111111111111111111111;
 	public static final long MASK_BYTE_2 = 0b0011111111111111;
