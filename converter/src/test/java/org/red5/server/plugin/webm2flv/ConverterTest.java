@@ -36,14 +36,14 @@ public class ConverterTest {
 	
 	@Before
 	public void before() {
-		//assumeTrue(System.getProperties().containsKey(WEBM_INFILE_PROPERTY));
-		//assumeTrue(System.getProperties().containsKey(FLV_OUTFILE_PROPERTY));
+		assumeTrue(System.getProperties().containsKey(WEBM_INFILE_PROPERTY));
+		assumeTrue(System.getProperties().containsKey(FLV_OUTFILE_PROPERTY));
 	}
 	
 	@Test
 	public void testConvert() throws FileNotFoundException {
-		File webmF = new File("/home/dbezheckov/Documents/gsoc/sample.mkv");
-		File flvF = new File("/home/dbezheckov/Documents/gsoc/example.flv");
+		File webmF = new File(System.getProperty(WEBM_INFILE_PROPERTY));
+		File flvF = new File(System.getProperty(FLV_OUTFILE_PROPERTY));
 		assertTrue("Invalid webM file is specified", webmF.exists() && webmF.isFile());
 		WebM2FLVPlugin.convert(new FileInputStream(webmF), new FileOutputStream(flvF));
 	}
