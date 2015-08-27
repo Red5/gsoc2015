@@ -6,4 +6,4 @@ Build system: maven
 
 Build instruction: mvn install
 
-Test instruction: mvn test
+Test instruction: mvn -Dwebm.in.file=path_to_webm_file.webm -Dflv.out.file=path_to_flv_file.flv test
