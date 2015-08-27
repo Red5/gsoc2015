@@ -18,21 +18,23 @@
  */
 package org.red5.server.sctp.packet.chunks;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.Mac;
+
 import org.red5.server.sctp.IAssociationControl;
 import org.red5.server.sctp.IServerChannelControl;
 import org.red5.server.sctp.SctpException;
+import org.red5.server.sctp.IAssociationControl.State;
+import org.red5.server.sctp.packet.SctpPacket;
 
 public final class InitAck extends Chunk {
 	
 	private static final int MANDATORY_FIELD_SIZE = 16;
-	
-	private static final int DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT = 1024;
-	
-	private static final int DEFAULT_NUMBER_OF_OUTBOUND_STREAM = 1;
-	
-	private static final int DEFAULT_NUMBER_OF_INBOUND_STREAM = 1;
 	
 	private int initiateTag;
 	
@@ -46,38 +48,35 @@ public final class InitAck extends Chunk {
 	
 	StateCookie stateCookie;
 	
-	public InitAck(byte flags, short length, byte[] data) {
-		super(ChunkType.INIT_ACK, flags, length, data);
-	}
+	byte[] stateCookieBytes;
 	
 	public InitAck(final byte[] data, int offset, int length) throws SctpException {
 		super(data, offset, length);
 		assert length - offset - CHUNK_HEADER_SIZE > MANDATORY_FIELD_SIZE;
-		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset + CHUNK_HEADER_SIZE, length - offset - CHUNK_HEADER_SIZE);
+		ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset + CHUNK_HEADER_SIZE, MANDATORY_FIELD_SIZE);
 		initiateTag = byteBuffer.getInt();
 		advertisedReceiverWindowCredit = byteBuffer.getInt();
 		numberOfOutboundStreams = byteBuffer.getShort() & 0xffff;
 		numberOfInboundStreams = byteBuffer.getShort() & 0xffff;
 		initialTSN = byteBuffer.getInt();
-		stateCookie = new StateCookie(data, offset, length);
+		stateCookie = new StateCookie(data, offset + MANDATORY_FIELD_SIZE + CHUNK_HEADER_SIZE, length - (MANDATORY_FIELD_SIZE + CHUNK_HEADER_SIZE));
 	}
 	
-	public InitAck(int initiateTag, int initialTSN, byte[] stateCookie) {
+	public InitAck(int initiateTag, int initialTSN, StateCookie stateCookie, Mac mac) throws InvalidKeyException, NoSuchAlgorithmException {
 		super(ChunkType.INIT_ACK, (byte)0x00);
-		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE + stateCookie.length);
-		byteBuffer.putInt(initiateTag);
-		byteBuffer.putInt(DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT);
-		byteBuffer.putShort((short) DEFAULT_NUMBER_OF_OUTBOUND_STREAM);
-		byteBuffer.putShort((short) DEFAULT_NUMBER_OF_INBOUND_STREAM);
-		byteBuffer.putInt(initialTSN);
-		byteBuffer.put(stateCookie);
-		super.setData(byteBuffer.toString().getBytes());
-		super.setLength(MANDATORY_FIELD_SIZE + stateCookie.length);
+		this.initiateTag = initiateTag;
+		this.initialTSN = initialTSN;
+		this.stateCookie = stateCookie;
+		stateCookieBytes = stateCookie.getBytes(mac);
+		this.numberOfInboundStreams = IAssociationControl.DEFAULT_NUMBER_OF_INBOUND_STREAM;
+		this.numberOfOutboundStreams = IAssociationControl.DEFAULT_NUMBER_OF_OUTBOUND_STREAM;
+		this.advertisedReceiverWindowCredit = IAssociationControl.DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT;
+		super.setLength(MANDATORY_FIELD_SIZE + stateCookieBytes.length + super.getSize());
 	}
 	
 	@Override
 	public byte[] getBytes() {
-		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE + CHUNK_HEADER_SIZE);
+		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE + super.getSize() + stateCookieBytes.length);
 		byte[] data = super.getBytes();
 		byteBuffer.put(data);
 		byteBuffer.putInt(initiateTag);
@@ -85,17 +84,35 @@ public final class InitAck extends Chunk {
 		byteBuffer.putShort((short) numberOfOutboundStreams);
 		byteBuffer.putShort((short) numberOfInboundStreams);
 		byteBuffer.putInt(initialTSN);
-		return byteBuffer.toString().getBytes();
+		byteBuffer.put(stateCookieBytes);
+		
+		byteBuffer.clear();
+		byte[] result = new byte[byteBuffer.capacity()];
+		byteBuffer.get(result, 0, result.length);
+		return result;
 	}
 	
 	@Override
-	public void apply(IAssociationControl channel) {
-		// TODO Auto-generated method stub
+	public int getSize() {
+		return MANDATORY_FIELD_SIZE + stateCookie.getSize() + super.getSize();
+	}
+	
+	@Override
+	public void apply(IAssociationControl channel) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SctpException {
+		if (channel.getState() != State.COOKIE_WAIT) {
+			throw new SctpException("init ack chunk : wrong state " + channel.getState());
+		}
+		
+		// send cookie echo
+		CookieEcho cookieEcho = new CookieEcho(stateCookie.getBytes(null));
+		SctpPacket packet = new SctpPacket((short) channel.getSourcePort(), (short)channel.getDestinationPort(), 0, cookieEcho);
+		channel.sendPacket(packet);
+		channel.setState(State.COOKIE_ECHOED);
 	}
 
 	@Override
-	public void apply(InetSocketAddress address, IServerChannelControl server) {
-		// TODO Auto-generated method stub
+	public void apply(InetSocketAddress address, IServerChannelControl server) throws SctpException {
+		throw new SctpException("init ack chunk : not using with server");
 	}
 	
 	public int getInitiateTag() {

@@ -36,8 +36,6 @@ public abstract class Chunk {
 	// type(1 byte) + flags(1 byte) + length(2 byte)
 	protected static final int CHUNK_HEADER_SIZE = 4;
 	
-	private byte[] data;
-	
 	private ChunkType type;
 	
 	private byte flags;
@@ -55,44 +53,40 @@ public abstract class Chunk {
 		this.length = byteBuffer.getShort() & 0xffff;
 	}
 	
-	public Chunk(final ChunkType type, final byte flags, final short length, final byte[] data) {
+	public Chunk(final ChunkType type, final byte flags, final short length) {
 		this.type = type;
 		this.flags = flags;
 		this.length = length;
-		this.data = data;
 	}
-	
-	public abstract void apply(IAssociationControl channel) throws SctpException, IOException;
-	
-	public abstract void apply(InetSocketAddress address, IServerChannelControl server)
-			throws SctpException, InvalidKeyException, NoSuchAlgorithmException, IOException;
 	
 	public Chunk(final ChunkType type, final byte flags) {
 		this.type = type;
 		this.flags = flags;
 	}
+	
+	public abstract void apply(IAssociationControl channel)
+			throws SctpException, IOException, InvalidKeyException, NoSuchAlgorithmException;
+	
+	public abstract void apply(InetSocketAddress address, IServerChannelControl server)
+			throws SctpException, InvalidKeyException, NoSuchAlgorithmException, IOException;
 
 	public int getSize() {
-		return CHUNK_HEADER_SIZE + length;
+		return CHUNK_HEADER_SIZE;
 	}
 
 	public byte[] getBytes() {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE);
 		byteBuffer.put((byte)type.getValue());
 		byteBuffer.put(flags);
-		byteBuffer.putShort((short)length);
-		byte[] data = new byte[byteBuffer.limit()];
-		byteBuffer.flip();
-		byteBuffer.get(data);
+		byteBuffer.putShort((short)(getSize() & 0xffff));
 		
-		return data;
+		byteBuffer.clear();
+		byte[] result = new byte[byteBuffer.capacity()];
+		byteBuffer.get(result, 0, result.length);
+		return result;
 	}
 	
 	protected void setLength(int length) {
 		this.length = length;
-	}
-	
-	protected void setData(byte[] data) {
-		this.data = data;
 	}
 }

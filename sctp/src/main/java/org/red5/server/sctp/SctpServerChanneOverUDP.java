@@ -73,16 +73,18 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 	public SctpChannel accept() throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
 		logger.setLevel(Level.INFO);
 		
+		DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
+		SctpPacket packet = null;
 		while (true) {
-			DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
 			serverSocket.receive(receivePacket);
-			SctpPacket packet = null;
 			try {
 				packet = new SctpPacket(buffer, 0, receivePacket.getLength());
 			} catch (SctpException e) {
 				logger.log(Level.WARNING, e.getMessage());
 				continue;
 			}
+			
+			logger.log(Level.INFO, "receive new packet");
 			
 			InetSocketAddress address = new InetSocketAddress(receivePacket.getAddress(), receivePacket.getPort());
 			packet.apply(address, this);
@@ -113,9 +115,9 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 	}
 	
 	@Override
-	public boolean addPendingChannel(InetSocketAddress address) throws SocketException {
+	public boolean addPendingChannel(InetSocketAddress address, int initialTSN, int verificationTag) throws SocketException {
 		if (pendingAssociations.size() < maxNumberOfPendingChannels) {
-			Association channel = new Association(random, address);
+			Association channel = new Association(random, address, initialTSN, verificationTag);
 			pendingAssociations.put(address, channel);
 			return true;
 		}
@@ -130,13 +132,13 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 	
 	@Override
 	public int getPort() {
-		return serverSocket.getPort();
+		return serverSocket.getLocalPort();
 	}
 	
 	@Override
-	public void send(SctpPacket packet) throws IOException {
+	public void send(SctpPacket packet, InetSocketAddress address) throws IOException {
 		byte[] data = packet.getBytes();
-		serverSocket.send(new DatagramPacket(data, data.length));
+		serverSocket.send(new DatagramPacket(data, data.length, address));
 	}
 	
 	@Override
