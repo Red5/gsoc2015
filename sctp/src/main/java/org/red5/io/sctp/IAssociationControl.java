@@ -16,34 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp.packet.chunks;
+package org.red5.io.sctp;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
-import org.red5.server.sctp.IAssociationControl;
-import org.red5.server.sctp.IServerChannelControl;
-import org.red5.server.sctp.SctpException;
+import org.red5.io.sctp.packet.SctpPacket;
 
-public class CookieAck extends Chunk {
-
-	public CookieAck() {
-		super(ChunkType.COOKIE_ACK, (byte)0x00, (short)CHUNK_HEADER_SIZE);
+public interface IAssociationControl {
+	
+	public static enum State {
+		CLOSED,
+		COOKIE_WAIT,
+		COOKIE_ECHOED,
+		ESTABLISHED
 	}
-
-	@Override
-	public void apply(IAssociationControl channel)
-			throws SctpException, IOException, InvalidKeyException, NoSuchAlgorithmException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void apply(InetSocketAddress address, IServerChannelControl server)
-			throws SctpException, InvalidKeyException, NoSuchAlgorithmException, IOException {
-		// TODO Auto-generated method stub
-	}
-
+	
+	static final int VALID_COOKIE_TIME = 60; // in seconds
+	
+	static final int DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT = 1024;
+	
+	static final int DEFAULT_NUMBER_OF_OUTBOUND_STREAM = 1;
+	
+	static final int DEFAULT_NUMBER_OF_INBOUND_STREAM = 1;
+	
+	State getState();
+	
+	void setState(State state);
+	
+	int getDestinationPort();
+	
+	int getSourcePort();
+	
+	void sendPacket(SctpPacket packet) throws IOException;
+	
+	int getVerificationTag();
 }

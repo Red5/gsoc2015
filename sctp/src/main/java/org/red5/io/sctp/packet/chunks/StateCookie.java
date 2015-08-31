@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp.packet.chunks;
+package org.red5.io.sctp.packet.chunks;
 
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;

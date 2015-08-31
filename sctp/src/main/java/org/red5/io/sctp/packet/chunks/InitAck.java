@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp.packet.chunks;
+package org.red5.io.sctp.packet.chunks;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -26,11 +26,11 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Mac;
 
-import org.red5.server.sctp.IAssociationControl;
-import org.red5.server.sctp.IServerChannelControl;
-import org.red5.server.sctp.SctpException;
-import org.red5.server.sctp.IAssociationControl.State;
-import org.red5.server.sctp.packet.SctpPacket;
+import org.red5.io.sctp.IAssociationControl;
+import org.red5.io.sctp.IServerChannelControl;
+import org.red5.io.sctp.SctpException;
+import org.red5.io.sctp.IAssociationControl.State;
+import org.red5.io.sctp.packet.SctpPacket;
 
 public final class InitAck extends Chunk {
 	

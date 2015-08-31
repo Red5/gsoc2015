@@ -16,15 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp;
+package org.red5.io.sctp;
 
-public class SctpException extends Exception {
+import java.net.SocketOption;
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
-	public SctpException() { super(); }
-	public SctpException(String message) { super(message); }
-}
+public interface SctpSocketOption<T> extends SocketOption<T> { }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp;
+package org.red5.io.sctp;
 
 import java.io.IOException;
 import java.net.InetAddress;

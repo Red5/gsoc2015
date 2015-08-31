@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp;
+package org.red5.io.sctp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -28,8 +28,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.Random;
 
-import org.red5.server.sctp.packet.SctpPacket;
-import org.red5.server.sctp.packet.chunks.Init;
+import org.red5.io.sctp.packet.SctpPacket;
+import org.red5.io.sctp.packet.chunks.Init;
 
 public class Association implements IAssociationControl {
 	

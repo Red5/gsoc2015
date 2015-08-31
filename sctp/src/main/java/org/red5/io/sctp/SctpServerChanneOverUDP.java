@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp;
+package org.red5.io.sctp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -38,8 +38,8 @@ import java.util.logging.Logger;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.red5.server.sctp.IAssociationControl.State;
-import org.red5.server.sctp.packet.SctpPacket;
+import org.red5.io.sctp.IAssociationControl.State;
+import org.red5.io.sctp.packet.SctpPacket;
 
 public class SctpServerChanneOverUDP extends SctpServerChannel implements IServerChannelControl {
 	

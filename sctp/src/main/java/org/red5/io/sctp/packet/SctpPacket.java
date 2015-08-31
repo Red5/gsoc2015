@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp.packet;
+package org.red5.io.sctp.packet;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -24,11 +24,11 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
-import org.red5.server.sctp.IAssociationControl;
-import org.red5.server.sctp.IServerChannelControl;
-import org.red5.server.sctp.SctpException;
-import org.red5.server.sctp.packet.chunks.Chunk;
-import org.red5.server.sctp.packet.chunks.ChunkFactory;
+import org.red5.io.sctp.IAssociationControl;
+import org.red5.io.sctp.IServerChannelControl;
+import org.red5.io.sctp.SctpException;
+import org.red5.io.sctp.packet.chunks.Chunk;
+import org.red5.io.sctp.packet.chunks.ChunkFactory;
 
 public class SctpPacket {
 	

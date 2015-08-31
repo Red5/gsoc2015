@@ -16,44 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp;
+package org.red5.io.sctp.packet.chunks;
 
 import java.io.IOException;
-import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Random;
 
-public class SctpChannel {
-	
-	private Association association;
-	
-	public SctpChannel(Association association) {
-		this.association = association;
-	}
-	
-	public SctpChannel bind(InetSocketAddress address) throws SocketException {
-		association.setSource(new DatagramSocket(address));
-		return this;
-	}
-	
-	public boolean connect(InetSocketAddress address)
-			throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
-		return association.setUp(address);
-	}
-	
-	public void send(byte[] data, int offset, int lenght) {
-		// TODO
-	}
-	
-	public byte[] receive() {
-		// TODO
-		return null;
+import org.red5.io.sctp.IAssociationControl;
+import org.red5.io.sctp.IServerChannelControl;
+import org.red5.io.sctp.SctpException;
+
+public class CookieAck extends Chunk {
+
+	public CookieAck() {
+		super(ChunkType.COOKIE_ACK, (byte)0x00, (short)CHUNK_HEADER_SIZE);
 	}
 
-	public static SctpChannel open() throws SocketException {
-		return new SctpChannel(new Association(new Random(), null));
+	@Override
+	public void apply(IAssociationControl channel)
+			throws SctpException, IOException, InvalidKeyException, NoSuchAlgorithmException {
+		// TODO Auto-generated method stub
+		
 	}
+
+	@Override
+	public void apply(InetSocketAddress address, IServerChannelControl server)
+			throws SctpException, InvalidKeyException, NoSuchAlgorithmException, IOException {
+		// TODO Auto-generated method stub
+	}
+
 }

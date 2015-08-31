@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp.packet;
+package org.red5.io.sctp.packet;
 
 import java.nio.ByteBuffer;
 
-import org.red5.server.sctp.SctpException;
+import org.red5.io.sctp.SctpException;
 
 /*
  * see https://tools.ietf.org/html/rfc4960#section-3.1

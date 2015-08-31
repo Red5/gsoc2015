@@ -16,41 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp;
+package org.red5.io.sctp.packet.chunks;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.red5.io.sctp.SctpException;
 
-/**
- * Unit test for simple App.
- */
-public class AppTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
-
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
-    }
+public class ChunkFactory {
+	public static Chunk createChunk(final byte[] data, int offset, int length)
+			throws SctpException {
+		assert length > 0;
+		switch (ChunkType.values()[data[offset]]) {
+		case INIT:
+			return new Init(data, offset, length);
+		case INIT_ACK:
+			return new InitAck(data, offset, length);
+		default:
+			throw new SctpException("not supported chunk type " + data);
+		}
+	}
 }

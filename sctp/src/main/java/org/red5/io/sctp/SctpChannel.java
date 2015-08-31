@@ -16,29 +16,44 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp;
+package org.red5.io.sctp;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
-import javax.crypto.Mac;
+public class SctpChannel {
+	
+	private Association association;
+	
+	public SctpChannel(Association association) {
+		this.association = association;
+	}
+	
+	public SctpChannel bind(InetSocketAddress address) throws SocketException {
+		association.setSource(new DatagramSocket(address));
+		return this;
+	}
+	
+	public boolean connect(InetSocketAddress address)
+			throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
+		return association.setUp(address);
+	}
+	
+	public void send(byte[] data, int offset, int lenght) {
+		// TODO
+	}
+	
+	public byte[] receive() {
+		// TODO
+		return null;
+	}
 
-import org.red5.server.sctp.packet.SctpPacket;
-
-public interface IServerChannelControl {
-	void removePendingChannel(InetSocketAddress address);
-	
-	boolean addPendingChannel(InetSocketAddress address, int initialTSN, int verificationTag) throws SocketException;
-	
-	IAssociationControl getPendingChannel(InetSocketAddress address);
-	
-	Mac getMac();
-	
-	Random getRandom();
-	
-	int getPort();
-	
-	void send(SctpPacket packet, InetSocketAddress address) throws IOException;
+	public static SctpChannel open() throws SocketException {
+		return new SctpChannel(new Association(new Random(), null));
+	}
 }

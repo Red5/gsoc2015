@@ -16,33 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.red5.server.sctp.packet.chunks;
+package org.red5.io.sctp;
 
-public enum ChunkType {
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
+import java.util.Random;
+
+import javax.crypto.Mac;
+
+import org.red5.io.sctp.packet.SctpPacket;
+
+public interface IServerChannelControl {
+	void removePendingChannel(InetSocketAddress address);
 	
-	DATA(0), // Payload Data
-	INIT(1), // Initiation
-	INIT_ACK(2), // Initiation Acknowledgement
-	SACK(3), // Selective Acknowledgement
-	HEARTBEAT(4), // Heartbeat Request
-	HEARTBEAT_ACK(5), // Heartbeat Acknowledgement
-	ABORT(6), // Abort
-	SHUTDOWN(7), // Shutdown
-	SHUTDOWN_ACK(8), // Shutdown Acknowledgement
-	ERROR(9), // Operation Error
-	COOKIE_ECHO(10), // State Cookie
-	COOKIE_ACK(11), // Cookie Acknowledgement
-	ECNE(12), // Reserved for Explicit Congestion Notification Echo
-	CWR(13), // Reserved for Congestion Window Reduced
-	SHUTDOWN_COMPLETE(14);
+	boolean addPendingChannel(InetSocketAddress address, int initialTSN, int verificationTag) throws SocketException;
 	
-	private int value;
+	IAssociationControl getPendingChannel(InetSocketAddress address);
 	
-	private ChunkType(final int value) {
-		this.value = value;
-	}
+	Mac getMac();
 	
-	public int getValue() {
-		return value;
-	}
+	Random getRandom();
+	
+	int getPort();
+	
+	void send(SctpPacket packet, InetSocketAddress address) throws IOException;
 }
