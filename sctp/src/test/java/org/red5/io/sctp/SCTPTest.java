@@ -39,10 +39,6 @@ public class SCTPTest {
 	private static final String CLIENT_PORT = "client.port";
 	private static final String SERVER_PORT = "server.port";
 	
-	/**
-	 * This check will cancel further tests in case there is no system property "webm.file.path" specified
-	 * with path to the test web file.
-	 */
 	@Before
 	public void before() {
 		assumeTrue(System.getProperties().containsKey(CLIENT_PORT) && System.getProperties().containsKey(SERVER_PORT));
