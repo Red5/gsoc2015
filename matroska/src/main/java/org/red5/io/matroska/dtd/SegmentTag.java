@@ -26,10 +26,9 @@ import java.util.ArrayList;
 import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
-import org.red5.io.matroska.dtd.Tag.Type;
 
 /**
- * Special version if {@link CompoundTag}
+ * Special version of {@link CompoundTag}
  *
  */
 public class SegmentTag extends Tag {
@@ -42,30 +41,42 @@ public class SegmentTag extends Tag {
 	 *
 	 * @param name - the name of tag to be created
 	 * @param id - the id of tag to be created
+	 * @throws IOException - in case of IO error
 	 */
-	public SegmentTag(String name, VINT id) {
+	public SegmentTag(String name, VINT id) throws IOException {
 		super(name, id);
 	}
 	
 	/**
 	 * Constructor
 	 * 
-	 * @see Tag#Tag(String, VINT, VINT)
+	 * @see Tag#Tag(String, VINT, VINT, InputStream)
 	 * 
 	 * @param name - the name of tag to be created
 	 * @param id - the id of tag to be created
 	 * @param size - the size of tag to be created
+	 * @param inputStream - stream to read tag data from
+	 * @throws IOException - in case of IO error
 	 */
-	public SegmentTag(String name, VINT id, VINT size) {
-		super(name, id, size);
+	public SegmentTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+		super(name, id, size, inputStream);
 	}
-
+	
 	/**
-	 * getter for type, overriden to return {@link Type#master}
+	 * @see Tag#readData(InputStream)
+	 * 
+	 * @param inputStream - stream to read tag data from
+	 * @throws IOException - in case of any IO errors
 	 */
 	@Override
-	public Type getType() {
-		return Type.master;
+	public void readData(InputStream inputStream) throws IOException {
+		// we save RAM here
+		return;
+	}
+	
+	@Override
+	public int totalSize() {
+		return (int)(id.getLength() + size.getLength());
 	}
 
 	/**

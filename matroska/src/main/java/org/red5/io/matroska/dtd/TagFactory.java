@@ -58,15 +58,15 @@ public class TagFactory {
 		}
 	}
 	
-	public static Tag createTag(VINT id, VINT size) throws ConverterException {
+	public static Tag createTag(VINT id, VINT size, InputStream inputStream) throws ConverterException {
 		NameTag nt = tagsById.get(id.getBinary());
 		if (null == nt) {
 			throw new ConverterException("not supported matroska tag: " + id.getBinary());
 		}
 		try {
 			return (Tag) nt.clazz
-					.getConstructor(String.class, VINT.class, VINT.class)
-					.newInstance(nt.name, id, size);
+					.getConstructor(String.class, VINT.class, VINT.class, InputStream.class)
+					.newInstance(nt.name, id, size, inputStream);
 		} catch (Exception e) {
 			log.error("Unexpected exception while creating tag", e);
 		}

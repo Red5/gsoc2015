@@ -43,22 +43,25 @@ public class UnsignedIntegerTag extends Tag {
 	 *
 	 * @param name - the name of tag to be created
 	 * @param id - the id of tag to be created
+	 * @throws IOException - in case of IO error
 	 */
-	public UnsignedIntegerTag(String name, VINT id) {
+	public UnsignedIntegerTag(String name, VINT id) throws IOException {
 		super(name, id);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @see Tag#Tag(String, VINT, VINT)
+	 * @see Tag#Tag(String, VINT, VINT, InputStream)
 	 * 
 	 * @param name - the name of tag to be created
 	 * @param id - the id of tag to be created
 	 * @param size - the size of tag to be created
+	 * @param inputStream - stream to read tag data from
+	 * @throws IOException - in case of IO error
 	 */
-	public UnsignedIntegerTag(String name, VINT id, VINT size) {
-		super(name, id, size);
+	public UnsignedIntegerTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+		super(name, id, size, inputStream);
 	}
 
 	/**

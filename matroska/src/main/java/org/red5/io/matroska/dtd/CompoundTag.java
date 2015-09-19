@@ -40,22 +40,37 @@ public class CompoundTag extends Tag {
 	 *
 	 * @param name - the name of tag to be created
 	 * @param id - the id of tag to be created
+	 * @throws IOException - in case of IO error
 	 */
-	public CompoundTag(String name, VINT id) {
+	public CompoundTag(String name, VINT id) throws IOException {
 		super(name, id);
 	}
 	
 	/**
 	 * Constructor
 	 * 
-	 * @see Tag#Tag(String, VINT, VINT)
+	 * @see Tag#Tag(String, VINT, VINT, InputStream)
 	 * 
 	 * @param name - the name of tag to be created
 	 * @param id - the id of tag to be created
 	 * @param size - the size of tag to be created
+	 * @param inputStream - stream to read tag data from
+	 * @throws IOException - in case of IO error
 	 */
-	public CompoundTag(String name, VINT id, VINT size) {
-		super(name, id, size);
+	public CompoundTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+		super(name, id, size, inputStream);
+	}
+	
+	/**
+	 * @see Tag#readData(InputStream)
+	 * 
+	 * @param inputStream - stream to read tag data from
+	 * @throws IOException - in case of any IO errors
+	 */
+	@Override
+	public void readData(InputStream inputStream) throws IOException {
+		// we save RAM here
+		return;
 	}
 	
 	/**
@@ -66,6 +81,11 @@ public class CompoundTag extends Tag {
 		subElements = ParserUtils.parseMasterElement(inputStream, (int) getSize());
 	}
 	
+	@Override
+	public int totalSize() {
+		return (int)(id.getLength() + size.getLength() + (!subElements.isEmpty() ? size.getValue() : 0));
+	}
+	
 	/**
 	 * @see Tag#putValue(ByteBuffer)
 	 */
@@ -74,14 +94,6 @@ public class CompoundTag extends Tag {
 		for (Tag tag : subElements) {
 			bb.put(tag.encode());
 		}
-	}
-
-	/**
-	 * getter for type, overriden to return {@link Type#master}
-	 */
-	@Override
-	public Type getType() {
-		return Type.master;
 	}
 
 	/**
@@ -101,6 +113,14 @@ public class CompoundTag extends Tag {
 		}
 		size = new VINT(0L, length, sz);
 		return this;
+	}
+	
+	public int getNumberOfSubElements() {
+		return subElements.size();
+	}
+	
+	public Tag get(int idx) {
+		return subElements.get(idx);
 	}
 	
 	/**

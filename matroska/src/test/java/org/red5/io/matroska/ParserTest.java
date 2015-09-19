@@ -95,7 +95,7 @@ public class ParserTest {
 		assertEquals("EBMLVersion", tag.getName());
 		assertEquals(0x4286, tag.getId());
 		assertEquals(1, tag.getSize());
-		tag.parse(inputStream);
+		tag.parse();
 		assertEquals(1, ((UnsignedIntegerTag)tag).getValue());
 	}
 	
@@ -115,7 +115,7 @@ public class ParserTest {
 		assertEquals(tag.getName(), "EBMLReadVersion");
 		assertEquals(tag.getId(), 0x42f7);
 		assertEquals(tag.getSize(), 1);
-		tag.parse(inputStream);
+		tag.parse();
 		assertEquals(((UnsignedIntegerTag)tag).getValue(), 255);
 	}
 	
@@ -133,7 +133,7 @@ public class ParserTest {
 		assertEquals(tag.getName(), "DocType");
 		assertEquals(tag.getId(), 0x4282);
 		assertEquals(tag.getSize(), 8);
-		tag.parse(inputStream);
+		tag.parse();
 		assertEquals(((StringTag)tag).getValue(), "matroska");
 		
 		inputStream = new ByteArrayInputStream(ebmlDocTypeTagBytesWebm);
@@ -141,7 +141,7 @@ public class ParserTest {
 		assertEquals(tag.getName(), "DocType");
 		assertEquals(tag.getId(), 0x4282);
 		assertEquals(tag.getSize(), 4);
-		tag.parse(inputStream);
+		tag.parse();
 		assertEquals(((StringTag)tag).getValue(), "webm");
 		
 		inputStream = new ByteArrayInputStream(ebmlDocTypeTagBytesArch);
@@ -149,8 +149,9 @@ public class ParserTest {
 		assertEquals(tag.getName(), "DocType");
 		assertEquals(tag.getId(), 0x4282);
 		assertEquals(tag.getSize(), 4);
-		tag.parse(inputStream);
+		tag.parse();
 		assertFalse("webm".equals(((StringTag)tag).getValue()));
 		assertFalse("matroska".equals(((StringTag)tag).getValue()));
+		assertEquals(((StringTag)tag).getValue(), "arch");
 	}
 }

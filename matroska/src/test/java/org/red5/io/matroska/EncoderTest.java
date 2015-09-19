@@ -75,9 +75,15 @@ public class EncoderTest {
 				.add(TagFactory.<UnsignedIntegerTag>create("EBMLVersion").setValue(1));
 		
 		InputStream is = new ByteArrayInputStream(t.encode());
-		Tag tag = ParserUtils.parseTag(is);
+		CompoundTag tag = (CompoundTag) ParserUtils.parseTag(is);
 		assertEquals("TrackEntry:: wrong tag was read", "EBML", tag.getName());
-		//TODO FIXME, there is no possibility to check inner tag here
+		
+		tag.parse(is);
+		assertEquals("TrackEntry:: wrong size of tag", 1, tag.getNumberOfSubElements());
+		UnsignedIntegerTag subTag = (UnsignedIntegerTag) tag.get(0);
+		subTag.parse();
+		assertEquals("TrackEntry:: wrong sub tag was read", "EBMLVersion", subTag.getName());
+		assertEquals("TrackEntry:: wrong sub tag was read", 1, subTag.getValue());
 	}
 
 	/**
@@ -94,7 +100,7 @@ public class EncoderTest {
 			
 			InputStream is = new ByteArrayInputStream(t.encode());
 			Tag tag = ParserUtils.parseTag(is);
-			tag.parse(is);
+			tag.parse();
 			assertEquals("EBML:: IDs are not equals", t.getId(), tag.getId());
 			assertEquals("EBML:: Values are not equals", t.getValue(), ((UnsignedIntegerTag)tag).getValue());
 		}
@@ -114,7 +120,7 @@ public class EncoderTest {
 			
 			InputStream is = new ByteArrayInputStream(t.encode());
 			Tag tag = ParserUtils.parseTag(is);
-			tag.parse(is);
+			tag.parse();
 			assertEquals("EBML:: IDs are not equals", t.getId(), tag.getId());
 			assertEquals("EBML:: Values are not equals", t.getValue(), ((StringTag)tag).getValue());
 		}
@@ -134,7 +140,7 @@ public class EncoderTest {
 			
 			InputStream is = new ByteArrayInputStream(t.encode());
 			Tag tag = ParserUtils.parseTag(is);
-			tag.parse(is);
+			tag.parse();
 			assertEquals("EBML:: IDs are not equals", t.getId(), tag.getId());
 			assertEquals("EBML:: Values are not equals", t.getValue(), ((FloatTag)tag).getValue(), 1e-10);
 		}
@@ -154,7 +160,7 @@ public class EncoderTest {
 			
 			InputStream is = new ByteArrayInputStream(t.encode());
 			Tag tag = ParserUtils.parseTag(is);
-			tag.parse(is);
+			tag.parse();
 			assertEquals("EBML:: IDs are not equals", t.getId(), tag.getId());
 			assertEquals("EBML:: Values are not equals", t.getValue(), ((DateTag)tag).getValue(), 1e-10);
 		}

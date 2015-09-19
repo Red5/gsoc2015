@@ -25,7 +25,6 @@ import java.nio.ByteBuffer;
 import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
-import org.red5.io.matroska.dtd.Tag.Type;
 
 /**
  * Tag representing complex block of different tags
@@ -44,30 +43,25 @@ public class SimpleBlock extends Tag {
 	 *
 	 * @param name - the name of tag to be created
 	 * @param id - the id of tag to be created
+	 * @throws IOException - in case of IO error
 	 */
-	public SimpleBlock(String name, VINT id) {
+	public SimpleBlock(String name, VINT id) throws IOException {
 		super(name, id);
 	}
 	
 	/**
 	 * Constructor
 	 * 
-	 * @see Tag#Tag(String, VINT, VINT)
+	 * @see Tag#Tag(String, VINT, VINT, InputStream)
 	 * 
 	 * @param name - the name of tag to be created
 	 * @param id - the id of tag to be created
 	 * @param size - the size of tag to be created
+	 * @param inputStream - stream to read tag data from
+	 * @throws IOException - in case of IO error
 	 */
-	public SimpleBlock(String name, VINT id, VINT size) {
-		super(name, id, size);
-	}
-
-	/**
-	 * getter for type, overriden to return {@link Type#simple}
-	 */
-	@Override
-	public Type getType() {
-		return Type.simple;
+	public SimpleBlock(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
+		super(name, id, size, inputStream);
 	}
 	
 	/**

@@ -30,9 +30,7 @@ import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.red5.io.matroska.ConverterException;
-import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.dtd.Tag;
-import org.red5.io.matroska.dtd.Tag.Type;
 import org.red5.io.matroska.parser.TagCrawler;
 import org.red5.io.matroska.parser.TagHandler;
 import org.slf4j.Logger;
@@ -59,19 +57,16 @@ public class WebmTest {
 	 */
 	@Test
 	public void crawl() throws IOException, ConverterException {
-		final TagHandler compoundHandler = new TagHandler() {
+		final TagHandler logHandle = new TagHandler() {
 			@Override
 			public void handle(Tag tag, InputStream input) throws IOException, ConverterException {
 				log.debug("Tag found: " + tag.getName());
-				if (tag.getType() != Type.master) {
-					ParserUtils.skip(tag.getSize(), input);
-				}
 			}
 		};
 		TagCrawler crawler = new TagCrawler() {
 			@Override
 			public TagHandler getHandler(Tag tag) {
-				return compoundHandler;
+				return logHandle;
 			}
 		};
 		File webmF = new File(System.getProperty(WEBM_FILE_PROPERTY));
@@ -94,13 +89,13 @@ public class WebmTest {
 		File webmF = new File(System.getProperty(WEBM_FILE_PROPERTY));
 		assertTrue("Invalid webM file is specified", webmF.exists() && webmF.isFile());
 		File out = File.createTempFile("webmwriter", ".webm");
-		log.debug("Temporary file was created: " + out.getAbsolutePath());
 		try (
 				WebmWriter w = new WebmWriter(out, false);
 				WebmReader r = new WebmReader(webmF, w);
 		) {
 			r.process();
 		}
+		log.debug("Temporary file was created: " + out.getAbsolutePath());
 		assertEquals("", webmF.length(), out.length());
 	}
 }
