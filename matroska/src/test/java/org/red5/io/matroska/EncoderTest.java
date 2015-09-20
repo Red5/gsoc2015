@@ -80,10 +80,10 @@ public class EncoderTest {
 		
 		tag.parse(is);
 		assertEquals("TrackEntry:: wrong size of tag", 1, tag.getNumberOfSubElements());
-		UnsignedIntegerTag subTag = (UnsignedIntegerTag) tag.get(0);
-		subTag.parse();
-		assertEquals("TrackEntry:: wrong sub tag was read", "EBMLVersion", subTag.getName());
-		assertEquals("TrackEntry:: wrong sub tag was read", 1, subTag.getValue());
+		UnsignedIntegerTag ebmlVersion = (UnsignedIntegerTag) tag.get("EBMLVersion");
+		ebmlVersion.parse();
+		assertEquals("TrackEntry:: wrong sub tag was read", "EBMLVersion", ebmlVersion.getName());
+		assertEquals("TrackEntry:: wrong sub tag was read", 1, ebmlVersion.getValue());
 	}
 
 	/**

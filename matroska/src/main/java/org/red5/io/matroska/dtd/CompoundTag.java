@@ -23,7 +23,8 @@ import static org.red5.io.matroska.ParserUtils.BIT_IN_BYTE;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.ParserUtils;
@@ -31,7 +32,7 @@ import org.red5.io.matroska.VINT;
 
 
 public class CompoundTag extends Tag {
-	private ArrayList<Tag> subElements = new ArrayList<Tag>();
+	private Map<String, Tag> subElements = new HashMap<>();
 	
 	/**
 	 * Constructor
@@ -78,7 +79,9 @@ public class CompoundTag extends Tag {
 	 */
 	@Override
 	public void parse(InputStream inputStream) throws IOException, ConverterException {
-		subElements = ParserUtils.parseMasterElement(inputStream, (int) getSize());
+		for (Tag tag : ParserUtils.parseMasterElement(inputStream, (int) getSize())) {
+			subElements.put(tag.getName(), tag);
+		}
 	}
 	
 	@Override
@@ -91,7 +94,7 @@ public class CompoundTag extends Tag {
 	 */
 	@Override
 	protected void putValue(ByteBuffer bb) throws IOException {
-		for (Tag tag : subElements) {
+		for (Tag tag : subElements.values()) {
 			bb.put(tag.encode());
 		}
 	}
@@ -103,7 +106,7 @@ public class CompoundTag extends Tag {
 	 * @return - this for chaining
 	 */
 	public CompoundTag add(Tag ch) {
-		subElements.add(ch);
+		subElements.put(ch.getName(), ch);
 		long sz = getSize() + ch.totalSize();
 		byte length = 1;
 		long v = (sz + 1) >> BIT_IN_BYTE;
@@ -119,8 +122,8 @@ public class CompoundTag extends Tag {
 		return subElements.size();
 	}
 	
-	public Tag get(int idx) {
-		return subElements.get(idx);
+	public Tag get(String tagName) {
+		return subElements.get(tagName);
 	}
 	
 	/**
@@ -129,7 +132,7 @@ public class CompoundTag extends Tag {
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder(super.toString() + "\n");
-		for (Tag tag : subElements) {
+		for (Tag tag : subElements.values()) {
 			result.append("\t" + tag + "\n");
 		}
 		return result.toString();
